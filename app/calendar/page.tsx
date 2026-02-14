@@ -1,12 +1,38 @@
 "use client";
 
 import { races, raceResults } from "@/lib/data";
-import { generateMockVotes } from "@/lib/mockData";
 import { clsx } from "clsx";
 import Link from "next/link";
 import { useStore } from "@/lib/store";
 import { calculateRaceScore } from "@/lib/scoring";
 import { useEffect, useState } from "react";
+
+const trackSlugs: Record<number, string> = {
+    1: "melbourne",
+    2: "shanghai",
+    3: "suzuka",
+    4: "sakhir",
+    5: "jeddah",
+    6: "miami",
+    7: "montreal",
+    8: "monaco",
+    9: "barcelona",
+    10: "spielberg",
+    11: "silverstone",
+    12: "spa",
+    13: "budapest",
+    14: "zandvoort",
+    15: "monza",
+    16: "madrid",
+    17: "baku",
+    18: "singapore",
+    19: "austin",
+    20: "mexico",
+    21: "saopaulo",
+    22: "lasvegas",
+    23: "lusail",
+    24: "yasmarina"
+};
 
 export default function CalendarPage() {
     const { votes, userId: currentUserId, loadFromIndexedDB, addVote } = useStore();
@@ -16,7 +42,6 @@ export default function CalendarPage() {
 
     useEffect(() => {
         loadFromIndexedDB().then(async () => {
-            // Check if we have votes for Jakub specifically
             const currentVotes = useStore.getState().votes;
             const hasJakubVotes = currentVotes.some(v => v.userId === "user-jakub");
 
@@ -55,24 +80,29 @@ export default function CalendarPage() {
         const days = Math.floor(diffTime / (1000 * 60 * 60 * 24));
         const hours = Math.floor((diffTime % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
         if (days === 0) return `${hours}h`;
-        if (days < 7) return `${days} dni ${hours}h`;
-        return `${days} dni`;
+        if (days < 7) return `${days}d ${hours}h`;
+        return `${days}d`;
     };
 
-    if (loading) return null;
+    if (loading) return (
+        <div className="flex items-center justify-center h-[50vh]">
+            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-[#E60000]"></div>
+        </div>
+    );
 
     return (
-        <div className="pb-24 max-w-4xl mx-auto">
-            <h1 className="text-3xl font-black mb-2 text-center bg-gradient-to-r from-red-500 via-orange-500 to-yellow-500 bg-clip-text text-transparent uppercase tracking-tight">
-                Kalendarz F1 2026
+        <div className="pb-32 max-w-4xl mx-auto pt-8">
+            <h1 className="text-4xl font-black mb-1 px-4 text-white uppercase tracking-tighter">
+                F1 Schedule <span className="text-[#E60000]">2026</span>
             </h1>
-            <p className="text-slate-400 text-center mb-8 text-sm">24 wyścigi na całym świecie</p>
+            <p className="text-gray-500 px-4 mb-8 text-sm font-bold tracking-widest">24 RACES • WORLD CHAMPIONSHIP</p>
 
             {/* Calendar Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 px-4">
                 {races.map((race) => {
                     const status = getRaceStatus(race.round);
                     const countdown = status !== "completed" ? getCountdown(race.date) : null;
+                    const slug = trackSlugs[race.round] || "melbourne";
 
                     // Calculate points for current user if completed
                     let points = 0;
@@ -81,7 +111,7 @@ export default function CalendarPage() {
                         points = score.totalPoints;
                     }
 
-                    const CardElement = (status === "completed" || status === "upcoming") ? Link : "div";
+                    const CardElement = ((status === "completed" || status === "upcoming") ? Link : "div") as any;
                     const cardProps = status === "completed"
                         ? { href: `/race/${race.round}/results` }
                         : status === "upcoming"
@@ -93,68 +123,80 @@ export default function CalendarPage() {
                             key={race.round}
                             {...cardProps}
                             className={clsx(
-                                "block p-4 rounded-xl border-l-4 transition-all relative overflow-hidden",
-                                status === "completed" && "bg-slate-900/50 border-slate-700 opacity-80 hover:opacity-100 hover:border-cyan-500 cursor-pointer",
-                                status === "upcoming" && "bg-orange-600/10 border-orange-500 border-l-orange-500 shadow-lg shadow-orange-500/10 hover:bg-orange-600/20 cursor-pointer",
-                                status === "future" && "bg-slate-800/10 border-slate-700 opacity-60"
+                                "block p-6 rounded-[2rem] transition-all relative overflow-hidden group",
+                                // Dark Grey Card Background
+                                "bg-[#1C1C1E] border border-white/5",
+                                status === "completed" && "opacity-80 hover:opacity-100",
+                                status === "upcoming" && "bg-gradient-to-br from-[#1C1C1E] to-[#2C2C2E] border-[#E60000]/30 shadow-2xl shadow-red-900/10 scale-[1.02] z-10",
+                                status === "future" && "opacity-40"
                             )}
                         >
-                            <div className="flex items-start justify-between">
-                                <div className="flex items-center gap-3">
-                                    <div className={clsx(
-                                        "w-10 h-10 rounded-lg flex items-center justify-center font-black text-sm",
-                                        status === "completed" && "bg-slate-800 text-slate-400 border border-slate-700",
-                                        status === "upcoming" && "bg-orange-500 text-white shadow-lg shadow-orange-500/30",
-                                        status === "future" && "bg-slate-800 text-slate-500 border border-slate-700"
+                            <div className="flex items-start justify-between mb-2">
+                                <div className="flex flex-col">
+                                    <span className={clsx(
+                                        "text-[10px] font-black uppercase tracking-[0.2em] mb-1",
+                                        status === "upcoming" ? "text-[#E60000]" : "text-gray-600"
                                     )}>
-                                        {race.round}
+                                        R{String(race.round).padStart(2, '0')}
+                                    </span>
+                                    <div className="font-black text-2xl leading-none text-white uppercase tracking-tighter mb-1">
+                                        {race.name.replace(" Grand Prix", "")}
                                     </div>
-                                    <div>
-                                        <div className="font-bold text-base leading-tight text-slate-100 uppercase tracking-tight">{race.name}</div>
-                                        <div className="text-xs text-slate-400 font-medium">{race.location}</div>
-                                    </div>
+                                    <div className="text-xs text-gray-400 font-bold uppercase tracking-wide">{race.location}</div>
                                 </div>
 
-                                {status === "completed" && (
-                                    <div className="text-right">
-                                        <div className="text-xl font-black text-cyan-400">+{points}</div>
-                                        <div className="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Twoje pkt</div>
+                                {status === "upcoming" && (
+                                    <div className="bg-[#E60000] text-white text-[10px] font-black px-2 py-1 rounded-lg animate-pulse">
+                                        LIVE
                                     </div>
                                 )}
                             </div>
 
-                            <div className="flex items-center justify-between mt-4">
-                                <div className="flex items-center gap-2">
-                                    <span className="text-xs text-slate-500 font-mono">📅 {formatDate(race.date)}</span>
-                                    {status === "upcoming" && (
-                                        <span className="animate-pulse flex h-2 w-2 rounded-full bg-orange-500"></span>
+                            <div className="relative h-24 mt-2 mb-4 flex items-center justify-center">
+                                {/* Track Image */}
+                                <img 
+                                    src={`https://media.formula1.com/image/upload/c_lfill,w_1000/v1740000000/common/f1/2026/track/2026track${slug}blackoutline.svg`}
+                                    alt={race.name}
+                                    className={clsx(
+                                        "h-full w-auto object-contain transition-transform duration-500 group-hover:scale-110",
+                                        status === "upcoming" ? "opacity-30 invert" : "opacity-10 invert"
                                     )}
+                                />
+                                
+                                {status === "completed" && points > 0 && (
+                                     <div className="absolute inset-0 flex items-center justify-center">
+                                         <div className="bg-[#E60000] text-white font-black px-3 py-1 rounded-full text-sm shadow-lg">
+                                             +{points} XP
+                                         </div>
+                                     </div>
+                                )}
+                            </div>
+
+                            <div className="flex items-center justify-between border-t border-white/5 pt-4">
+                                <div className="flex items-center gap-2">
+                                    <div className="text-xs text-gray-400 font-bold uppercase">
+                                        {formatDate(race.date)}
+                                    </div>
                                 </div>
 
-                                {countdown && (
+                                {status === "completed" ? (
+                                    <div className="text-xs font-black text-gray-500 uppercase flex items-center gap-1 group-hover:text-white transition-colors">
+                                        RESULTS <span>→</span>
+                                    </div>
+                                ) : countdown ? (
                                     <div className={clsx(
-                                        "px-3 py-1 rounded-full text-xs font-black uppercase tracking-tighter",
-                                        status === "upcoming" && "bg-orange-600 text-white",
-                                        status === "future" && "bg-slate-800 text-slate-400 border border-slate-700"
+                                        "px-3 py-1 rounded-xl text-[10px] font-black uppercase tracking-widest",
+                                        status === "upcoming" ? "bg-[#E60000] text-white" : "bg-[#2C2C2E] text-gray-500"
                                     )}>
                                         {countdown}
                                     </div>
-                                )}
-
-                                {status === "completed" && (
-                                    <div className="text-[10px] text-cyan-500 font-black uppercase tracking-widest bg-cyan-500/10 px-2 py-1 rounded-md">
-                                        Wyniki →
-                                    </div>
-                                )}
-                                {status === "upcoming" && (
-                                    <div className="text-[10px] text-orange-500 font-black uppercase tracking-widest bg-orange-500/10 px-2 py-1 rounded-md">
-                                        Głosuj teraz →
-                                    </div>
-                                )}
-                                {status === "future" && (
-                                    <div className="w-10" />
-                                )}
+                                ) : null}
                             </div>
+                            
+                            {/* Accent Glow */}
+                            {status === "upcoming" && (
+                                <div className="absolute -top-10 -left-10 w-32 h-32 bg-[#E60000] opacity-5 blur-[40px] rounded-full pointer-events-none" />
+                            )}
                         </CardElement>
                     );
                 })}

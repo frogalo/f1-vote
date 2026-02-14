@@ -101,10 +101,10 @@ export function calculateFriendScore(userId: string, userVotes: Vote[]) {
     // Filter votes for this user just in case
     const filteredVotes = userVotes.filter(v => v.userId === userId);
 
-    // Season points
-    const season = calculateSeasonPoints(filteredVotes);
-    totalPoints += season.totalPoints;
-    perfectPredictions += season.perfectPredictions;
+    // Season points moved to end
+    // const season = calculateSeasonPoints(filteredVotes);
+    // totalPoints += season.totalPoints;
+    // perfectPredictions += season.perfectPredictions;
 
     // Race points
     raceResults.forEach((result) => {

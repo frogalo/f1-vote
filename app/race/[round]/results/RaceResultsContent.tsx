@@ -26,13 +26,13 @@ export default function RaceResultsContent({ raceRound }: Props) {
 
     if (!result || !race) {
         return (
-            <div className="text-center p-8">
-                <p className="text-slate-400">Wyścig nie został jeszcze ukończony</p>
+            <div className="text-center p-8 flex flex-col items-center justify-center h-[50vh]">
+                <p className="text-gray-500 font-medium mb-4">Race pending or results not available.</p>
                 <button
                     onClick={() => router.push("/calendar")}
-                    className="mt-4 px-4 py-2 bg-cyan-600 text-white rounded-lg"
+                    className="px-6 py-3 bg-[#E60000] text-white font-bold rounded-xl shadow-lg shadow-red-900/20 active:scale-95 transition-all"
                 >
-                    ← Wróć do kalendarza
+                    Back to Calendar
                 </button>
             </div>
         );
@@ -59,128 +59,144 @@ export default function RaceResultsContent({ raceRound }: Props) {
 
     if (loading) {
         return (
-            <div className="text-center p-8 text-slate-500 animate-pulse">
-                Ładowanie wyników...
+            <div className="flex h-screen items-center justify-center bg-[#0D0D0D] text-[#E60000]">
+              <div className="animate-pulse text-xl font-bold">LOADING RESULTS...</div>
             </div>
         );
     }
 
     return (
-        <div className="pb-24">
+        <div className="pb-24 pt-8 px-4">
             {/* Race Header */}
-            <div className="mb-6 text-center">
-                <div className="text-sm text-slate-500 uppercase mb-1">Runda {race.round}</div>
-                <h1 className="text-2xl md:text-3xl font-black mb-2 bg-gradient-to-r from-red-500 to-orange-500 bg-clip-text text-transparent uppercase leading-tight">
+            <div className="mb-8 text-center">
+                <div className="text-xs font-bold text-[#E60000] uppercase tracking-widest mb-2 border border-[#E60000]/20 bg-[#E60000]/5 inline-block px-3 py-1 rounded-full">
+                    Round {race.round}
+                </div>
+                <h1 className="text-3xl font-black mb-1 text-white uppercase leading-none tracking-tight">
                     {race.name}
                 </h1>
-                <p className="text-slate-400 text-sm">{race.location}</p>
+                <p className="text-gray-500 text-sm font-medium">{race.location}</p>
+            </div>
+
+            {/* Friend Scores for This Race */}
+            <div className="mb-8">
+                <h2 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-4">📊 Round Standings</h2>
+                <div className="space-y-3">
+                    {friendScores.map((friend, index) => (
+                        <div
+                            key={friend.id}
+                            className={clsx(
+                                "flex items-center p-4 rounded-2xl border transition-all",
+                                index === 0 
+                                    ? "bg-gradient-to-r from-[#E60000]/10 to-[#1C1C1E] border-[#E60000] shadow-[0_4px_20px_-5px_rgba(230,0,0,0.3)]" 
+                                    : "bg-[#1C1C1E] border-white/5"
+                            )}
+                        >
+                            <div className={clsx(
+                                "w-10 h-10 rounded-xl flex items-center justify-center font-black text-lg mr-4",
+                                index === 0 ? "bg-[#E60000] text-white" : "bg-[#2C2C2E] text-gray-500"
+                            )}>
+                                {index + 1}
+                            </div>
+
+                            <div className="flex-1">
+                                <div className={clsx("font-bold text-lg flex items-center gap-2", index === 0 ? "text-[#E60000]" : "text-white")}>
+                                    {friend.name}
+                                    {index === 0 && <span>🏆</span>}
+                                </div>
+                                <div className="text-xs text-gray-500">
+                                    {friend.perfectPredictions} perfect {friend.perfectPredictions === 1 ? "pick" : "picks"}
+                                </div>
+                            </div>
+
+                            <div className="text-right">
+                                <div className={clsx("text-2xl font-black", index === 0 ? "text-[#E60000]" : "text-white")}>
+                                    {friend.totalPoints}
+                                </div>
+                                <div className="text-[10px] text-gray-500 uppercase font-medium">points</div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
             </div>
 
             {/* Full Classification */}
-            <div className="mb-8 space-y-2">
-                <h2 className="text-lg font-bold text-slate-300 mb-3">🏁 Pełna Klasyfikacja</h2>
+            <div className="space-y-3">
+                <h2 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-4">🏁 Race Classification</h2>
                 {result.fullResults.map((driverId, position) => {
                     const driver = drivers.find((d) => d.id === driverId);
                     if (!driver) return null;
 
-                    // Find all users who predicted this driver and their predicted positions
-                    const userPredictions = friends
-                        .map((friend) => {
-                            const userVotes = getCombinedVotes(friend.id);
-                            const prediction = userVotes.find(
-                                (v: any) =>
-                                    v.driverId === driverId &&
-                                    typeof v.raceRound === "string" &&
-                                    v.raceRound.startsWith(`race-${raceRound}-position-`)
-                            );
-
-                            if (!prediction) return null;
-
-                            const predictedPos = parseInt((prediction.raceRound as string).split("-")[3]);
-                            const actualPos = position + 1;
-                            const isPerfect = predictedPos === actualPos;
-
-                            // Calculate points using centralized scoring function
-                            const points = calculateRacePoints(predictedPos - 1, position); // Convert to 0-based
-
-                            return {
-                                friend: {
-                                    ...friend,
-                                    name: friend.id === currentUserId ? `${friend.name} (Ty)` : friend.name
-                                },
-                                predictedPos,
-                                points,
-                                isPerfect,
-                            };
-                        })
-                        .filter(Boolean);
+                    // Find all users who predicted this driver
+                    const userPredictions = friends.map((friend) => {
+                        const userVotes = getCombinedVotes(friend.id);
+                        const prediction = userVotes.find(
+                            (v: any) =>
+                                v.driverId === driverId &&
+                                typeof v.raceRound === "string" &&
+                                v.raceRound.startsWith(`race-${raceRound}-position-`)
+                        );
+                        if (!prediction) return null;
+                        const predictedPos = parseInt((prediction.raceRound as string).split("-")[3]);
+                        const isPerfect = predictedPos === (position + 1);
+                        const points = calculateRacePoints(predictedPos - 1, position);
+                        return { friend, predictedPos, points, isPerfect };
+                    }).filter(Boolean);
 
                     return (
                         <div
                             key={driverId}
                             className={clsx(
-                                "p-4 rounded-xl border-l-4 transition-all",
-                                position === 0 && "bg-gradient-to-r from-yellow-600/20 to-orange-600/10 border-yellow-500 shadow-lg",
-                                position === 1 && "bg-gradient-to-r from-slate-600/20 to-slate-700/10 border-slate-400",
-                                position === 2 && "bg-gradient-to-r from-orange-800/20 to-orange-900/10 border-orange-700",
-                                position > 2 && "bg-slate-800/50 border-slate-600"
+                                "p-4 rounded-xl border transition-all relative overflow-hidden",
+                                "bg-[#1C1C1E]",
+                                position === 0 ? "border-[#E60000]" : "border-white/5"
                             )}
                         >
+                             {/* Position Badge */}
+                             {position === 0 && (
+                                <div className="absolute top-0 right-0 bg-[#E60000] text-white text-[10px] font-bold px-2 py-0.5 rounded-bl-lg">WINNER</div>
+                             )}
+
                             <div className="flex items-center justify-between mb-3">
                                 <div className="flex items-center gap-3">
-                                    {/* Position */}
                                     <div
                                         className={clsx(
-                                            "w-10 h-10 rounded-lg flex items-center justify-center font-black text-lg",
-                                            position === 0 && "bg-yellow-500 text-black",
-                                            position === 1 && "bg-slate-400 text-black",
-                                            position === 2 && "bg-orange-700 text-white",
-                                            position > 2 && "bg-slate-700 text-slate-300"
+                                            "w-8 h-8 rounded-lg flex items-center justify-center font-bold text-sm",
+                                            position === 0 ? "bg-[#E60000] text-white" : "bg-[#2C2C2E] text-gray-500"
                                         )}
                                     >
                                         {position + 1}
                                     </div>
 
-                                    {/* Driver Info */}
                                     <div>
-                                        <div className="font-bold text-lg text-slate-100 flex items-center gap-2">
-                                            <span>{driver.country}</span>
-                                            <span>{driver.name}</span>
-                                            {position === 0 && <span className="text-yellow-500">🏆</span>}
+                                        <div className="font-bold text-base text-white flex items-center gap-2">
+                                            {driver.name}
                                         </div>
-                                        <div className="text-xs text-slate-400 uppercase">{driver.team}</div>
+                                        <div className="text-[10px] text-gray-500 uppercase font-medium">{driver.team}</div>
                                     </div>
                                 </div>
-
-                                {/* Team Color */}
-                                <div className={clsx("w-2 h-10 rounded-full", driver.color.split(" ")[0])} />
+                                
+                                <div className={clsx("w-1 h-8 rounded-full opacity-60", driver.color.split(" ")[0])} />
                             </div>
 
-                            {/* User Predictions */}
+                            {/* User Predictions Visualization */}
                             {userPredictions.length > 0 && (
-                                <div className="flex flex-wrap gap-2 mt-3 pt-3 border-t border-slate-700">
-                                    <div className="text-xs text-slate-500 w-full mb-1">Typy graczy:</div>
+                                <div className="mt-3 pt-3 border-t border-white/5 grid grid-cols-4 gap-2">
                                     {userPredictions.map((pred) => (
                                         <div
                                             key={pred!.friend.id}
-                                            className="group relative"
-                                            title={`${pred!.friend.name}: ${pred!.points} pkt`}
+                                            className={clsx(
+                                                "flex flex-col items-center justify-center p-1 rounded-lg border",
+                                                pred!.isPerfect
+                                                    ? "bg-[#E60000]/20 border-[#E60000]/50"
+                                                    : "bg-[#2C2C2E] border-white/5 opacity-50"
+                                            )}
                                         >
-                                            <div
-                                                className={clsx(
-                                                    "w-12 h-12 rounded-full flex flex-col items-center justify-center text-xs font-bold border-2 transition-all cursor-help",
-                                                    pred!.isPerfect
-                                                        ? "bg-green-600 border-green-400 text-white"
-                                                        : "bg-slate-700 border-slate-600 text-slate-300"
-                                                )}
-                                            >
-                                                <div className="text-[10px] leading-none">{pred!.friend.name.slice(0, 3)}</div>
-                                                <div className="text-base leading-none">{pred!.predictedPos}</div>
+                                            <div className="text-[10px] text-gray-400 font-bold uppercase truncate w-full text-center">
+                                                {pred!.friend.name.slice(0, 3)}
                                             </div>
-                                            {/* Hover tooltip */}
-                                            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-slate-900 border border-slate-700 rounded-lg text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
-                                                <div className="font-bold text-cyan-400">{pred!.points} pkt</div>
-                                                <div className="text-slate-400">Typował: P{pred!.predictedPos}</div>
+                                            <div className={clsx("text-xs font-black", pred!.isPerfect ? "text-[#E60000]" : "text-gray-500")}>
+                                                P{pred!.predictedPos}
                                             </div>
                                         </div>
                                     ))}
@@ -189,51 +205,6 @@ export default function RaceResultsContent({ raceRound }: Props) {
                         </div>
                     );
                 })}
-            </div>
-
-            {/* Friend Scores for This Race */}
-            <div className="space-y-3">
-                <h2 className="text-lg font-bold text-slate-300 mb-3">📊 Wyniki Rundy</h2>
-                {friendScores.map((friend, index) => (
-                    <div
-                        key={friend.id}
-                        className={clsx(
-                            "p-4 rounded-xl border-l-4 transition-all",
-                            index === 0 && "bg-gradient-to-r from-green-600/20 to-emerald-600/10 border-green-500",
-                            index > 0 && "bg-slate-800/50 border-slate-600"
-                        )}
-                    >
-                        <div className="flex items-center gap-4">
-                            {/* Position */}
-                            <div
-                                className={clsx(
-                                    "w-10 h-10 rounded-lg flex items-center justify-center font-black text-lg",
-                                    index === 0 && "bg-green-500 text-black",
-                                    index > 0 && "bg-slate-700 text-slate-300"
-                                )}
-                            >
-                                {index + 1}
-                            </div>
-
-                            {/* Friend Info */}
-                            <div className="flex-1">
-                                <div className="font-bold text-lg text-slate-100 flex items-center gap-2">
-                                    {friend.name}
-                                    {index === 0 && <span className="text-green-500">🏆</span>}
-                                </div>
-                                <div className="text-xs text-slate-400">
-                                    {friend.perfectPredictions} {friend.perfectPredictions === 1 ? "celny typ" : "celnych typów"}
-                                </div>
-                            </div>
-
-                            {/* Points */}
-                            <div className="text-right">
-                                <div className="text-2xl font-black text-cyan-400">{friend.totalPoints}</div>
-                                <div className="text-xs text-slate-500 uppercase">pkt</div>
-                            </div>
-                        </div>
-                    </div>
-                ))}
             </div>
         </div>
     );

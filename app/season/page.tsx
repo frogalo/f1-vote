@@ -23,7 +23,7 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import { Driver } from "@/lib/data";
 
-function SortableDriverItem({ driver, index }: { driver: Driver; index: number }) {
+function SortableDriverItem({ driver, index, disabled }: { driver: Driver; index: number; disabled?: boolean }) {
   const {
     attributes,
     listeners,
@@ -31,7 +31,7 @@ function SortableDriverItem({ driver, index }: { driver: Driver; index: number }
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: driver.id });
+  } = useSortable({ id: driver.id, disabled });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -45,50 +45,55 @@ function SortableDriverItem({ driver, index }: { driver: Driver; index: number }
       {...attributes}
       {...listeners}
       className={clsx(
-        "flex items-center p-3 rounded-lg border-l-4 bg-slate-800 transition cursor-move touch-manipulation select-none",
-        driver.color.replace("bg-", "border-"),
-        isDragging && "opacity-50 scale-95 shadow-2xl z-50"
+        "flex items-center p-3 rounded-2xl transition touch-manipulation select-none border border-white/5",
+        "bg-[#1C1C1E]",
+        !disabled && "cursor-move",
+        driver.color.replace("bg-", "border-l-4 border-"),
+        isDragging && "opacity-90 scale-95 shadow-2xl z-50 ring-2 ring-[#E60000]"
       )}
     >
       {/* Position Number */}
-      <div className="w-10 h-10 rounded-lg bg-slate-700 flex items-center justify-center mr-3 flex-shrink-0">
-        <span className="text-xl font-black text-cyan-400">
-          {index + 1}
-        </span>
+      <div className={clsx(
+        "w-10 h-10 rounded-xl flex items-center justify-center mr-3 flex-shrink-0 font-black text-xl",
+        index < 3 ? "bg-[#E60000] text-white" : "bg-[#2C2C2E] text-gray-500"
+      )}>
+        <span>{index + 1}</span>
       </div>
 
       {/* Driver Number */}
-      <span className="text-lg font-bold w-10 text-slate-500 flex-shrink-0">
+      <span className="text-lg font-bold w-10 text-gray-600 flex-shrink-0">
         #{driver.number}
       </span>
 
       {/* Driver Info */}
       <div className="text-left flex-1 min-w-0">
-        <div className="font-bold text-base leading-tight truncate flex items-center gap-1">
+        <div className="font-bold text-base leading-tight truncate flex items-center gap-1 text-white">
           <span>{driver.country}</span>
           <span>{driver.name}</span>
         </div>
-        <div className="text-xs text-slate-400 uppercase truncate">{driver.team}</div>
+        <div className="text-xs text-gray-500 uppercase truncate font-medium">{driver.team}</div>
       </div>
 
       {/* Team Stripe */}
-      <div className={clsx("w-2 h-8 rounded-full ml-2 flex-shrink-0", driver.color.split(" ")[0])} />
+      <div className={clsx("w-1.5 h-8 rounded-full ml-2 flex-shrink-0 opacity-80", driver.color.split(" ")[0])} />
 
       {/* Drag Indicator */}
-      <div className="ml-2 text-slate-600 flex-shrink-0">
-        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-          <path d="M7 2a2 2 0 1 0 .001 4.001A2 2 0 0 0 7 2zm0 6a2 2 0 1 0 .001 4.001A2 2 0 0 0 7 8zm0 6a2 2 0 1 0 .001 4.001A2 2 0 0 0 7 14zm6-8a2 2 0 1 0-.001-4.001A2 2 0 0 0 13 6zm0 2a2 2 0 1 0 .001 4.001A2 2 0 0 0 13 8zm0 6a2 2 0 1 0 .001 4.001A2 2 0 0 0 13 14z" />
-        </svg>
-      </div>
+      {!disabled && (
+        <div className="ml-2 text-gray-600 flex-shrink-0">
+          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M7 2a2 2 0 1 0 .001 4.001A2 2 0 0 0 7 2zm0 6a2 2 0 1 0 .001 4.001A2 2 0 0 0 7 8zm0 6a2 2 0 1 0 .001 4.001A2 2 0 0 0 7 14zm6-8a2 2 0 1 0-.001-4.001A2 2 0 0 0 13 6zm0 2a2 2 0 1 0 .001 4.001A2 2 0 0 0 13 8zm0 6a2 2 0 1 0 .001 4.001A2 2 0 0 0 13 14z" />
+          </svg>
+        </div>
+      )}
     </div>
   );
 }
 
 export default function SeasonVotePage() {
-  const { drivers, addVote, loadFromIndexedDB } = useStore();
-  const router = useRouter();
+  const { drivers, votes, userId, setSessionVotes, loadFromIndexedDB } = useStore();
   const [loading, setLoading] = useState(true);
   const [orderedDrivers, setOrderedDrivers] = useState(drivers);
+  const [isLocked, setIsLocked] = useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -102,63 +107,88 @@ export default function SeasonVotePage() {
   );
 
   useEffect(() => {
-    loadFromIndexedDB().then(() => setLoading(false));
+    loadFromIndexedDB().then(() => {
+      setLoading(false);
+      // Round 1 date is March 8, 2026. Lock after that.
+      const round1Date = new Date("2026-03-08T05:00:00Z");
+      setIsLocked(Date.now() > round1Date.getTime());
+    });
   }, [loadFromIndexedDB]);
 
+  // Restore previous order from votes
   useEffect(() => {
-    setOrderedDrivers(drivers);
-  }, [drivers]);
+    if (loading) return;
+    
+    const seasonVotes = votes.filter(v => 
+      v.userId === userId && String(v.raceRound).startsWith("season-position-")
+    );
 
-  const handleDragEnd = (event: DragEndEvent) => {
+    if (seasonVotes.length > 0) {
+      const restored = [...drivers].sort((a, b) => {
+        const voteA = seasonVotes.find(v => v.driverId === a.id);
+        const voteB = seasonVotes.find(v => v.driverId === b.id);
+        const posA = voteA ? parseInt(String(voteA.raceRound).split("-")[2]) : 999;
+        const posB = voteB ? parseInt(String(voteB.raceRound).split("-")[2]) : 999;
+        return posA - posB;
+      });
+      setOrderedDrivers(restored);
+    } else {
+      setOrderedDrivers(drivers);
+    }
+  }, [loading, votes, userId, drivers]);
+
+  const handleDragEnd = async (event: DragEndEvent) => {
+    if (isLocked) return;
     const { active, over } = event;
 
     if (over && active.id !== over.id) {
-      setOrderedDrivers((items) => {
-        const oldIndex = items.findIndex((item) => item.id === active.id);
-        const newIndex = items.findIndex((item) => item.id === over.id);
-        return arrayMove(items, oldIndex, newIndex);
-      });
+      const oldIndex = orderedDrivers.findIndex((item) => item.id === active.id);
+      const newIndex = orderedDrivers.findIndex((item) => item.id === over.id);
+      const newOrder = arrayMove(orderedDrivers, oldIndex, newIndex);
+      
+      setOrderedDrivers(newOrder);
+      
+      // Auto-save to store
+      await setSessionVotes("season-position-", userId, newOrder.map(d => d.id));
     }
-  };
-
-  const handleSubmit = async () => {
-    // Save the top 10 predictions
-    const top10 = orderedDrivers.slice(0, 10);
-
-    // Store as a special vote type for season predictions
-    for (let i = 0; i < top10.length; i++) {
-      await addVote({
-        driverId: top10[i].id,
-        raceRound: `season-position-${i + 1}`
-      });
-    }
-
-    alert(`✅ Twoje przewidywania zapisane!\nTwoja TOP 10:\n${top10.map((d, i) => `${i + 1}. ${d.name}`).join('\n')}`);
-    router.push("/leaderboard");
   };
 
   if (loading) {
     return (
-      <div className="animate-pulse space-y-4 pb-24">
+      <div className="animate-pulse space-y-4 pb-24 pt-8 px-4">
         {[...Array(6)].map((_, i) => (
-          <div key={i} className="h-16 bg-slate-800 rounded-lg w-full" />
+          <div key={i} className="h-16 bg-[#1C1C1E] rounded-2xl w-full" />
         ))}
       </div>
     );
   }
 
   return (
-    <div className="pb-32">
-      <div className="mb-6 text-center">
-        <h1 className="text-3xl font-black mb-2 bg-gradient-to-r from-red-500 to-orange-500 bg-clip-text text-transparent uppercase">
-          Przewidywania Sezonu 2026
-        </h1>
-        <p className="text-slate-400 text-sm mb-1">
-          Przeciągnij kierowców aby przewidzieć kolejność w mistrzostwach
+    <div className="pb-32 pt-8">
+      <div className="mb-6 px-4">
+        <div className="flex items-center justify-between mb-1">
+          <h1 className="text-3xl font-black text-white uppercase tracking-tighter">
+            Season <span className="text-[#E60000]">2026</span>
+          </h1>
+          {isLocked && (
+            <span className="bg-[#E60000]/10 text-[#E60000] text-[10px] font-bold px-2 py-1 rounded-lg border border-[#E60000]/20 flex items-center gap-1">
+              <span>🔒</span> LOCKED
+            </span>
+          )}
+        </div>
+        <p className="text-gray-500 text-sm mb-4 font-medium">
+          {isLocked 
+            ? "Season has started. Predictions are locked."
+            : "Drag & Drop to predict the championship order. Saved automatically."}
         </p>
-        <p className="text-cyan-400 text-xs font-bold">
-          📍 Twoja TOP 10 zostanie zapisana
-        </p>
+        {!isLocked && (
+            <div className="bg-[#1C1C1E] border border-white/10 rounded-xl p-3 flex items-start gap-3">
+              <div className="text-[#E60000] text-xl">ℹ️</div>
+              <div className="text-xs text-gray-400">
+                Predict the <strong>Top 10</strong> drivers correctly to earn maximum points. Changes save instantly.
+              </div>
+            </div>
+        )}
       </div>
 
       <DndContext
@@ -170,24 +200,18 @@ export default function SeasonVotePage() {
           items={orderedDrivers.map((d) => d.id)}
           strategy={verticalListSortingStrategy}
         >
-          <div className="grid grid-cols-1 gap-3 mb-6">
+          <div className="grid grid-cols-1 gap-2 mb-6 px-4">
             {orderedDrivers.map((driver, index) => (
-              <SortableDriverItem key={driver.id} driver={driver} index={index} />
+              <SortableDriverItem 
+                key={driver.id} 
+                driver={driver} 
+                index={index} 
+                disabled={isLocked}
+              />
             ))}
           </div>
         </SortableContext>
       </DndContext>
-
-      {/* Fixed Submit Button */}
-      <div className="fixed bottom-20 left-0 right-0 p-4 bg-gradient-to-t from-slate-950 via-slate-950 to-transparent pointer-events-none">
-        <button
-          onClick={handleSubmit}
-          className="w-full max-w-md mx-auto pointer-events-auto bg-gradient-to-r from-red-600 to-orange-600 text-white font-black py-4 rounded-xl shadow-lg shadow-red-500/30 active:scale-95 transition-transform uppercase tracking-wide text-lg flex items-center justify-center gap-2"
-        >
-          <span>🏆</span>
-          <span>Zapisz Moje Typy</span>
-        </button>
-      </div>
     </div>
   );
 }

@@ -29,7 +29,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pl">
-      <body className="bg-slate-950 text-slate-100 min-h-screen text-base md:text-lg">
+      <body className="min-h-screen text-base md:text-lg bg-[#0D0D0D] text-white">
         {/* Mobile: Top spacing for content, nav at bottom. Desktop: Top nav. */}
         <div className="md:pt-16 pb-20 md:pb-0">
           <Nav />

@@ -4,12 +4,12 @@ import { raceResults, actualSeasonStandings } from "./data";
 
 // Friend user IDs
 export const friends = [
-    { id: "user-agata", name: "Agata" },
-    { id: "user-jakub", name: "Jakub" },
-    { id: "user-kasia", name: "Kasia" },
-    { id: "user-wiktoria", name: "Wiktoria" },
-    { id: "user-iga", name: "Iga" },
-    { id: "user-rafal", name: "Rafał" },
+    { id: "user-jakub", name: "Jakub", team: "Red Bull Racing", avatar: "https://i.pravatar.cc/150?u=jakub" },
+    { id: "user-agata", name: "Agata", team: "Ferrari", avatar: "https://i.pravatar.cc/150?u=agata" },
+    { id: "user-kasia", name: "Kasia", team: "Mercedes", avatar: "https://i.pravatar.cc/150?u=kasia" },
+    { id: "user-wiktoria", name: "Wiktoria", team: "McLaren", avatar: "https://i.pravatar.cc/150?u=wiktoria" },
+    { id: "user-iga", name: "Iga", team: "Aston Martin", avatar: "https://i.pravatar.cc/150?u=iga" },
+    { id: "user-rafal", name: "Rafał", team: "Alpine", avatar: "https://i.pravatar.cc/150?u=rafal" },
 ];
 
 /**
@@ -128,3 +128,4 @@ export function getJakubVotes(): Vote[] {
 
 // Re-export scoring functions from the dedicated scoring module
 export { calculateRaceScore, calculateFriendScore } from './scoring';
+export { raceResults, actualSeasonStandings };

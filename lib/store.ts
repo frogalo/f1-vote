@@ -17,6 +17,7 @@ type Store = {
   userId: string;
   setDrivers: (d: Driver[]) => void;
   addVote: (v: Omit<Vote, "id" | "userId" | "createdAt">) => Promise<void>;
+  setSessionVotes: (raceRoundPrefix: string, voterId: string, driverIds: string[]) => Promise<void>;
   loadFromIndexedDB: () => Promise<void>;
   persistToIndexedDB: () => Promise<void>;
 };
@@ -49,6 +50,40 @@ export const useStore = create<Store>((setState, getState) => ({
     } catch (e) {
       console.error("Failed to persist vote", e);
       // Revert or retry logic could go here
+    }
+  },
+
+  setSessionVotes: async (raceRoundPrefix, voterId, driverIds) => {
+    const uid = getState().userId || userId();
+    const now = Date.now();
+    
+    // Create new votes for this session
+    const newVotes: Vote[] = driverIds.map((driverId, index) => ({
+      id: nanoid(),
+      userId: voterId || uid,
+      driverId,
+      raceRound: `${raceRoundPrefix}${index + 1}`,
+      createdAt: now,
+    }));
+
+    setState((state) => {
+      // Remove all previous votes for this user and this session
+      const filteredVotes = state.votes.filter(v => {
+        const isThisSession = String(v.raceRound).startsWith(raceRoundPrefix);
+        const isThisUser = v.userId === (voterId || uid);
+        return !(isThisSession && isThisUser);
+      });
+
+      return {
+        votes: [...filteredVotes, ...newVotes],
+        userId: uid
+      };
+    });
+
+    try {
+      await getState().persistToIndexedDB();
+    } catch (e) {
+      console.error("Failed to persist session votes", e);
     }
   },
 
