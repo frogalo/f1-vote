@@ -5,6 +5,7 @@ import { Driver } from "@/lib/data";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { clsx } from "clsx";
+import { GripVertical } from "lucide-react";
 import {
   DndContext,
   closestCenter,
@@ -84,7 +85,7 @@ export function VoteComponent({ race, drivers }: Props) {
         const diff = raceDate.getTime() - now.getTime();
         
         if (diff <= 0) {
-            setTimeLeft("RACE STARTED");
+            setTimeLeft("WYŚCIG ROZPOCZĘTY");
             setIsLocked(true);
             return;
         }
@@ -112,14 +113,14 @@ export function VoteComponent({ race, drivers }: Props) {
       setOrderedDrivers(newOrder);
       
       // Auto-save to store
-      await setSessionVotes(`race-${race.round}-position-`, userId, newOrder.map(d => d.id));
+      await setSessionVotes(`race-${race.round}-position-`, userId || "", newOrder.map(d => d.id));
     }
   };
 
   if (loading) {
     return (
         <div className="flex h-[60vh] items-center justify-center">
-            <div className="animate-pulse text-[#E60000] font-black text-xl">LOADING GRID...</div>
+            <div className="animate-pulse text-[#E60000] font-black text-xl">ŁADOWANIE STAWKI...</div>
         </div>
     );
   }
@@ -132,7 +133,7 @@ export function VoteComponent({ race, drivers }: Props) {
         </h2>
         <div className="flex items-center justify-center gap-2 mb-4">
           <span className="text-xs font-bold bg-[#2C2C2E] text-white px-3 py-1 rounded-lg border border-white/10">
-            Round {race.round}
+            Runda {race.round}
           </span>
           <span className={clsx(
             "text-xs font-bold px-3 py-1 rounded-lg border",
@@ -140,13 +141,13 @@ export function VoteComponent({ race, drivers }: Props) {
               ? "bg-[#E60000] text-white border-[#E60000]"
               : "bg-[#E60000]/10 text-[#E60000] border-[#E60000]/20"
           )}>
-            ⏱ {timeLeft || "Loading..."}
+            ⏱ {timeLeft || "Ładowanie..."}
           </span>
         </div>
         <p className="text-gray-500 text-xs uppercase tracking-widest font-bold">
           {isLocked 
-            ? "Grid is locked. Race has started." 
-            : "Drag & Drop to set your grid. Changes save instantly."}
+            ? "Stawka zablokowana. Wyścig się rozpoczął." 
+            : "Przeciągnij i upuść, aby ustawić stawkę. Zmiany zapisują się natychmiast."}
         </p>
       </div>
 
@@ -227,9 +228,7 @@ function SortableDriverItem({ driver, index, disabled }: { driver: Driver; index
       
       {!disabled && (
         <div className="ml-2 text-gray-600 flex-shrink-0">
-            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M7 2a2 2 0 1 0 .001 4.001A2 2 0 0 0 7 2zm0 6a2 2 0 1 0 .001 4.001A2 2 0 0 0 7 8zm0 6a2 2 0 1 0 .001 4.001A2 2 0 0 0 7 14zm6-8a2 2 0 1 0-.001-4.001A2 2 0 0 0 13 6zm0 2a2 2 0 1 0 .001 4.001A2 2 0 0 0 13 8zm0 6a2 2 0 1 0 .001 4.001A2 2 0 0 0 13 14z" />
-            </svg>
+            <GripVertical className="w-4 h-4 text-gray-500" />
         </div>
       )}
     </div>

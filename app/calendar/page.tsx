@@ -42,6 +42,8 @@ export default function CalendarPage() {
 
     useEffect(() => {
         loadFromIndexedDB().then(async () => {
+            // Mock data loading disabled for real auth
+            /*
             const currentVotes = useStore.getState().votes;
             const hasJakubVotes = currentVotes.some(v => v.userId === "user-jakub");
 
@@ -55,6 +57,7 @@ export default function CalendarPage() {
                     });
                 }
             }
+            */
             setLoading(false);
         });
     }, [loadFromIndexedDB, addVote]);
@@ -67,7 +70,7 @@ export default function CalendarPage() {
 
     const formatDate = (dateString: string) => {
         const date = new Date(dateString);
-        return date.toLocaleDateString("en-US", {
+        return date.toLocaleDateString("pl-PL", {
             day: "2-digit",
             month: "short",
         });
@@ -93,9 +96,9 @@ export default function CalendarPage() {
     return (
         <div className="pb-32 max-w-4xl mx-auto pt-8">
             <h1 className="text-4xl font-black mb-1 px-4 text-white uppercase tracking-tighter">
-                F1 Schedule <span className="text-[#E60000]">2026</span>
+                Terminarz F1 <span className="text-[#E60000]">2026</span>
             </h1>
-            <p className="text-gray-500 px-4 mb-8 text-sm font-bold tracking-widest">24 RACES • WORLD CHAMPIONSHIP</p>
+            <p className="text-gray-500 px-4 mb-8 text-sm font-bold tracking-widest">24 WYŚCIGI • MISTRZOSTWA ŚWIATA</p>
 
             {/* Calendar Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 px-4">
@@ -107,7 +110,7 @@ export default function CalendarPage() {
                     // Calculate points for current user if completed
                     let points = 0;
                     if (status === "completed") {
-                        const score = calculateRaceScore(currentUserId, race.round, votes);
+                        const score = calculateRaceScore(currentUserId || "", race.round, votes);
                         points = score.totalPoints;
                     }
 
@@ -147,7 +150,7 @@ export default function CalendarPage() {
 
                                 {status === "upcoming" && (
                                     <div className="bg-[#E60000] text-white text-[10px] font-black px-2 py-1 rounded-lg animate-pulse">
-                                        LIVE
+                                        NA ŻYWO
                                     </div>
                                 )}
                             </div>
@@ -166,7 +169,7 @@ export default function CalendarPage() {
                                 {status === "completed" && points > 0 && (
                                      <div className="absolute inset-0 flex items-center justify-center">
                                          <div className="bg-[#E60000] text-white font-black px-3 py-1 rounded-full text-sm shadow-lg">
-                                             +{points} XP
+                                             +{points} PKT
                                          </div>
                                      </div>
                                 )}
@@ -181,7 +184,7 @@ export default function CalendarPage() {
 
                                 {status === "completed" ? (
                                     <div className="text-xs font-black text-gray-500 uppercase flex items-center gap-1 group-hover:text-white transition-colors">
-                                        RESULTS <span>→</span>
+                                        WYNIKI <span>→</span>
                                     </div>
                                 ) : countdown ? (
                                     <div className={clsx(

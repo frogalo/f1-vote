@@ -3,6 +3,7 @@
 import { useStore } from "@/lib/store";
 import { useEffect, useState } from "react";
 import { clsx } from "clsx";
+import { ChevronLeft } from "lucide-react";
 import { friends, generateMockVotes, calculateFriendScore } from "@/lib/mockData";
 
 type FriendScore = {
@@ -86,7 +87,7 @@ export default function LeaderboardContent() {
   if (loading) {
     return (
       <div className="flex h-screen items-center justify-center bg-[#0D0D0D] text-[#E60000]">
-        <div className="animate-pulse text-xl font-bold">LOADING RESULTS...</div>
+        <div className="animate-pulse text-xl font-bold">ŁADOWANIE WYNIKÓW...</div>
       </div>
     );
   }
@@ -100,16 +101,14 @@ export default function LeaderboardContent() {
       {/* Header */}
       <div className="p-6 pt-12">
         <button className="text-[#E60000] mb-4 text-2xl">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M15 18l-6-6 6-6" />
-          </svg>
+          <ChevronLeft className="w-6 h-6" />
         </button>
         <h1 className="text-4xl font-black text-white mb-1 tracking-tighter uppercase relative">
-          Rank
+          Ranking
           <div className="absolute -bottom-2 w-12 h-1 bg-[#E60000] rounded-full blur-[2px]"></div>
         </h1>
         <p className="text-gray-500 text-xs mt-2 font-medium">
-          Last Updated: {new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long' })}, {new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}
+          Ostatnia aktualizacja: {new Date().toLocaleDateString('pl-PL', { day: 'numeric', month: 'long' })}, {new Date().toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' })}
         </p>
       </div>
 
@@ -153,7 +152,7 @@ export default function LeaderboardContent() {
               return (
                 <div key={user.id} className={`flex flex-col items-center text-center transition-all ${scale} ${heightClass}`}>
                   <div className="font-bold text-gray-300 mb-2 text-sm uppercase tracking-wider">
-                    {rank === 1 ? '1st' : rank === 2 ? '2nd' : '3rd'}
+                    {rank === 1 ? '1.' : rank === 2 ? '2.' : '3.'}
                   </div>
                   
                   <div className={`relative p-1 rounded-full border-2 ${ringColor} ${isWinner ? 'shadow-[0_0_20px_rgba(230,0,0,0.3)]' : ''}`}>
@@ -166,7 +165,7 @@ export default function LeaderboardContent() {
                      </div>
                      {isWinner && (
                         <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-[#E60000] text-white text-[10px] font-black px-2 py-0.5 rounded-full border border-[#0D0D0D] shadow-lg">
-                          KING
+                          MISTRZ
                         </div>
                      )}
                   </div>
@@ -178,7 +177,7 @@ export default function LeaderboardContent() {
                     </div>
                     <div className="text-[10px] text-gray-500 uppercase tracking-widest">{user.team}</div>
                     <div className={`font-black text-lg md:text-xl ${isWinner ? 'text-[#E60000]' : 'text-white'}`}>
-                      {user.totalPoints} <span className="text-[10px] font-normal opacity-70 text-white">XP</span>
+                      {user.totalPoints} <span className="text-[10px] font-normal opacity-70 text-white">PKT</span>
                     </div>
                   </div>
                 </div>
@@ -242,11 +241,11 @@ export default function LeaderboardContent() {
               <div className="text-right z-10">
                  {rank <= 3 && (
                    <div className="text-[10px] text-gray-400 mb-0.5">
-                     Rank {rank}
+                     Miejsce {rank}
                    </div>
                  )}
                  <div className="font-black text-white text-lg tracking-tight">
-                   {user.totalPoints} <span className="text-[#E60000] text-xs">XP</span>
+                   {user.totalPoints} <span className="text-[#E60000] text-xs">PKT</span>
                  </div>
               </div>
               

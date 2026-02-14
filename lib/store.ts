@@ -14,7 +14,8 @@ export type Vote = {
 type Store = {
   drivers: Driver[];
   votes: Vote[];
-  userId: string;
+  userId: string | null;
+  setUserId: (id: string) => void;
   setDrivers: (d: Driver[]) => void;
   addVote: (v: Omit<Vote, "id" | "userId" | "createdAt">) => Promise<void>;
   setSessionVotes: (raceRoundPrefix: string, voterId: string, driverIds: string[]) => Promise<void>;
@@ -25,12 +26,24 @@ type Store = {
 export const useStore = create<Store>((setState, getState) => ({
   drivers: staticDrivers,
   votes: [],
-  userId: "user-jakub",
+  userId: userId() || null,
+
+  setUserId: (id) => setState({ userId: id }),
 
   setDrivers: (drivers) => setState({ drivers }),
 
   addVote: async (voteData) => {
-    const uid = getState().userId || userId();
+    let uid = getState().userId;
+    if (!uid) {
+        uid = userId();
+    }
+    
+    // Safety check just in case logic fails
+    if (!uid) {
+        console.error("Cannot add vote: No user ID available");
+        return;
+    }
+
     const newVote: Vote = {
       id: nanoid(),
       userId: uid,
@@ -41,7 +54,7 @@ export const useStore = create<Store>((setState, getState) => ({
     // Optimistic update
     setState((state) => ({
       votes: [...state.votes, newVote],
-      userId: uid // ensure userId is set if not already
+      userId: uid 
     }));
 
     // Background persist

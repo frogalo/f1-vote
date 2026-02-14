@@ -4,6 +4,7 @@ import { useStore } from "@/lib/store";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { clsx } from "clsx";
+import { GripVertical } from "lucide-react";
 import {
   DndContext,
   closestCenter,
@@ -80,9 +81,7 @@ function SortableDriverItem({ driver, index, disabled }: { driver: Driver; index
       {/* Drag Indicator */}
       {!disabled && (
         <div className="ml-2 text-gray-600 flex-shrink-0">
-          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-            <path d="M7 2a2 2 0 1 0 .001 4.001A2 2 0 0 0 7 2zm0 6a2 2 0 1 0 .001 4.001A2 2 0 0 0 7 8zm0 6a2 2 0 1 0 .001 4.001A2 2 0 0 0 7 14zm6-8a2 2 0 1 0-.001-4.001A2 2 0 0 0 13 6zm0 2a2 2 0 1 0 .001 4.001A2 2 0 0 0 13 8zm0 6a2 2 0 1 0 .001 4.001A2 2 0 0 0 13 14z" />
-          </svg>
+      <GripVertical className="w-5 h-5 text-gray-500" />
         </div>
       )}
     </div>
@@ -137,6 +136,13 @@ export default function SeasonVotePage() {
     }
   }, [loading, votes, userId, drivers]);
 
+  useEffect(() => {
+    if (!loading && !userId) {
+       // Optional: Redirect to login if enforced
+       // router.push("/login");
+    }
+  }, [loading, userId]);
+
   const handleDragEnd = async (event: DragEndEvent) => {
     if (isLocked) return;
     const { active, over } = event;
@@ -149,7 +155,9 @@ export default function SeasonVotePage() {
       setOrderedDrivers(newOrder);
       
       // Auto-save to store
-      await setSessionVotes("season-position-", userId, newOrder.map(d => d.id));
+      if (userId) {
+        setSessionVotes("season-position-", userId, newOrder.map(d => d.id));
+      }
     }
   };
 
@@ -168,24 +176,24 @@ export default function SeasonVotePage() {
       <div className="mb-6 px-4">
         <div className="flex items-center justify-between mb-1">
           <h1 className="text-3xl font-black text-white uppercase tracking-tighter">
-            Season <span className="text-[#E60000]">2026</span>
+            Sezon <span className="text-[#E60000]">2026</span>
           </h1>
           {isLocked && (
             <span className="bg-[#E60000]/10 text-[#E60000] text-[10px] font-bold px-2 py-1 rounded-lg border border-[#E60000]/20 flex items-center gap-1">
-              <span>🔒</span> LOCKED
+              <span>🔒</span> ZABLOKOWANE
             </span>
           )}
         </div>
         <p className="text-gray-500 text-sm mb-4 font-medium">
           {isLocked 
-            ? "Season has started. Predictions are locked."
-            : "Drag & Drop to predict the championship order. Saved automatically."}
+            ? "Sezon się rozpoczął. Typy są zablokowane."
+            : "Przeciągnij i upuść, aby przewidzieć kolejność w mistrzostwach. Zapisywane automatycznie."}
         </p>
         {!isLocked && (
             <div className="bg-[#1C1C1E] border border-white/10 rounded-xl p-3 flex items-start gap-3">
               <div className="text-[#E60000] text-xl">ℹ️</div>
               <div className="text-xs text-gray-400">
-                Predict the <strong>Top 10</strong> drivers correctly to earn maximum points. Changes save instantly.
+                Przewiduj poprawnie <strong>Top 10</strong> kierowców, aby zdobyć maksymalną liczbę punktów. Zmiany są zapisywane natychmiast.
               </div>
             </div>
         )}
