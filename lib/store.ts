@@ -7,7 +7,7 @@ export type Vote = {
   id: string;
   userId: string;
   driverId: string;
-  raceRound: number | "season"; 
+  raceRound: number | string; // Allow strings for season predictions like "season-position-1"
   createdAt: number;
 };
 
@@ -24,7 +24,7 @@ type Store = {
 export const useStore = create<Store>((setState, getState) => ({
   drivers: staticDrivers,
   votes: [],
-  userId: "",
+  userId: "user-jakub",
 
   setDrivers: (drivers) => setState({ drivers }),
 
@@ -38,7 +38,7 @@ export const useStore = create<Store>((setState, getState) => ({
     };
 
     // Optimistic update
-    setState((state) => ({ 
+    setState((state) => ({
       votes: [...state.votes, newVote],
       userId: uid // ensure userId is set if not already
     }));
@@ -57,9 +57,9 @@ export const useStore = create<Store>((setState, getState) => ({
     try {
       const storedVotes = await get<Vote[]>('f1-votes');
       const uid = userId();
-      setState({ 
-        votes: storedVotes || [], 
-        userId: uid 
+      setState({
+        votes: storedVotes || [],
+        userId: uid
       });
     } catch (e) {
       console.error("IDB load failed", e);

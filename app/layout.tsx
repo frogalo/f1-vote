@@ -3,13 +3,13 @@ import "./globals.css";
 import Nav from "@/app/components/Nav";
 
 export const metadata: Metadata = {
-  title: "F1 2025 Vote",
-  description: "Vote for your favorite 2025 season winner",
+  title: "F1 Typy 2026",
+  description: "Typuj i przewiduj wyniki sezonu F1 2026",
   manifest: "/manifest.webmanifest",
-  applicationName: "F1 Vote",
+  applicationName: "F1 Typy",
   appleWebApp: {
     capable: true,
-    title: "F1 Vote",
+    title: "F1 Typy",
     statusBarStyle: "black-translucent",
   },
 };
@@ -18,8 +18,8 @@ export const viewport: Viewport = {
   themeColor: "#0f172a",
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
+  maximumScale: 5, // Allow zoom for accessibility
+  userScalable: true,
 };
 
 export default function RootLayout({
@@ -28,12 +28,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="pl">
       <body className="bg-slate-950 text-slate-100 min-h-screen text-base md:text-lg">
         {/* Mobile: Top spacing for content, nav at bottom. Desktop: Top nav. */}
         <div className="md:pt-16 pb-20 md:pb-0">
           <Nav />
-          <main className="max-w-md mx-auto p-4 md:max-w-2xl min-h-[calc(100vh-80px)]">
+          <main className="max-w-md mx-auto p-4 md:max-w-4xl min-h-[calc(100vh-80px)]">
             {children}
           </main>
         </div>
