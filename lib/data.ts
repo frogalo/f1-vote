@@ -15,6 +15,24 @@ export type Race = {
   isTesting?: boolean;
 };
 
+export const getTeamLogo = (team: string) => {
+  const slugs: Record<string, string> = {
+    "Alpine": "alpine",
+    "Aston Martin": "astonmartin",
+    "Williams": "williams",
+    "Audi": "audi",
+    "Cadillac": "cadillac",
+    "Ferrari": "ferrari",
+    "Haas": "haas",
+    "McLaren": "mclaren",
+    "Mercedes": "mercedes",
+    "Racing Bulls": "racingbulls",
+    "Red Bull Racing": "redbullracing"
+  };
+  const slug = slugs[team] || team.toLowerCase().replace(/\s+/g, '');
+  return `https://media.formula1.com/image/upload/c_lfill,w_48/q_auto/v1740000000/common/f1/2026/${slug}/2026${slug}logowhite.webp`;
+};
+
 export const drivers: Driver[] = [
   // Alpine
   {

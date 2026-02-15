@@ -6,6 +6,8 @@ import { useEffect, useState } from "react";
 import { clsx } from "clsx";
 import Link from "next/link";
 import { loginUser } from "@/app/actions/auth";
+import { hasSeasonVotes } from "@/app/actions/seasonVote";
+import { toast } from "sonner";
 
 export default function LoginPage() {
     const router = useRouter();
@@ -21,38 +23,44 @@ export default function LoginPage() {
         setError("");
 
         try {
-            const result = await loginUser(new FormData(e.target as HTMLFormElement));
+            const formData = new FormData(e.target as HTMLFormElement);
+            const result = await loginUser(formData);
 
             if (result.error) {
                 setError(result.error);
+                toast.error(result.error);
                 return;
             }
 
             if (result.success && result.user) {
+                toast.success(`Witaj ponownie, ${result.user.name}!`);
                 setUserId(result.user.id);
-                // Also load mock data? No, detach mock user votes logic.
-                router.push("/season");
+                // Check if user needs to set up seasonal votes
+                const hasSeason = await hasSeasonVotes();
+                router.push(hasSeason ? "/" : "/season"); // Go to dashboard if has votes, else to seasonal voting
             }
         } catch (err: any) {
-            setError(err.message || "An error occurred");
+            const msg = err.message || "An error occurred";
+            setError(msg);
+            toast.error(msg);
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <div className="flex flex-col items-center justify-center min-h-screen bg-[#0D0D0D] px-4">
-            <h1 className="text-4xl font-black text-white mb-2 uppercase tracking-tighter">
+        <div className="flex flex-col items-center justify-center fixed inset-0 bg-[#0D0D0D] px-4 overflow-hidden z-[60]">
+            <h1 className="text-4xl font-black text-white mb-2 uppercase tracking-tighter text-center">
                 F1 Vote <span className="text-[#E60000]">2026</span>
             </h1>
-            <p className="text-gray-500 mb-8 font-bold tracking-widest text-sm uppercase">Zaloguj do Padoku</p>
+            <p className="text-gray-500 mb-8 font-bold tracking-widest text-sm uppercase text-center">Zaloguj do Padoku</p>
 
             <form onSubmit={handleSubmit} className="w-full max-w-sm space-y-4">
                 <div>
                     <input
                         type="text"
                         name="username"
-                        placeholder="Użytkownik"
+                        placeholder="Imię"
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
                         className="w-full bg-[#1C1C1E] border border-white/10 p-4 rounded-xl text-white placeholder-gray-500 font-medium focus:border-[#E60000] outline-none transition-colors"
@@ -77,11 +85,11 @@ export default function LoginPage() {
                     type="submit"
                     disabled={loading}
                     className={clsx(
-                        "w-full bg-[#E60000] text-white p-4 rounded-xl font-black uppercase tracking-wider text-lg shadow-lg shadow-red-900/20 active:scale-95 transition-all",
+                        "w-full bg-[#E60000] text-white p-4 rounded-xl font-black uppercase tracking-wider text-lg shadow-lg shadow-red-900/20 active:scale-95 transition-all mt-4",
                         loading && "opacity-50 cursor-not-allowed"
                     )}
                 >
-                    {loading ? "Rozgrzewanie opon..." : "Start wyścigu"}
+                    {loading ? "Rozgrzewanie opon..." : "Zaloguj"}
                 </button>
 
                 <div className="text-center mt-6">

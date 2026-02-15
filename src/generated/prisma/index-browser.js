@@ -120,12 +120,29 @@ exports.Prisma.TransactionIsolationLevel = makeStrictEnum({
   Serializable: 'Serializable'
 });
 
+exports.Prisma.TeamScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  color: 'color'
+};
+
+exports.Prisma.DriverScalarFieldEnum = {
+  slug: 'slug',
+  name: 'name',
+  number: 'number',
+  country: 'country',
+  teamId: 'teamId',
+  color: 'color'
+};
+
 exports.Prisma.UserScalarFieldEnum = {
   id: 'id',
   username: 'username',
   password: 'password',
   name: 'name',
-  team: 'team',
+  isAdmin: 'isAdmin',
+  teamId: 'teamId',
+  favoriteDriverId: 'favoriteDriverId',
   avatar: 'avatar',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -137,6 +154,16 @@ exports.Prisma.VoteScalarFieldEnum = {
   driverId: 'driverId',
   raceRound: 'raceRound',
   createdAt: 'createdAt'
+};
+
+exports.Prisma.SeasonVoteScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  driverId: 'driverId',
+  position: 'position',
+  season: 'season',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 };
 
 exports.Prisma.SortOrder = {
@@ -156,8 +183,11 @@ exports.Prisma.NullsOrder = {
 
 
 exports.Prisma.ModelName = {
+  Team: 'Team',
+  Driver: 'Driver',
   User: 'User',
-  Vote: 'Vote'
+  Vote: 'Vote',
+  SeasonVote: 'SeasonVote'
 };
 
 /**

@@ -10,16 +10,42 @@ datasource db {
   provider = "postgresql"
 }
 
+model Team {
+  id      String   @id @default(cuid())
+  name    String   @unique
+  color   String? // Tailwind class or specific style
+  users   User[]
+  drivers Driver[]
+}
+
+model Driver {
+  slug      String  @id // The ID from data.ts ("ver", etc)
+  name      String
+  number    Int
+  country   String?
+  teamId    String
+  team      Team    @relation(fields: [teamId], references: [id])
+  color     String?
+  votes       Vote[]
+  seasonVotes SeasonVote[]
+  favorited   User[]
+}
+
 model User {
-  id        String   @id @default(cuid())
-  username  String   @unique
-  password  String   // Hashed password
-  name      String?
-  team      String?  // F1 Team preference
-  avatar    String?  // URL to avatar image
-  votes     Vote[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id               String   @id @default(cuid())
+  username         String   @unique
+  password         String // Hashed password
+  name             String?
+  isAdmin          Boolean  @default(false)
+  teamId           String?
+  team             Team?    @relation(fields: [teamId], references: [id])
+  favoriteDriverId String?
+  favoriteDriver   Driver?  @relation(fields: [favoriteDriverId], references: [slug])
+  avatar           String? // URL to avatar image
+  votes            Vote[]
+  seasonVotes      SeasonVote[]
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 }
 
 model Vote {
@@ -27,9 +53,26 @@ model Vote {
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   driverId  String
-  raceRound String   // Stores "season-position-X" or "race-Y-position-Z"
+  driver    Driver   @relation(fields: [driverId], references: [slug])
+  raceRound String // Stores "season-position-X" or "race-Y-position-Z"
   createdAt DateTime @default(now())
 
   @@index([userId])
   @@index([raceRound])
+}
+
+model SeasonVote {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  driverId  String
+  driver    Driver   @relation(fields: [driverId], references: [slug])
+  position  Int      // 1-based position (1 = predicted champion)
+  season    Int      @default(2026)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, position, season])
+  @@unique([userId, driverId, season])
+  @@index([userId, season])
 }

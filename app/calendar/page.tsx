@@ -41,26 +41,10 @@ export default function CalendarPage() {
     const completedRaceCount = raceResults.length;
 
     useEffect(() => {
-        loadFromIndexedDB().then(async () => {
-            // Mock data loading disabled for real auth
-            /*
-            const currentVotes = useStore.getState().votes;
-            const hasJakubVotes = currentVotes.some(v => v.userId === "user-jakub");
-
-            if (!hasJakubVotes) {
-                const { getJakubVotes } = await import("@/lib/mockData");
-                const jakubVotes = getJakubVotes();
-                for (const vote of jakubVotes) {
-                    await addVote({
-                        driverId: vote.driverId,
-                        raceRound: vote.raceRound,
-                    });
-                }
-            }
-            */
+        loadFromIndexedDB().then(() => {
             setLoading(false);
         });
-    }, [loadFromIndexedDB, addVote]);
+    }, [loadFromIndexedDB]);
 
     const getRaceStatus = (raceRound: number) => {
         if (raceRound <= completedRaceCount) return "completed";
@@ -157,7 +141,7 @@ export default function CalendarPage() {
 
                             <div className="relative h-24 mt-2 mb-4 flex items-center justify-center">
                                 {/* Track Image */}
-                                <img 
+                                <img
                                     src={`https://media.formula1.com/image/upload/c_lfill,w_1000/v1740000000/common/f1/2026/track/2026track${slug}blackoutline.svg`}
                                     alt={race.name}
                                     className={clsx(
@@ -165,13 +149,13 @@ export default function CalendarPage() {
                                         status === "upcoming" ? "opacity-30 invert" : "opacity-10 invert"
                                     )}
                                 />
-                                
+
                                 {status === "completed" && points > 0 && (
-                                     <div className="absolute inset-0 flex items-center justify-center">
-                                         <div className="bg-[#E60000] text-white font-black px-3 py-1 rounded-full text-sm shadow-lg">
-                                             +{points} PKT
-                                         </div>
-                                     </div>
+                                    <div className="absolute inset-0 flex items-center justify-center">
+                                        <div className="bg-[#E60000] text-white font-black px-3 py-1 rounded-full text-sm shadow-lg">
+                                            +{points} PKT
+                                        </div>
+                                    </div>
                                 )}
                             </div>
 
@@ -195,7 +179,7 @@ export default function CalendarPage() {
                                     </div>
                                 ) : null}
                             </div>
-                            
+
                             {/* Accent Glow */}
                             {status === "upcoming" && (
                                 <div className="absolute -top-10 -left-10 w-32 h-32 bg-[#E60000] opacity-5 blur-[40px] rounded-full pointer-events-none" />

@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import Nav from "@/app/components/Nav";
 import { AuthProvider } from "@/app/providers/AuthProvider";
+import { Toaster } from "sonner";
 
 export const metadata: Metadata = {
   title: "F1 Typy 2026",
@@ -31,6 +32,7 @@ export default function RootLayout({
   return (
     <html lang="pl">
       <body className="min-h-screen text-base md:text-lg bg-[#0D0D0D] text-white">
+        <Toaster position="top-center" richColors theme="dark" closeButton />
         {/* Mobile: Top spacing for content, nav at bottom. Desktop: Top nav. */}
         <div className="md:pt-16 pb-20 md:pb-0">
           <AuthProvider>

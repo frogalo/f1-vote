@@ -1,11 +1,88 @@
 "use client";
 
 import { useAuth } from "@/app/providers/AuthProvider";
-import { logoutUser } from "@/app/actions/auth";
-import { User, LogOut, Shield, Settings } from "lucide-react";
+import { logoutUser, updateProfile } from "@/app/actions/auth";
+import { getProfileOptions } from "@/app/actions/profile";
+import { User, LogOut, Edit3, Check, X, ChevronDown } from "lucide-react";
+import { getTeamLogo } from "@/lib/data";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+
+type Team = { id: string; name: string };
+type DriverOption = { slug: string; name: string; number: number; team: { name: string } };
 
 export default function ProfilePage() {
-    const { user, loading } = useAuth();
+    const { user, loading, refreshUser } = useAuth();
+    const [editing, setEditing] = useState(false);
+    const [saving, setSaving] = useState(false);
+
+    // Editable fields
+    const [name, setName] = useState("");
+    const [selectedTeam, setSelectedTeam] = useState("");
+    const [selectedDriver, setSelectedDriver] = useState("");
+
+    // Dropdown options from DB
+    const [teams, setTeams] = useState<Team[]>([]);
+    const [drivers, setDrivers] = useState<DriverOption[]>([]);
+    const [optionsLoaded, setOptionsLoaded] = useState(false);
+
+    // Sync form state when user loads
+    useEffect(() => {
+        if (user) {
+            setName(user.name || "");
+            setSelectedTeam(user.team || "");
+            setSelectedDriver(user.favoriteDriverSlug || "");
+        }
+    }, [user]);
+
+    // Load dropdown options when editing starts
+    useEffect(() => {
+        if (editing && !optionsLoaded) {
+            getProfileOptions().then(({ teams, drivers }) => {
+                setTeams(teams);
+                setDrivers(drivers);
+                setOptionsLoaded(true);
+            });
+        }
+    }, [editing, optionsLoaded]);
+
+    // Filter drivers by selected team
+    const filteredDrivers = selectedTeam
+        ? drivers.filter(d => d.team.name === selectedTeam)
+        : drivers;
+
+    const handleSave = async () => {
+        setSaving(true);
+        try {
+            const formData = new FormData();
+            formData.set("name", name);
+            formData.set("team", selectedTeam);
+            formData.set("favoriteDriver", selectedDriver);
+
+            const result = await updateProfile(formData);
+            if (result.error) {
+                toast.error(result.error);
+            } else {
+                toast.success("Profil zaktualizowany!");
+                await refreshUser();
+                setEditing(false);
+            }
+        } catch (err) {
+            toast.error("Błąd podczas zapisywania profilu");
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    const handleCancel = () => {
+        // Reset to current user values
+        if (user) {
+            setName(user.name || "");
+            setSelectedTeam(user.team || "");
+            setSelectedDriver(user.favoriteDriverSlug || "");
+        }
+        setEditing(false);
+    };
 
     if (loading) return (
         <div className="flex items-center justify-center h-[50vh]">
@@ -21,53 +98,144 @@ export default function ProfilePage() {
 
     return (
         <div className="pb-32 pt-8 px-4">
-            <h1 className="text-4xl font-black mb-8 text-white uppercase tracking-tighter">
-                Profil <span className="text-[#E60000]">Kierowcy</span>
-            </h1>
+            <div className="flex items-center justify-between mb-8">
+                <h1 className="text-4xl font-black text-white uppercase tracking-tighter">
+                    Profil
+                </h1>
+                {!editing ? (
+                    <button
+                        onClick={() => setEditing(true)}
+                        className="flex items-center gap-2 px-4 py-2 bg-[#1C1C1E] hover:bg-[#2C2C2E] border border-white/10 rounded-xl text-sm font-bold text-gray-300 transition-all active:scale-95"
+                    >
+                        <Edit3 className="w-4 h-4" />
+                        Edytuj
+                    </button>
+                ) : (
+                    <div className="flex gap-2">
+                        <button
+                            onClick={handleCancel}
+                            className="flex items-center gap-1 px-3 py-2 bg-[#1C1C1E] hover:bg-[#2C2C2E] border border-white/10 rounded-xl text-sm font-bold text-gray-400 transition-all active:scale-95"
+                        >
+                            <X className="w-4 h-4" />
+                        </button>
+                        <button
+                            onClick={handleSave}
+                            disabled={saving}
+                            className="flex items-center gap-1 px-4 py-2 bg-[#E60000] hover:bg-red-700 border border-red-500 rounded-xl text-sm font-bold text-white transition-all active:scale-95 disabled:opacity-50"
+                        >
+                            <Check className="w-4 h-4" />
+                            {saving ? "..." : "Zapisz"}
+                        </button>
+                    </div>
+                )}
+            </div>
 
+            {/* Avatar & Name Card */}
             <div className="bg-[#1C1C1E] rounded-[2rem] p-8 border border-white/5 mb-6 text-center">
                 <div className="relative inline-block mb-4">
-                    <img 
-                        src={user.avatar || `https://i.pravatar.cc/150?u=${user.id}`} 
-                        alt={user.name} 
+                    <img
+                        src={user.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || "U")}&background=E60000&color=fff&bold=true&size=150`}
+                        alt={user.name}
                         className="w-24 h-24 rounded-full border-4 border-[#E60000] shadow-lg shadow-red-900/20"
                     />
                     <div className="absolute -bottom-1 -right-1 bg-[#E60000] p-2 rounded-full border-2 border-[#1C1C1E]">
                         <User className="w-4 h-4 text-white" />
                     </div>
                 </div>
-                
-                <h2 className="text-2xl font-black text-white mb-1 uppercase tracking-tight">{user.name}</h2>
-                <p className="text-[#E60000] text-sm font-bold uppercase tracking-widest mb-6">{user.team || "Independent"}</p>
 
+                {editing ? (
+                    <div className="max-w-xs mx-auto">
+                        <label className="text-gray-500 text-[10px] uppercase font-bold mb-2 block text-left">Imię</label>
+                        <input
+                            value={name}
+                            onChange={e => setName(e.target.value)}
+                            className="w-full bg-[#2C2C2E] border border-white/10 rounded-xl px-4 py-3 text-white font-bold text-lg text-center focus:outline-none focus:border-[#E60000] transition-colors"
+                            placeholder="Twoje imię"
+                        />
+                    </div>
+                ) : (
+                    <h2 className="text-2xl font-black text-white mb-1 uppercase tracking-tight">{user.name}</h2>
+                )}
+            </div>
+
+            {/* Team & Driver Selection */}
+            <div className="space-y-4 mb-6">
+                {/* Team */}
+                <div className="bg-[#1C1C1E] rounded-2xl p-5 border border-white/5">
+                    <div className="text-gray-500 text-[10px] uppercase font-bold mb-3 tracking-wider">Ulubiony zespół</div>
+                    {editing ? (
+                        <div className="relative">
+                            <select
+                                value={selectedTeam}
+                                onChange={e => {
+                                    setSelectedTeam(e.target.value);
+                                    // Reset driver when team changes
+                                    setSelectedDriver("");
+                                }}
+                                className="w-full bg-[#2C2C2E] border border-white/10 rounded-xl px-4 py-3 text-white font-bold appearance-none cursor-pointer focus:outline-none focus:border-[#E60000] transition-colors"
+                            >
+                                <option value="">Brak zespołu</option>
+                                {teams.map(t => (
+                                    <option key={t.id} value={t.name}>{t.name}</option>
+                                ))}
+                            </select>
+                            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
+                        </div>
+                    ) : (
+                        <div className="flex items-center gap-3">
+                            <img
+                                src={getTeamLogo(user.team || "Independent")}
+                                alt={user.team || "Independent"}
+                                className="w-6 h-6 object-contain brightness-0 invert opacity-60"
+                            />
+                            <span className="text-white font-bold text-lg">{user.team || "Nie wybrano"}</span>
+                        </div>
+                    )}
+                </div>
+
+                {/* Favorite Driver */}
+                <div className="bg-[#1C1C1E] rounded-2xl p-5 border border-white/5">
+                    <div className="text-gray-500 text-[10px] uppercase font-bold mb-3 tracking-wider">Ulubiony kierowca</div>
+                    {editing ? (
+                        <div className="relative">
+                            <select
+                                value={selectedDriver}
+                                onChange={e => setSelectedDriver(e.target.value)}
+                                className="w-full bg-[#2C2C2E] border border-white/10 rounded-xl px-4 py-3 text-white font-bold appearance-none cursor-pointer focus:outline-none focus:border-[#E60000] transition-colors"
+                            >
+                                <option value="">Brak ulubionego</option>
+                                {filteredDrivers.map(d => (
+                                    <option key={d.slug} value={d.slug}>#{d.number} {d.name} ({d.team.name})</option>
+                                ))}
+                            </select>
+                            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
+                        </div>
+                    ) : (
+                        <div className="flex items-center gap-3">
+                            <div className="w-6 h-6 rounded-full bg-[#E60000]/20 flex items-center justify-center text-[#E60000] text-xs font-black">
+                                ★
+                            </div>
+                            <span className="text-white font-bold text-lg">{user.favoriteDriver || "Nie wybrano"}</span>
+                        </div>
+                    )}
+                </div>
+
+                {/* Status & Season info */}
                 <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-[#2C2C2E] p-4 rounded-2xl">
+                    <div className="bg-[#1C1C1E] rounded-2xl p-5 border border-white/5">
                         <div className="text-gray-500 text-[10px] uppercase font-bold mb-1">Status</div>
                         <div className="text-white font-bold text-sm">Aktywny</div>
                     </div>
-                    <div className="bg-[#2C2C2E] p-4 rounded-2xl">
+                    <div className="bg-[#1C1C1E] rounded-2xl p-5 border border-white/5">
                         <div className="text-gray-500 text-[10px] uppercase font-bold mb-1">Sezon</div>
                         <div className="text-white font-bold text-sm">2026</div>
                     </div>
                 </div>
             </div>
 
+            {/* Actions */}
             <div className="space-y-3">
-                <button className="w-full flex items-center justify-between p-5 bg-[#1C1C1E] hover:bg-[#2C2C2E] border border-white/5 rounded-2xl transition-all group">
-                    <div className="flex items-center gap-4">
-                        <Settings className="w-5 h-5 text-gray-500 group-hover:text-white" />
-                        <span className="font-bold text-white">Ustawienia konta</span>
-                    </div>
-                    <span className="text-gray-600">→</span>
-                </button>
-                <button className="w-full flex items-center justify-between p-5 bg-[#1C1C1E] hover:bg-[#2C2C2E] border border-white/5 rounded-2xl transition-all group">
-                    <div className="flex items-center gap-4">
-                        <Shield className="w-5 h-5 text-gray-500 group-hover:text-white" />
-                        <span className="font-bold text-white">Prywatność</span>
-                    </div>
-                    <span className="text-gray-600">→</span>
-                </button>
-                <button 
+                <button
                     onClick={() => logoutUser()}
                     className="w-full flex items-center justify-between p-5 bg-red-900/10 hover:bg-red-900/20 border border-red-900/20 rounded-2xl transition-all group"
                 >

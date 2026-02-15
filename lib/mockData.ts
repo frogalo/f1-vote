@@ -4,7 +4,6 @@ import { raceResults, actualSeasonStandings } from "./data";
 
 // Friend user IDs
 export const friends = [
-    { id: "user-jakub", name: "Jakub", team: "Red Bull Racing", avatar: "https://i.pravatar.cc/150?u=jakub" },
     { id: "user-agata", name: "Agata", team: "Ferrari", avatar: "https://i.pravatar.cc/150?u=agata" },
     { id: "user-kasia", name: "Kasia", team: "Mercedes", avatar: "https://i.pravatar.cc/150?u=kasia" },
     { id: "user-wiktoria", name: "Wiktoria", team: "McLaren", avatar: "https://i.pravatar.cc/150?u=wiktoria" },
@@ -61,7 +60,6 @@ function generateRealisticArray(actual: string[], seed: string): string[] {
 // Season predictions for each friend (TOP 10)
 export const seasonPredictions: Record<string, string[]> = {
     "user-agata": generateRealisticArray(actualSeasonStandings, "agata-season").slice(0, 10),
-    "user-jakub": generateRealisticArray(actualSeasonStandings, "jakub-season").slice(0, 10),
     "user-kasia": generateRealisticArray(actualSeasonStandings, "kasia-season").slice(0, 10),
     "user-wiktoria": generateRealisticArray(actualSeasonStandings, "wiktoria-season").slice(0, 10),
     "user-iga": generateRealisticArray(actualSeasonStandings, "iga-season").slice(0, 10),
@@ -120,12 +118,6 @@ function getVotesForUser(userId: string): Vote[] {
 export function generateMockVotes(): Vote[] {
     return friends.flatMap(friend => getVotesForUser(friend.id));
 }
-
-// Special function to get only Jakub's votes (for initializing the user's store)
-export function getJakubVotes(): Vote[] {
-    return getVotesForUser("user-jakub");
-}
-
 // Re-export scoring functions from the dedicated scoring module
 export { calculateRaceScore, calculateFriendScore } from './scoring';
 export { raceResults, actualSeasonStandings };
