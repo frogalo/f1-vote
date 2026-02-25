@@ -44,6 +44,7 @@ export async function registerUser(formData: FormData) {
 
   const cookieStore = await cookies();
   cookieStore.set("userId", user.id, { httpOnly: true, secure: true });
+  cookieStore.set("isAdmin", "false", { httpOnly: true, secure: true });
 
   return { success: true, user: { id: user.id, name: user.name } };
 }
@@ -72,6 +73,8 @@ export async function loginUser(formData: FormData) {
 
   const cookieStore = await cookies();
   cookieStore.set("userId", user.id, { httpOnly: true, secure: true });
+  // Store role in a separate readable cookie for middleware routing
+  cookieStore.set("isAdmin", String(user.isAdmin), { httpOnly: true, secure: true });
 
   return { success: true, user: { id: user.id, name: user.name, isAdmin: user.isAdmin } };
 }
@@ -79,6 +82,7 @@ export async function loginUser(formData: FormData) {
 export async function logoutUser() {
   const cookieStore = await cookies();
   cookieStore.delete("userId");
+  cookieStore.delete("isAdmin");
   redirect("/login");
 }
 

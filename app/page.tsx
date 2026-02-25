@@ -4,10 +4,9 @@ import { useAuth } from "@/app/providers/AuthProvider";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { getNextRound } from "@/app/actions/races";
 
 export default function LandingPage() {
-    const { user, loading, hasSeasonalVote } = useAuth();
+    const { user, loading } = useAuth();
     const router = useRouter();
 
     // Animation phases: "driving" → "stopping" → "done"
@@ -24,24 +23,22 @@ export default function LandingPage() {
 
     useEffect(() => {
         const redirectUser = async () => {
-            if (!loading && user) {
-                if (user.isAdmin) {
-                    router.push("/admin");
-                    return;
-                }
-                if (hasSeasonalVote === false) {
-                    router.push("/season");
-                } else if (hasSeasonalVote === true) {
-                    const nextRound = await getNextRound();
-                    router.push(`/race/${nextRound}`);
-                }
+            if (loading || !user) return;
+
+            // Admins go straight to /admin
+            if (user.isAdmin) {
+                router.replace("/admin");
+                return;
             }
+
+            // Regular users → calendar is the main page
+            router.replace("/calendar");
         };
         redirectUser();
-    }, [user, loading, hasSeasonalVote, router]);
+    }, [user, loading, router]);
 
-    // While auth is resolving, or if we're about to redirect a logged-in user,
-    // render nothing so the overlay never covers other pages.
+    // Render nothing while auth is resolving or a redirect is pending —
+    // this prevents the overlay from flashing over other pages.
     if (loading || user) return null;
 
     return (

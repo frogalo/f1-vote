@@ -102,7 +102,7 @@ export default function AdminPage() {
 
     useEffect(() => {
         if (!loading && (!user || !user.isAdmin)) {
-            router.push("/");
+            router.replace("/calendar");
         }
     }, [user, loading, router]);
 
