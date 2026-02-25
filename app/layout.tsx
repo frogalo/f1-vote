@@ -24,11 +24,16 @@ export const viewport: Viewport = {
   userScalable: true,
 };
 
-export default function RootLayout({
+import { prisma } from "@/lib/prisma";
+
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const races = await prisma.race.findMany({ select: { round: true, date: true } });
+  const nextRound = races.sort((a, b) => a.round - b.round).find(r => new Date(r.date) > new Date())?.round || 1;
+
   return (
     <html lang="pl">
       <body className="min-h-screen text-base md:text-lg bg-[#0D0D0D] text-white">
@@ -36,7 +41,7 @@ export default function RootLayout({
         {/* Mobile: Top spacing for content, nav at bottom. Desktop: Top nav. */}
         <div className="md:pt-16 pb-20 md:pb-0">
           <AuthProvider>
-            <Nav />
+            <Nav nextRound={nextRound} />
             <main className="max-w-md mx-auto p-4 md:max-w-4xl min-h-[calc(100vh-80px)]">
               {children}
             </main>

@@ -7,7 +7,7 @@ import { useStore } from "@/lib/store";
 
 type User = {
   id: string;
-  name: string;
+  name: string | null;
   isAdmin: boolean;
   team: string | null;
   avatar: string | null;

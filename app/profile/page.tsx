@@ -7,13 +7,21 @@ import { User, LogOut, Edit3, Check, X, ChevronDown } from "lucide-react";
 import { getTeamLogo } from "@/lib/data";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 type Team = { id: string; name: string };
 type DriverOption = { slug: string; name: string; number: number; team: { name: string } };
 
 export default function ProfilePage() {
     const { user, loading, refreshUser } = useAuth();
+    const router = useRouter();
     const [editing, setEditing] = useState(false);
+    
+    useEffect(() => {
+        if (!loading && user?.isAdmin) {
+            router.push("/admin");
+        }
+    }, [user, loading, router]);
     const [saving, setSaving] = useState(false);
 
     // Editable fields
@@ -135,7 +143,7 @@ export default function ProfilePage() {
                 <div className="relative inline-block mb-4">
                     <img
                         src={user.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || "U")}&background=E60000&color=fff&bold=true&size=150`}
-                        alt={user.name}
+                        alt={user.name || "User Avatar"}
                         className="w-24 h-24 rounded-full border-4 border-[#E60000] shadow-lg shadow-red-900/20"
                     />
                     <div className="absolute -bottom-1 -right-1 bg-[#E60000] p-2 rounded-full border-2 border-[#1C1C1E]">
@@ -186,7 +194,7 @@ export default function ProfilePage() {
                             <img
                                 src={getTeamLogo(user.team || "Independent")}
                                 alt={user.team || "Independent"}
-                                className="w-6 h-6 object-contain brightness-0 invert opacity-60"
+                                className="w-6 h-6 object-contain"
                             />
                             <span className="text-white font-bold text-lg">{user.team || "Nie wybrano"}</span>
                         </div>

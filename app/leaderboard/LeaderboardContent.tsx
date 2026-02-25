@@ -6,6 +6,7 @@ import { ChevronLeft } from "lucide-react";
 import { getTeamLogo } from "@/lib/data";
 import { getLeaderboardUsers } from "@/app/actions/leaderboard";
 import { useAuth } from "@/app/providers/AuthProvider";
+import { useRouter } from "next/navigation";
 
 type LeaderboardUser = {
   id: string;
@@ -16,15 +17,21 @@ type LeaderboardUser = {
 };
 
 export default function LeaderboardContent() {
-  const { user: currentUser } = useAuth();
+  const { user: currentUser, loading: authLoading } = useAuth();
+  const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [users, setUsers] = useState<LeaderboardUser[]>([]);
 
   useEffect(() => {
+    if (!authLoading && currentUser?.isAdmin) {
+      router.push("/admin");
+      return;
+    }
+
     getLeaderboardUsers()
       .then(setUsers)
       .finally(() => setLoading(false));
-  }, []);
+  }, [currentUser, authLoading, router]);
 
   if (loading) {
     return (

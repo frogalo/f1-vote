@@ -4,7 +4,8 @@ export type Driver = {
   number: number; // 1
   team: string; // "Red Bull Racing"
   color: string; // Tailwind class "bg-red-600"
-  country: string; // Country flag emoji or code
+  country: string; // ISO 3166-1 alpha-2 code (e.g. "NL", "GB")
+  active?: boolean; // Default true
 };
 
 export type Race = {
@@ -41,7 +42,7 @@ export const drivers: Driver[] = [
     number: 43,
     team: "Alpine",
     color: "bg-pink-500 border-blue-600",
-    country: "🇫🇷",
+    country: "FR",
   },
   {
     id: "col",
@@ -49,7 +50,7 @@ export const drivers: Driver[] = [
     number: 10,
     team: "Alpine",
     color: "bg-pink-500 border-blue-600",
-    country: "🇦🇷",
+    country: "AR",
   },
   // Aston Martin
   {
@@ -58,7 +59,7 @@ export const drivers: Driver[] = [
     number: 14,
     team: "Aston Martin",
     color: "bg-emerald-700 border-lime-400",
-    country: "🇪🇸",
+    country: "ES",
   },
   {
     id: "str",
@@ -66,7 +67,7 @@ export const drivers: Driver[] = [
     number: 18,
     team: "Aston Martin",
     color: "bg-emerald-700 border-lime-400",
-    country: "🇨🇦",
+    country: "CA",
   },
   // Williams
   {
@@ -75,7 +76,7 @@ export const drivers: Driver[] = [
     number: 23,
     team: "Williams",
     color: "bg-blue-800 border-blue-400",
-    country: "🇹🇭",
+    country: "TH",
   },
   {
     id: "sai",
@@ -83,7 +84,7 @@ export const drivers: Driver[] = [
     number: 55,
     team: "Williams",
     color: "bg-blue-800 border-blue-400",
-    country: "🇪🇸",
+    country: "ES",
   },
   // Audi
   {
@@ -92,7 +93,7 @@ export const drivers: Driver[] = [
     number: 5,
     team: "Audi",
     color: "bg-red-700 border-white",
-    country: "🇧🇷",
+    country: "BR",
   },
   {
     id: "hul",
@@ -100,7 +101,7 @@ export const drivers: Driver[] = [
     number: 27,
     team: "Audi",
     color: "bg-red-700 border-white",
-    country: "🇩🇪",
+    country: "DE",
   },
   // Cadillac
   {
@@ -109,7 +110,7 @@ export const drivers: Driver[] = [
     number: 11,
     team: "Cadillac",
     color: "bg-slate-700 border-yellow-500",
-    country: "🇲🇽",
+    country: "MX",
   },
   {
     id: "bot",
@@ -117,7 +118,7 @@ export const drivers: Driver[] = [
     number: 77,
     team: "Cadillac",
     color: "bg-slate-700 border-yellow-500",
-    country: "🇫🇮",
+    country: "FI",
   },
   // Ferrari
   {
@@ -126,7 +127,7 @@ export const drivers: Driver[] = [
     number: 16,
     team: "Ferrari",
     color: "bg-red-600 border-yellow-400",
-    country: "🇲🇨",
+    country: "MC",
   },
   {
     id: "ham",
@@ -134,7 +135,7 @@ export const drivers: Driver[] = [
     number: 44,
     team: "Ferrari",
     color: "bg-red-600 border-yellow-400",
-    country: "🇬🇧",
+    country: "GB",
   },
   // Haas
   {
@@ -143,7 +144,7 @@ export const drivers: Driver[] = [
     number: 31,
     team: "Haas",
     color: "bg-slate-100 border-red-600 text-black",
-    country: "🇫🇷",
+    country: "FR",
   },
   {
     id: "bea",
@@ -151,7 +152,7 @@ export const drivers: Driver[] = [
     number: 87,
     team: "Haas",
     color: "bg-slate-100 border-red-600 text-black",
-    country: "🇬🇧",
+    country: "GB",
   },
   // McLaren
   {
@@ -160,7 +161,7 @@ export const drivers: Driver[] = [
     number: 1,
     team: "McLaren",
     color: "bg-orange-500 border-black",
-    country: "🇬🇧",
+    country: "GB",
   },
   {
     id: "pia",
@@ -168,7 +169,7 @@ export const drivers: Driver[] = [
     number: 81,
     team: "McLaren",
     color: "bg-orange-500 border-black",
-    country: "🇦🇺",
+    country: "AU",
   },
   // Mercedes
   {
@@ -177,7 +178,7 @@ export const drivers: Driver[] = [
     number: 12,
     team: "Mercedes",
     color: "bg-slate-300 border-cyan-400 text-black",
-    country: "🇮🇹",
+    country: "IT",
   },
   {
     id: "rus",
@@ -185,7 +186,7 @@ export const drivers: Driver[] = [
     number: 63,
     team: "Mercedes",
     color: "bg-slate-300 border-cyan-400 text-black",
-    country: "🇬🇧",
+    country: "GB",
   },
   // Racing Bulls
   {
@@ -194,7 +195,7 @@ export const drivers: Driver[] = [
     number: 30,
     team: "Racing Bulls",
     color: "bg-blue-600 border-white",
-    country: "🇳🇿",
+    country: "NZ",
   },
   {
     id: "lin",
@@ -202,7 +203,7 @@ export const drivers: Driver[] = [
     number: 41,
     team: "Racing Bulls",
     color: "bg-blue-600 border-white",
-    country: "🇬🇧",
+    country: "GB",
   },
   // Red Bull Racing
   {
@@ -211,7 +212,7 @@ export const drivers: Driver[] = [
     number: 3,
     team: "Red Bull Racing",
     color: "bg-blue-900 border-red-600",
-    country: "🇳🇱",
+    country: "NL",
   },
   {
     id: "had",
@@ -219,7 +220,7 @@ export const drivers: Driver[] = [
     number: 6,
     team: "Red Bull Racing",
     color: "bg-blue-900 border-red-600",
-    country: "🇫🇷",
+    country: "FR",
   },
 ];
 
@@ -370,21 +371,6 @@ export const races: Race[] = [
   },
 ];
 
-export const raceResults = [
-  { round: 1, fullResults: ["ver", "nor", "lec", "ham", "pia", "rus", "sai", "alo", "gas", "hul", "ant", "str", "alb", "col", "bor", "per", "oco", "bea", "law", "lin", "had", "bot"] },
-  { round: 2, fullResults: ["lec", "ver", "nor", "ham", "pia", "rus", "gas", "sai", "alo", "ant", "hul", "str", "alb", "col", "bor", "per", "oco", "bea", "law", "lin", "had", "bot"] },
-  { round: 3, fullResults: ["nor", "ver", "lec", "pia", "ham", "rus", "sai", "alo", "gas", "hul", "ant", "str", "alb", "col", "bor", "per", "oco", "bea", "law", "lin", "had", "bot"] },
-  { round: 4, fullResults: ["ver", "lec", "nor", "ham", "pia", "rus", "sai", "gas", "alo", "hul", "ant", "str", "alb", "col", "bor", "per", "oco", "bea", "law", "lin", "had", "bot"] },
-  { round: 5, fullResults: ["lec", "ver", "nor", "ham", "pia", "rus", "sai", "gas", "alo", "ant", "hul", "str", "alb", "col", "bor", "per", "oco", "bea", "law", "lin", "had", "bot"] },
-  { round: 6, fullResults: ["nor", "lec", "ver", "pia", "ham", "rus", "sai", "alo", "gas", "hul", "ant", "str", "alb", "col", "bor", "per", "oco", "bea", "law", "lin", "had", "bot"] },
-  { round: 7, fullResults: ["ham", "nor", "ver", "lec", "rus", "pia", "sai", "alo", "gas", "ant", "hul", "str", "alb", "col", "bor", "per", "oco", "bea", "law", "lin", "had", "bot"] },
-  { round: 8, fullResults: ["lec", "nor", "ver", "ham", "pia", "rus", "sai", "gas", "alo", "hul", "ant", "str", "alb", "col", "bor", "per", "oco", "bea", "law", "lin", "had", "bot"] },
-  { round: 9, fullResults: ["ver", "nor", "lec", "ham", "pia", "rus", "sai", "alo", "gas", "hul", "ant", "str", "alb", "col", "bor", "per", "oco", "bea", "law", "lin", "had", "bot"] },
-  { round: 10, fullResults: ["nor", "ver", "lec", "pia", "ham", "rus", "sai", "alo", "gas", "ant", "hul", "str", "alb", "col", "bor", "per", "oco", "bea", "law", "lin", "had", "bot"] },
-  { round: 11, fullResults: ["ham", "nor", "rus", "ver", "lec", "pia", "sai", "gas", "alo", "hul", "ant", "str", "alb", "col", "bor", "per", "oco", "bea", "law", "lin", "had", "bot"] },
-  { round: 12, fullResults: ["ver", "lec", "nor", "ham", "pia", "rus", "sai", "alo", "gas", "hul", "ant", "str", "alb", "col", "bor", "per", "oco", "bea", "law", "lin", "had", "bot"] },
-];
+export const raceResults: { round: number; fullResults: string[] }[] = [];
 
-export const actualSeasonStandings = [
-  "nor", "ver", "lec", "ham", "pia", "rus", "sai", "alo", "gas", "hul",
-];
+export const actualSeasonStandings: string[] = [];

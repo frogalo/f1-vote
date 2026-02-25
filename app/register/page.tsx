@@ -9,10 +9,12 @@ import { registerUser } from "@/app/actions/auth";
 import { drivers, getTeamLogo } from "@/lib/data";
 import { toast } from "sonner";
 import { ChevronDown } from "lucide-react";
+import { useAuth } from "@/app/providers/AuthProvider";
 
 export default function RegisterPage() {
     const router = useRouter();
     const { setUserId } = useStore();
+    const { user, loading: authLoading } = useAuth();
     const [name, setName] = useState("");
     const [team, setTeam] = useState("");
     const [favoriteDriver, setFavoriteDriver] = useState("");
@@ -28,6 +30,13 @@ export default function RegisterPage() {
 
     const teams = Array.from(new Set(drivers.map(d => d.team))).sort();
     const sortedDrivers = [...drivers].sort((a, b) => a.name.localeCompare(b.name));
+
+    // Redirect if already logged in
+    useEffect(() => {
+        if (!authLoading && user) {
+            router.push(user.isAdmin ? "/admin" : "/season");
+        }
+    }, [user, authLoading, router]);
 
     // Close dropdowns on outside click
     useEffect(() => {
@@ -77,8 +86,9 @@ export default function RegisterPage() {
             }
 
             if (result.success && result.user) {
-                toast.success("Zarejestrowano pomyślnie! Zaloguj się, aby kontynuować.");
-                router.push("/login"); // Redirect to login as requested
+                toast.success("Zarejestrowano pomyślnie!");
+                setUserId(result.user.id); // Update local store
+                router.push("/season"); // Redirect to season voting
             }
         } catch (err: any) {
             const msg = err.message || "An error occurred";
@@ -127,7 +137,7 @@ export default function RegisterPage() {
                                 <img
                                     src={getTeamLogo(team)}
                                     alt={team}
-                                    className="w-5 h-5 object-contain brightness-0 invert"
+                                    className="w-5 h-5 object-contain"
                                 />
                                 <span className="flex-1">{team}</span>
                             </>
@@ -155,7 +165,7 @@ export default function RegisterPage() {
                                     <img
                                         src={getTeamLogo(t)}
                                         alt={t}
-                                        className="w-5 h-5 object-contain brightness-0 invert opacity-70"
+                                        className="w-5 h-5 object-contain"
                                     />
                                     <span className="font-medium">{t}</span>
                                 </button>
@@ -183,7 +193,7 @@ export default function RegisterPage() {
                                 <img
                                     src={getTeamLogo(selectedDriver.team)}
                                     alt={selectedDriver.team}
-                                    className="w-5 h-5 object-contain brightness-0 invert opacity-60"
+                                    className="w-5 h-5 object-contain"
                                 />
                                 <span className="flex-1">{selectedDriver.name}</span>
                             </>
@@ -211,7 +221,7 @@ export default function RegisterPage() {
                                     <img
                                         src={getTeamLogo(d.team)}
                                         alt={d.team}
-                                        className="w-5 h-5 object-contain brightness-0 invert opacity-40"
+                                        className="w-5 h-5 object-contain"
                                     />
                                     <div className="flex flex-col">
                                         <span className="font-medium text-sm">{d.name}</span>

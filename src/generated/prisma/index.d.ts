@@ -38,6 +38,11 @@ export type Vote = $Result.DefaultSelection<Prisma.$VotePayload>
  * 
  */
 export type SeasonVote = $Result.DefaultSelection<Prisma.$SeasonVotePayload>
+/**
+ * Model Race
+ * 
+ */
+export type Race = $Result.DefaultSelection<Prisma.$RacePayload>
 
 /**
  * ##  Prisma Client ʲˢ
@@ -205,6 +210,16 @@ export class PrismaClient<
     * ```
     */
   get seasonVote(): Prisma.SeasonVoteDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.race`: Exposes CRUD operations for the **Race** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Races
+    * const races = await prisma.race.findMany()
+    * ```
+    */
+  get race(): Prisma.RaceDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -643,7 +658,8 @@ export namespace Prisma {
     Driver: 'Driver',
     User: 'User',
     Vote: 'Vote',
-    SeasonVote: 'SeasonVote'
+    SeasonVote: 'SeasonVote',
+    Race: 'Race'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -659,7 +675,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "team" | "driver" | "user" | "vote" | "seasonVote"
+      modelProps: "team" | "driver" | "user" | "vote" | "seasonVote" | "race"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1033,6 +1049,80 @@ export namespace Prisma {
           }
         }
       }
+      Race: {
+        payload: Prisma.$RacePayload<ExtArgs>
+        fields: Prisma.RaceFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.RaceFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RacePayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.RaceFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RacePayload>
+          }
+          findFirst: {
+            args: Prisma.RaceFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RacePayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.RaceFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RacePayload>
+          }
+          findMany: {
+            args: Prisma.RaceFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RacePayload>[]
+          }
+          create: {
+            args: Prisma.RaceCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RacePayload>
+          }
+          createMany: {
+            args: Prisma.RaceCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.RaceCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RacePayload>[]
+          }
+          delete: {
+            args: Prisma.RaceDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RacePayload>
+          }
+          update: {
+            args: Prisma.RaceUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RacePayload>
+          }
+          deleteMany: {
+            args: Prisma.RaceDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.RaceUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.RaceUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RacePayload>[]
+          }
+          upsert: {
+            args: Prisma.RaceUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RacePayload>
+          }
+          aggregate: {
+            args: Prisma.RaceAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateRace>
+          }
+          groupBy: {
+            args: Prisma.RaceGroupByArgs<ExtArgs>
+            result: $Utils.Optional<RaceGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.RaceCountArgs<ExtArgs>
+            result: $Utils.Optional<RaceCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -1146,6 +1236,7 @@ export namespace Prisma {
     user?: UserOmit
     vote?: VoteOmit
     seasonVote?: SeasonVoteOmit
+    race?: RaceOmit
   }
 
   /* Types for Logging */
@@ -2451,6 +2542,7 @@ export namespace Prisma {
     name: string | null
     number: number | null
     country: string | null
+    active: boolean | null
     teamId: string | null
     color: string | null
   }
@@ -2460,6 +2552,7 @@ export namespace Prisma {
     name: string | null
     number: number | null
     country: string | null
+    active: boolean | null
     teamId: string | null
     color: string | null
   }
@@ -2469,6 +2562,7 @@ export namespace Prisma {
     name: number
     number: number
     country: number
+    active: number
     teamId: number
     color: number
     _all: number
@@ -2488,6 +2582,7 @@ export namespace Prisma {
     name?: true
     number?: true
     country?: true
+    active?: true
     teamId?: true
     color?: true
   }
@@ -2497,6 +2592,7 @@ export namespace Prisma {
     name?: true
     number?: true
     country?: true
+    active?: true
     teamId?: true
     color?: true
   }
@@ -2506,6 +2602,7 @@ export namespace Prisma {
     name?: true
     number?: true
     country?: true
+    active?: true
     teamId?: true
     color?: true
     _all?: true
@@ -2602,6 +2699,7 @@ export namespace Prisma {
     name: string
     number: number
     country: string | null
+    active: boolean
     teamId: string
     color: string | null
     _count: DriverCountAggregateOutputType | null
@@ -2630,6 +2728,7 @@ export namespace Prisma {
     name?: boolean
     number?: boolean
     country?: boolean
+    active?: boolean
     teamId?: boolean
     color?: boolean
     team?: boolean | TeamDefaultArgs<ExtArgs>
@@ -2644,6 +2743,7 @@ export namespace Prisma {
     name?: boolean
     number?: boolean
     country?: boolean
+    active?: boolean
     teamId?: boolean
     color?: boolean
     team?: boolean | TeamDefaultArgs<ExtArgs>
@@ -2654,6 +2754,7 @@ export namespace Prisma {
     name?: boolean
     number?: boolean
     country?: boolean
+    active?: boolean
     teamId?: boolean
     color?: boolean
     team?: boolean | TeamDefaultArgs<ExtArgs>
@@ -2664,11 +2765,12 @@ export namespace Prisma {
     name?: boolean
     number?: boolean
     country?: boolean
+    active?: boolean
     teamId?: boolean
     color?: boolean
   }
 
-  export type DriverOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"slug" | "name" | "number" | "country" | "teamId" | "color", ExtArgs["result"]["driver"]>
+  export type DriverOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"slug" | "name" | "number" | "country" | "active" | "teamId" | "color", ExtArgs["result"]["driver"]>
   export type DriverInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     team?: boolean | TeamDefaultArgs<ExtArgs>
     votes?: boolean | Driver$votesArgs<ExtArgs>
@@ -2696,6 +2798,7 @@ export namespace Prisma {
       name: string
       number: number
       country: string | null
+      active: boolean
       teamId: string
       color: string | null
     }, ExtArgs["result"]["driver"]>
@@ -3129,6 +3232,7 @@ export namespace Prisma {
     readonly name: FieldRef<"Driver", 'String'>
     readonly number: FieldRef<"Driver", 'Int'>
     readonly country: FieldRef<"Driver", 'String'>
+    readonly active: FieldRef<"Driver", 'Boolean'>
     readonly teamId: FieldRef<"Driver", 'String'>
     readonly color: FieldRef<"Driver", 'String'>
   }
@@ -7041,6 +7145,1100 @@ export namespace Prisma {
 
 
   /**
+   * Model Race
+   */
+
+  export type AggregateRace = {
+    _count: RaceCountAggregateOutputType | null
+    _avg: RaceAvgAggregateOutputType | null
+    _sum: RaceSumAggregateOutputType | null
+    _min: RaceMinAggregateOutputType | null
+    _max: RaceMaxAggregateOutputType | null
+  }
+
+  export type RaceAvgAggregateOutputType = {
+    round: number | null
+  }
+
+  export type RaceSumAggregateOutputType = {
+    round: number | null
+  }
+
+  export type RaceMinAggregateOutputType = {
+    id: string | null
+    round: number | null
+    name: string | null
+    location: string | null
+    date: Date | null
+    circuitId: string | null
+    url: string | null
+    country: string | null
+    trackImage: string | null
+    isTesting: boolean | null
+  }
+
+  export type RaceMaxAggregateOutputType = {
+    id: string | null
+    round: number | null
+    name: string | null
+    location: string | null
+    date: Date | null
+    circuitId: string | null
+    url: string | null
+    country: string | null
+    trackImage: string | null
+    isTesting: boolean | null
+  }
+
+  export type RaceCountAggregateOutputType = {
+    id: number
+    round: number
+    name: number
+    location: number
+    date: number
+    circuitId: number
+    url: number
+    country: number
+    trackImage: number
+    isTesting: number
+    _all: number
+  }
+
+
+  export type RaceAvgAggregateInputType = {
+    round?: true
+  }
+
+  export type RaceSumAggregateInputType = {
+    round?: true
+  }
+
+  export type RaceMinAggregateInputType = {
+    id?: true
+    round?: true
+    name?: true
+    location?: true
+    date?: true
+    circuitId?: true
+    url?: true
+    country?: true
+    trackImage?: true
+    isTesting?: true
+  }
+
+  export type RaceMaxAggregateInputType = {
+    id?: true
+    round?: true
+    name?: true
+    location?: true
+    date?: true
+    circuitId?: true
+    url?: true
+    country?: true
+    trackImage?: true
+    isTesting?: true
+  }
+
+  export type RaceCountAggregateInputType = {
+    id?: true
+    round?: true
+    name?: true
+    location?: true
+    date?: true
+    circuitId?: true
+    url?: true
+    country?: true
+    trackImage?: true
+    isTesting?: true
+    _all?: true
+  }
+
+  export type RaceAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Race to aggregate.
+     */
+    where?: RaceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Races to fetch.
+     */
+    orderBy?: RaceOrderByWithRelationInput | RaceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: RaceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Races from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Races.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned Races
+    **/
+    _count?: true | RaceCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: RaceAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: RaceSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: RaceMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: RaceMaxAggregateInputType
+  }
+
+  export type GetRaceAggregateType<T extends RaceAggregateArgs> = {
+        [P in keyof T & keyof AggregateRace]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateRace[P]>
+      : GetScalarType<T[P], AggregateRace[P]>
+  }
+
+
+
+
+  export type RaceGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: RaceWhereInput
+    orderBy?: RaceOrderByWithAggregationInput | RaceOrderByWithAggregationInput[]
+    by: RaceScalarFieldEnum[] | RaceScalarFieldEnum
+    having?: RaceScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: RaceCountAggregateInputType | true
+    _avg?: RaceAvgAggregateInputType
+    _sum?: RaceSumAggregateInputType
+    _min?: RaceMinAggregateInputType
+    _max?: RaceMaxAggregateInputType
+  }
+
+  export type RaceGroupByOutputType = {
+    id: string
+    round: number
+    name: string
+    location: string
+    date: Date
+    circuitId: string | null
+    url: string | null
+    country: string | null
+    trackImage: string | null
+    isTesting: boolean
+    _count: RaceCountAggregateOutputType | null
+    _avg: RaceAvgAggregateOutputType | null
+    _sum: RaceSumAggregateOutputType | null
+    _min: RaceMinAggregateOutputType | null
+    _max: RaceMaxAggregateOutputType | null
+  }
+
+  type GetRaceGroupByPayload<T extends RaceGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<RaceGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof RaceGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], RaceGroupByOutputType[P]>
+            : GetScalarType<T[P], RaceGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type RaceSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    round?: boolean
+    name?: boolean
+    location?: boolean
+    date?: boolean
+    circuitId?: boolean
+    url?: boolean
+    country?: boolean
+    trackImage?: boolean
+    isTesting?: boolean
+  }, ExtArgs["result"]["race"]>
+
+  export type RaceSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    round?: boolean
+    name?: boolean
+    location?: boolean
+    date?: boolean
+    circuitId?: boolean
+    url?: boolean
+    country?: boolean
+    trackImage?: boolean
+    isTesting?: boolean
+  }, ExtArgs["result"]["race"]>
+
+  export type RaceSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    round?: boolean
+    name?: boolean
+    location?: boolean
+    date?: boolean
+    circuitId?: boolean
+    url?: boolean
+    country?: boolean
+    trackImage?: boolean
+    isTesting?: boolean
+  }, ExtArgs["result"]["race"]>
+
+  export type RaceSelectScalar = {
+    id?: boolean
+    round?: boolean
+    name?: boolean
+    location?: boolean
+    date?: boolean
+    circuitId?: boolean
+    url?: boolean
+    country?: boolean
+    trackImage?: boolean
+    isTesting?: boolean
+  }
+
+  export type RaceOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "round" | "name" | "location" | "date" | "circuitId" | "url" | "country" | "trackImage" | "isTesting", ExtArgs["result"]["race"]>
+
+  export type $RacePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "Race"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      round: number
+      name: string
+      location: string
+      date: Date
+      circuitId: string | null
+      url: string | null
+      country: string | null
+      trackImage: string | null
+      isTesting: boolean
+    }, ExtArgs["result"]["race"]>
+    composites: {}
+  }
+
+  type RaceGetPayload<S extends boolean | null | undefined | RaceDefaultArgs> = $Result.GetResult<Prisma.$RacePayload, S>
+
+  type RaceCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<RaceFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: RaceCountAggregateInputType | true
+    }
+
+  export interface RaceDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['Race'], meta: { name: 'Race' } }
+    /**
+     * Find zero or one Race that matches the filter.
+     * @param {RaceFindUniqueArgs} args - Arguments to find a Race
+     * @example
+     * // Get one Race
+     * const race = await prisma.race.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends RaceFindUniqueArgs>(args: SelectSubset<T, RaceFindUniqueArgs<ExtArgs>>): Prisma__RaceClient<$Result.GetResult<Prisma.$RacePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one Race that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {RaceFindUniqueOrThrowArgs} args - Arguments to find a Race
+     * @example
+     * // Get one Race
+     * const race = await prisma.race.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends RaceFindUniqueOrThrowArgs>(args: SelectSubset<T, RaceFindUniqueOrThrowArgs<ExtArgs>>): Prisma__RaceClient<$Result.GetResult<Prisma.$RacePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Race that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RaceFindFirstArgs} args - Arguments to find a Race
+     * @example
+     * // Get one Race
+     * const race = await prisma.race.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends RaceFindFirstArgs>(args?: SelectSubset<T, RaceFindFirstArgs<ExtArgs>>): Prisma__RaceClient<$Result.GetResult<Prisma.$RacePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Race that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RaceFindFirstOrThrowArgs} args - Arguments to find a Race
+     * @example
+     * // Get one Race
+     * const race = await prisma.race.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends RaceFindFirstOrThrowArgs>(args?: SelectSubset<T, RaceFindFirstOrThrowArgs<ExtArgs>>): Prisma__RaceClient<$Result.GetResult<Prisma.$RacePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more Races that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RaceFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all Races
+     * const races = await prisma.race.findMany()
+     * 
+     * // Get first 10 Races
+     * const races = await prisma.race.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const raceWithIdOnly = await prisma.race.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends RaceFindManyArgs>(args?: SelectSubset<T, RaceFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RacePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a Race.
+     * @param {RaceCreateArgs} args - Arguments to create a Race.
+     * @example
+     * // Create one Race
+     * const Race = await prisma.race.create({
+     *   data: {
+     *     // ... data to create a Race
+     *   }
+     * })
+     * 
+     */
+    create<T extends RaceCreateArgs>(args: SelectSubset<T, RaceCreateArgs<ExtArgs>>): Prisma__RaceClient<$Result.GetResult<Prisma.$RacePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many Races.
+     * @param {RaceCreateManyArgs} args - Arguments to create many Races.
+     * @example
+     * // Create many Races
+     * const race = await prisma.race.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends RaceCreateManyArgs>(args?: SelectSubset<T, RaceCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Races and returns the data saved in the database.
+     * @param {RaceCreateManyAndReturnArgs} args - Arguments to create many Races.
+     * @example
+     * // Create many Races
+     * const race = await prisma.race.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Races and only return the `id`
+     * const raceWithIdOnly = await prisma.race.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends RaceCreateManyAndReturnArgs>(args?: SelectSubset<T, RaceCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RacePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a Race.
+     * @param {RaceDeleteArgs} args - Arguments to delete one Race.
+     * @example
+     * // Delete one Race
+     * const Race = await prisma.race.delete({
+     *   where: {
+     *     // ... filter to delete one Race
+     *   }
+     * })
+     * 
+     */
+    delete<T extends RaceDeleteArgs>(args: SelectSubset<T, RaceDeleteArgs<ExtArgs>>): Prisma__RaceClient<$Result.GetResult<Prisma.$RacePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one Race.
+     * @param {RaceUpdateArgs} args - Arguments to update one Race.
+     * @example
+     * // Update one Race
+     * const race = await prisma.race.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends RaceUpdateArgs>(args: SelectSubset<T, RaceUpdateArgs<ExtArgs>>): Prisma__RaceClient<$Result.GetResult<Prisma.$RacePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more Races.
+     * @param {RaceDeleteManyArgs} args - Arguments to filter Races to delete.
+     * @example
+     * // Delete a few Races
+     * const { count } = await prisma.race.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends RaceDeleteManyArgs>(args?: SelectSubset<T, RaceDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Races.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RaceUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many Races
+     * const race = await prisma.race.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends RaceUpdateManyArgs>(args: SelectSubset<T, RaceUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Races and returns the data updated in the database.
+     * @param {RaceUpdateManyAndReturnArgs} args - Arguments to update many Races.
+     * @example
+     * // Update many Races
+     * const race = await prisma.race.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more Races and only return the `id`
+     * const raceWithIdOnly = await prisma.race.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends RaceUpdateManyAndReturnArgs>(args: SelectSubset<T, RaceUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RacePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one Race.
+     * @param {RaceUpsertArgs} args - Arguments to update or create a Race.
+     * @example
+     * // Update or create a Race
+     * const race = await prisma.race.upsert({
+     *   create: {
+     *     // ... data to create a Race
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the Race we want to update
+     *   }
+     * })
+     */
+    upsert<T extends RaceUpsertArgs>(args: SelectSubset<T, RaceUpsertArgs<ExtArgs>>): Prisma__RaceClient<$Result.GetResult<Prisma.$RacePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of Races.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RaceCountArgs} args - Arguments to filter Races to count.
+     * @example
+     * // Count the number of Races
+     * const count = await prisma.race.count({
+     *   where: {
+     *     // ... the filter for the Races we want to count
+     *   }
+     * })
+    **/
+    count<T extends RaceCountArgs>(
+      args?: Subset<T, RaceCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], RaceCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a Race.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RaceAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends RaceAggregateArgs>(args: Subset<T, RaceAggregateArgs>): Prisma.PrismaPromise<GetRaceAggregateType<T>>
+
+    /**
+     * Group by Race.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RaceGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends RaceGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: RaceGroupByArgs['orderBy'] }
+        : { orderBy?: RaceGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, RaceGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetRaceGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the Race model
+   */
+  readonly fields: RaceFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for Race.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__RaceClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the Race model
+   */
+  interface RaceFieldRefs {
+    readonly id: FieldRef<"Race", 'String'>
+    readonly round: FieldRef<"Race", 'Int'>
+    readonly name: FieldRef<"Race", 'String'>
+    readonly location: FieldRef<"Race", 'String'>
+    readonly date: FieldRef<"Race", 'DateTime'>
+    readonly circuitId: FieldRef<"Race", 'String'>
+    readonly url: FieldRef<"Race", 'String'>
+    readonly country: FieldRef<"Race", 'String'>
+    readonly trackImage: FieldRef<"Race", 'String'>
+    readonly isTesting: FieldRef<"Race", 'Boolean'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * Race findUnique
+   */
+  export type RaceFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Race
+     */
+    select?: RaceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Race
+     */
+    omit?: RaceOmit<ExtArgs> | null
+    /**
+     * Filter, which Race to fetch.
+     */
+    where: RaceWhereUniqueInput
+  }
+
+  /**
+   * Race findUniqueOrThrow
+   */
+  export type RaceFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Race
+     */
+    select?: RaceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Race
+     */
+    omit?: RaceOmit<ExtArgs> | null
+    /**
+     * Filter, which Race to fetch.
+     */
+    where: RaceWhereUniqueInput
+  }
+
+  /**
+   * Race findFirst
+   */
+  export type RaceFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Race
+     */
+    select?: RaceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Race
+     */
+    omit?: RaceOmit<ExtArgs> | null
+    /**
+     * Filter, which Race to fetch.
+     */
+    where?: RaceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Races to fetch.
+     */
+    orderBy?: RaceOrderByWithRelationInput | RaceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Races.
+     */
+    cursor?: RaceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Races from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Races.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Races.
+     */
+    distinct?: RaceScalarFieldEnum | RaceScalarFieldEnum[]
+  }
+
+  /**
+   * Race findFirstOrThrow
+   */
+  export type RaceFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Race
+     */
+    select?: RaceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Race
+     */
+    omit?: RaceOmit<ExtArgs> | null
+    /**
+     * Filter, which Race to fetch.
+     */
+    where?: RaceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Races to fetch.
+     */
+    orderBy?: RaceOrderByWithRelationInput | RaceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Races.
+     */
+    cursor?: RaceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Races from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Races.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Races.
+     */
+    distinct?: RaceScalarFieldEnum | RaceScalarFieldEnum[]
+  }
+
+  /**
+   * Race findMany
+   */
+  export type RaceFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Race
+     */
+    select?: RaceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Race
+     */
+    omit?: RaceOmit<ExtArgs> | null
+    /**
+     * Filter, which Races to fetch.
+     */
+    where?: RaceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Races to fetch.
+     */
+    orderBy?: RaceOrderByWithRelationInput | RaceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing Races.
+     */
+    cursor?: RaceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Races from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Races.
+     */
+    skip?: number
+    distinct?: RaceScalarFieldEnum | RaceScalarFieldEnum[]
+  }
+
+  /**
+   * Race create
+   */
+  export type RaceCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Race
+     */
+    select?: RaceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Race
+     */
+    omit?: RaceOmit<ExtArgs> | null
+    /**
+     * The data needed to create a Race.
+     */
+    data: XOR<RaceCreateInput, RaceUncheckedCreateInput>
+  }
+
+  /**
+   * Race createMany
+   */
+  export type RaceCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many Races.
+     */
+    data: RaceCreateManyInput | RaceCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * Race createManyAndReturn
+   */
+  export type RaceCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Race
+     */
+    select?: RaceSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Race
+     */
+    omit?: RaceOmit<ExtArgs> | null
+    /**
+     * The data used to create many Races.
+     */
+    data: RaceCreateManyInput | RaceCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * Race update
+   */
+  export type RaceUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Race
+     */
+    select?: RaceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Race
+     */
+    omit?: RaceOmit<ExtArgs> | null
+    /**
+     * The data needed to update a Race.
+     */
+    data: XOR<RaceUpdateInput, RaceUncheckedUpdateInput>
+    /**
+     * Choose, which Race to update.
+     */
+    where: RaceWhereUniqueInput
+  }
+
+  /**
+   * Race updateMany
+   */
+  export type RaceUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update Races.
+     */
+    data: XOR<RaceUpdateManyMutationInput, RaceUncheckedUpdateManyInput>
+    /**
+     * Filter which Races to update
+     */
+    where?: RaceWhereInput
+    /**
+     * Limit how many Races to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * Race updateManyAndReturn
+   */
+  export type RaceUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Race
+     */
+    select?: RaceSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Race
+     */
+    omit?: RaceOmit<ExtArgs> | null
+    /**
+     * The data used to update Races.
+     */
+    data: XOR<RaceUpdateManyMutationInput, RaceUncheckedUpdateManyInput>
+    /**
+     * Filter which Races to update
+     */
+    where?: RaceWhereInput
+    /**
+     * Limit how many Races to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * Race upsert
+   */
+  export type RaceUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Race
+     */
+    select?: RaceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Race
+     */
+    omit?: RaceOmit<ExtArgs> | null
+    /**
+     * The filter to search for the Race to update in case it exists.
+     */
+    where: RaceWhereUniqueInput
+    /**
+     * In case the Race found by the `where` argument doesn't exist, create a new Race with this data.
+     */
+    create: XOR<RaceCreateInput, RaceUncheckedCreateInput>
+    /**
+     * In case the Race was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<RaceUpdateInput, RaceUncheckedUpdateInput>
+  }
+
+  /**
+   * Race delete
+   */
+  export type RaceDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Race
+     */
+    select?: RaceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Race
+     */
+    omit?: RaceOmit<ExtArgs> | null
+    /**
+     * Filter which Race to delete.
+     */
+    where: RaceWhereUniqueInput
+  }
+
+  /**
+   * Race deleteMany
+   */
+  export type RaceDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Races to delete
+     */
+    where?: RaceWhereInput
+    /**
+     * Limit how many Races to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * Race without action
+   */
+  export type RaceDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Race
+     */
+    select?: RaceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Race
+     */
+    omit?: RaceOmit<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -7068,6 +8266,7 @@ export namespace Prisma {
     name: 'name',
     number: 'number',
     country: 'country',
+    active: 'active',
     teamId: 'teamId',
     color: 'color'
   };
@@ -7113,6 +8312,22 @@ export namespace Prisma {
   };
 
   export type SeasonVoteScalarFieldEnum = (typeof SeasonVoteScalarFieldEnum)[keyof typeof SeasonVoteScalarFieldEnum]
+
+
+  export const RaceScalarFieldEnum: {
+    id: 'id',
+    round: 'round',
+    name: 'name',
+    location: 'location',
+    date: 'date',
+    circuitId: 'circuitId',
+    url: 'url',
+    country: 'country',
+    trackImage: 'trackImage',
+    isTesting: 'isTesting'
+  };
+
+  export type RaceScalarFieldEnum = (typeof RaceScalarFieldEnum)[keyof typeof RaceScalarFieldEnum]
 
 
   export const SortOrder: {
@@ -7266,6 +8481,7 @@ export namespace Prisma {
     name?: StringFilter<"Driver"> | string
     number?: IntFilter<"Driver"> | number
     country?: StringNullableFilter<"Driver"> | string | null
+    active?: BoolFilter<"Driver"> | boolean
     teamId?: StringFilter<"Driver"> | string
     color?: StringNullableFilter<"Driver"> | string | null
     team?: XOR<TeamScalarRelationFilter, TeamWhereInput>
@@ -7279,6 +8495,7 @@ export namespace Prisma {
     name?: SortOrder
     number?: SortOrder
     country?: SortOrderInput | SortOrder
+    active?: SortOrder
     teamId?: SortOrder
     color?: SortOrderInput | SortOrder
     team?: TeamOrderByWithRelationInput
@@ -7295,6 +8512,7 @@ export namespace Prisma {
     name?: StringFilter<"Driver"> | string
     number?: IntFilter<"Driver"> | number
     country?: StringNullableFilter<"Driver"> | string | null
+    active?: BoolFilter<"Driver"> | boolean
     teamId?: StringFilter<"Driver"> | string
     color?: StringNullableFilter<"Driver"> | string | null
     team?: XOR<TeamScalarRelationFilter, TeamWhereInput>
@@ -7308,6 +8526,7 @@ export namespace Prisma {
     name?: SortOrder
     number?: SortOrder
     country?: SortOrderInput | SortOrder
+    active?: SortOrder
     teamId?: SortOrder
     color?: SortOrderInput | SortOrder
     _count?: DriverCountOrderByAggregateInput
@@ -7325,6 +8544,7 @@ export namespace Prisma {
     name?: StringWithAggregatesFilter<"Driver"> | string
     number?: IntWithAggregatesFilter<"Driver"> | number
     country?: StringNullableWithAggregatesFilter<"Driver"> | string | null
+    active?: BoolWithAggregatesFilter<"Driver"> | boolean
     teamId?: StringWithAggregatesFilter<"Driver"> | string
     color?: StringNullableWithAggregatesFilter<"Driver"> | string | null
   }
@@ -7548,6 +8768,85 @@ export namespace Prisma {
     updatedAt?: DateTimeWithAggregatesFilter<"SeasonVote"> | Date | string
   }
 
+  export type RaceWhereInput = {
+    AND?: RaceWhereInput | RaceWhereInput[]
+    OR?: RaceWhereInput[]
+    NOT?: RaceWhereInput | RaceWhereInput[]
+    id?: StringFilter<"Race"> | string
+    round?: IntFilter<"Race"> | number
+    name?: StringFilter<"Race"> | string
+    location?: StringFilter<"Race"> | string
+    date?: DateTimeFilter<"Race"> | Date | string
+    circuitId?: StringNullableFilter<"Race"> | string | null
+    url?: StringNullableFilter<"Race"> | string | null
+    country?: StringNullableFilter<"Race"> | string | null
+    trackImage?: StringNullableFilter<"Race"> | string | null
+    isTesting?: BoolFilter<"Race"> | boolean
+  }
+
+  export type RaceOrderByWithRelationInput = {
+    id?: SortOrder
+    round?: SortOrder
+    name?: SortOrder
+    location?: SortOrder
+    date?: SortOrder
+    circuitId?: SortOrderInput | SortOrder
+    url?: SortOrderInput | SortOrder
+    country?: SortOrderInput | SortOrder
+    trackImage?: SortOrderInput | SortOrder
+    isTesting?: SortOrder
+  }
+
+  export type RaceWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    round?: number
+    AND?: RaceWhereInput | RaceWhereInput[]
+    OR?: RaceWhereInput[]
+    NOT?: RaceWhereInput | RaceWhereInput[]
+    name?: StringFilter<"Race"> | string
+    location?: StringFilter<"Race"> | string
+    date?: DateTimeFilter<"Race"> | Date | string
+    circuitId?: StringNullableFilter<"Race"> | string | null
+    url?: StringNullableFilter<"Race"> | string | null
+    country?: StringNullableFilter<"Race"> | string | null
+    trackImage?: StringNullableFilter<"Race"> | string | null
+    isTesting?: BoolFilter<"Race"> | boolean
+  }, "id" | "round">
+
+  export type RaceOrderByWithAggregationInput = {
+    id?: SortOrder
+    round?: SortOrder
+    name?: SortOrder
+    location?: SortOrder
+    date?: SortOrder
+    circuitId?: SortOrderInput | SortOrder
+    url?: SortOrderInput | SortOrder
+    country?: SortOrderInput | SortOrder
+    trackImage?: SortOrderInput | SortOrder
+    isTesting?: SortOrder
+    _count?: RaceCountOrderByAggregateInput
+    _avg?: RaceAvgOrderByAggregateInput
+    _max?: RaceMaxOrderByAggregateInput
+    _min?: RaceMinOrderByAggregateInput
+    _sum?: RaceSumOrderByAggregateInput
+  }
+
+  export type RaceScalarWhereWithAggregatesInput = {
+    AND?: RaceScalarWhereWithAggregatesInput | RaceScalarWhereWithAggregatesInput[]
+    OR?: RaceScalarWhereWithAggregatesInput[]
+    NOT?: RaceScalarWhereWithAggregatesInput | RaceScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"Race"> | string
+    round?: IntWithAggregatesFilter<"Race"> | number
+    name?: StringWithAggregatesFilter<"Race"> | string
+    location?: StringWithAggregatesFilter<"Race"> | string
+    date?: DateTimeWithAggregatesFilter<"Race"> | Date | string
+    circuitId?: StringNullableWithAggregatesFilter<"Race"> | string | null
+    url?: StringNullableWithAggregatesFilter<"Race"> | string | null
+    country?: StringNullableWithAggregatesFilter<"Race"> | string | null
+    trackImage?: StringNullableWithAggregatesFilter<"Race"> | string | null
+    isTesting?: BoolWithAggregatesFilter<"Race"> | boolean
+  }
+
   export type TeamCreateInput = {
     id?: string
     name: string
@@ -7603,6 +8902,7 @@ export namespace Prisma {
     name: string
     number: number
     country?: string | null
+    active?: boolean
     color?: string | null
     team: TeamCreateNestedOneWithoutDriversInput
     votes?: VoteCreateNestedManyWithoutDriverInput
@@ -7615,6 +8915,7 @@ export namespace Prisma {
     name: string
     number: number
     country?: string | null
+    active?: boolean
     teamId: string
     color?: string | null
     votes?: VoteUncheckedCreateNestedManyWithoutDriverInput
@@ -7627,6 +8928,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     number?: IntFieldUpdateOperationsInput | number
     country?: NullableStringFieldUpdateOperationsInput | string | null
+    active?: BoolFieldUpdateOperationsInput | boolean
     color?: NullableStringFieldUpdateOperationsInput | string | null
     team?: TeamUpdateOneRequiredWithoutDriversNestedInput
     votes?: VoteUpdateManyWithoutDriverNestedInput
@@ -7639,6 +8941,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     number?: IntFieldUpdateOperationsInput | number
     country?: NullableStringFieldUpdateOperationsInput | string | null
+    active?: BoolFieldUpdateOperationsInput | boolean
     teamId?: StringFieldUpdateOperationsInput | string
     color?: NullableStringFieldUpdateOperationsInput | string | null
     votes?: VoteUncheckedUpdateManyWithoutDriverNestedInput
@@ -7651,6 +8954,7 @@ export namespace Prisma {
     name: string
     number: number
     country?: string | null
+    active?: boolean
     teamId: string
     color?: string | null
   }
@@ -7660,6 +8964,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     number?: IntFieldUpdateOperationsInput | number
     country?: NullableStringFieldUpdateOperationsInput | string | null
+    active?: BoolFieldUpdateOperationsInput | boolean
     color?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
@@ -7668,6 +8973,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     number?: IntFieldUpdateOperationsInput | number
     country?: NullableStringFieldUpdateOperationsInput | string | null
+    active?: BoolFieldUpdateOperationsInput | boolean
     teamId?: StringFieldUpdateOperationsInput | string
     color?: NullableStringFieldUpdateOperationsInput | string | null
   }
@@ -7891,6 +9197,97 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type RaceCreateInput = {
+    id?: string
+    round: number
+    name: string
+    location: string
+    date: Date | string
+    circuitId?: string | null
+    url?: string | null
+    country?: string | null
+    trackImage?: string | null
+    isTesting?: boolean
+  }
+
+  export type RaceUncheckedCreateInput = {
+    id?: string
+    round: number
+    name: string
+    location: string
+    date: Date | string
+    circuitId?: string | null
+    url?: string | null
+    country?: string | null
+    trackImage?: string | null
+    isTesting?: boolean
+  }
+
+  export type RaceUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    round?: IntFieldUpdateOperationsInput | number
+    name?: StringFieldUpdateOperationsInput | string
+    location?: StringFieldUpdateOperationsInput | string
+    date?: DateTimeFieldUpdateOperationsInput | Date | string
+    circuitId?: NullableStringFieldUpdateOperationsInput | string | null
+    url?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
+    trackImage?: NullableStringFieldUpdateOperationsInput | string | null
+    isTesting?: BoolFieldUpdateOperationsInput | boolean
+  }
+
+  export type RaceUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    round?: IntFieldUpdateOperationsInput | number
+    name?: StringFieldUpdateOperationsInput | string
+    location?: StringFieldUpdateOperationsInput | string
+    date?: DateTimeFieldUpdateOperationsInput | Date | string
+    circuitId?: NullableStringFieldUpdateOperationsInput | string | null
+    url?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
+    trackImage?: NullableStringFieldUpdateOperationsInput | string | null
+    isTesting?: BoolFieldUpdateOperationsInput | boolean
+  }
+
+  export type RaceCreateManyInput = {
+    id?: string
+    round: number
+    name: string
+    location: string
+    date: Date | string
+    circuitId?: string | null
+    url?: string | null
+    country?: string | null
+    trackImage?: string | null
+    isTesting?: boolean
+  }
+
+  export type RaceUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    round?: IntFieldUpdateOperationsInput | number
+    name?: StringFieldUpdateOperationsInput | string
+    location?: StringFieldUpdateOperationsInput | string
+    date?: DateTimeFieldUpdateOperationsInput | Date | string
+    circuitId?: NullableStringFieldUpdateOperationsInput | string | null
+    url?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
+    trackImage?: NullableStringFieldUpdateOperationsInput | string | null
+    isTesting?: BoolFieldUpdateOperationsInput | boolean
+  }
+
+  export type RaceUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    round?: IntFieldUpdateOperationsInput | number
+    name?: StringFieldUpdateOperationsInput | string
+    location?: StringFieldUpdateOperationsInput | string
+    date?: DateTimeFieldUpdateOperationsInput | Date | string
+    circuitId?: NullableStringFieldUpdateOperationsInput | string | null
+    url?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
+    trackImage?: NullableStringFieldUpdateOperationsInput | string | null
+    isTesting?: BoolFieldUpdateOperationsInput | boolean
+  }
+
   export type StringFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[] | ListStringFieldRefInput<$PrismaModel>
@@ -8011,6 +9408,11 @@ export namespace Prisma {
     not?: NestedIntFilter<$PrismaModel> | number
   }
 
+  export type BoolFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolFilter<$PrismaModel> | boolean
+  }
+
   export type TeamScalarRelationFilter = {
     is?: TeamWhereInput
     isNot?: TeamWhereInput
@@ -8041,6 +9443,7 @@ export namespace Prisma {
     name?: SortOrder
     number?: SortOrder
     country?: SortOrder
+    active?: SortOrder
     teamId?: SortOrder
     color?: SortOrder
   }
@@ -8054,6 +9457,7 @@ export namespace Prisma {
     name?: SortOrder
     number?: SortOrder
     country?: SortOrder
+    active?: SortOrder
     teamId?: SortOrder
     color?: SortOrder
   }
@@ -8063,6 +9467,7 @@ export namespace Prisma {
     name?: SortOrder
     number?: SortOrder
     country?: SortOrder
+    active?: SortOrder
     teamId?: SortOrder
     color?: SortOrder
   }
@@ -8087,9 +9492,12 @@ export namespace Prisma {
     _max?: NestedIntFilter<$PrismaModel>
   }
 
-  export type BoolFilter<$PrismaModel = never> = {
+  export type BoolWithAggregatesFilter<$PrismaModel = never> = {
     equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolFilter<$PrismaModel> | boolean
+    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedBoolFilter<$PrismaModel>
+    _max?: NestedBoolFilter<$PrismaModel>
   }
 
   export type DateTimeFilter<$PrismaModel = never> = {
@@ -8150,14 +9558,6 @@ export namespace Prisma {
     avatar?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-  }
-
-  export type BoolWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedBoolFilter<$PrismaModel>
-    _max?: NestedBoolFilter<$PrismaModel>
   }
 
   export type DateTimeWithAggregatesFilter<$PrismaModel = never> = {
@@ -8258,6 +9658,53 @@ export namespace Prisma {
   export type SeasonVoteSumOrderByAggregateInput = {
     position?: SortOrder
     season?: SortOrder
+  }
+
+  export type RaceCountOrderByAggregateInput = {
+    id?: SortOrder
+    round?: SortOrder
+    name?: SortOrder
+    location?: SortOrder
+    date?: SortOrder
+    circuitId?: SortOrder
+    url?: SortOrder
+    country?: SortOrder
+    trackImage?: SortOrder
+    isTesting?: SortOrder
+  }
+
+  export type RaceAvgOrderByAggregateInput = {
+    round?: SortOrder
+  }
+
+  export type RaceMaxOrderByAggregateInput = {
+    id?: SortOrder
+    round?: SortOrder
+    name?: SortOrder
+    location?: SortOrder
+    date?: SortOrder
+    circuitId?: SortOrder
+    url?: SortOrder
+    country?: SortOrder
+    trackImage?: SortOrder
+    isTesting?: SortOrder
+  }
+
+  export type RaceMinOrderByAggregateInput = {
+    id?: SortOrder
+    round?: SortOrder
+    name?: SortOrder
+    location?: SortOrder
+    date?: SortOrder
+    circuitId?: SortOrder
+    url?: SortOrder
+    country?: SortOrder
+    trackImage?: SortOrder
+    isTesting?: SortOrder
+  }
+
+  export type RaceSumOrderByAggregateInput = {
+    round?: SortOrder
   }
 
   export type UserCreateNestedManyWithoutTeamInput = {
@@ -8408,6 +9855,10 @@ export namespace Prisma {
     divide?: number
   }
 
+  export type BoolFieldUpdateOperationsInput = {
+    set?: boolean
+  }
+
   export type TeamUpdateOneRequiredWithoutDriversNestedInput = {
     create?: XOR<TeamCreateWithoutDriversInput, TeamUncheckedCreateWithoutDriversInput>
     connectOrCreate?: TeamCreateOrConnectWithoutDriversInput
@@ -8538,10 +9989,6 @@ export namespace Prisma {
     connectOrCreate?: SeasonVoteCreateOrConnectWithoutUserInput | SeasonVoteCreateOrConnectWithoutUserInput[]
     createMany?: SeasonVoteCreateManyUserInputEnvelope
     connect?: SeasonVoteWhereUniqueInput | SeasonVoteWhereUniqueInput[]
-  }
-
-  export type BoolFieldUpdateOperationsInput = {
-    set?: boolean
   }
 
   export type DateTimeFieldUpdateOperationsInput = {
@@ -8764,6 +10211,11 @@ export namespace Prisma {
     not?: NestedIntNullableFilter<$PrismaModel> | number | null
   }
 
+  export type NestedBoolFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolFilter<$PrismaModel> | boolean
+  }
+
   export type NestedIntWithAggregatesFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel>
     in?: number[] | ListIntFieldRefInput<$PrismaModel>
@@ -8791,9 +10243,12 @@ export namespace Prisma {
     not?: NestedFloatFilter<$PrismaModel> | number
   }
 
-  export type NestedBoolFilter<$PrismaModel = never> = {
+  export type NestedBoolWithAggregatesFilter<$PrismaModel = never> = {
     equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolFilter<$PrismaModel> | boolean
+    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedBoolFilter<$PrismaModel>
+    _max?: NestedBoolFilter<$PrismaModel>
   }
 
   export type NestedDateTimeFilter<$PrismaModel = never> = {
@@ -8805,14 +10260,6 @@ export namespace Prisma {
     gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     not?: NestedDateTimeFilter<$PrismaModel> | Date | string
-  }
-
-  export type NestedBoolWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedBoolFilter<$PrismaModel>
-    _max?: NestedBoolFilter<$PrismaModel>
   }
 
   export type NestedDateTimeWithAggregatesFilter<$PrismaModel = never> = {
@@ -8872,6 +10319,7 @@ export namespace Prisma {
     name: string
     number: number
     country?: string | null
+    active?: boolean
     color?: string | null
     votes?: VoteCreateNestedManyWithoutDriverInput
     seasonVotes?: SeasonVoteCreateNestedManyWithoutDriverInput
@@ -8883,6 +10331,7 @@ export namespace Prisma {
     name: string
     number: number
     country?: string | null
+    active?: boolean
     color?: string | null
     votes?: VoteUncheckedCreateNestedManyWithoutDriverInput
     seasonVotes?: SeasonVoteUncheckedCreateNestedManyWithoutDriverInput
@@ -8955,6 +10404,7 @@ export namespace Prisma {
     name?: StringFilter<"Driver"> | string
     number?: IntFilter<"Driver"> | number
     country?: StringNullableFilter<"Driver"> | string | null
+    active?: BoolFilter<"Driver"> | boolean
     teamId?: StringFilter<"Driver"> | string
     color?: StringNullableFilter<"Driver"> | string | null
   }
@@ -9189,6 +10639,7 @@ export namespace Prisma {
     name: string
     number: number
     country?: string | null
+    active?: boolean
     color?: string | null
     team: TeamCreateNestedOneWithoutDriversInput
     votes?: VoteCreateNestedManyWithoutDriverInput
@@ -9200,6 +10651,7 @@ export namespace Prisma {
     name: string
     number: number
     country?: string | null
+    active?: boolean
     teamId: string
     color?: string | null
     votes?: VoteUncheckedCreateNestedManyWithoutDriverInput
@@ -9304,6 +10756,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     number?: IntFieldUpdateOperationsInput | number
     country?: NullableStringFieldUpdateOperationsInput | string | null
+    active?: BoolFieldUpdateOperationsInput | boolean
     color?: NullableStringFieldUpdateOperationsInput | string | null
     team?: TeamUpdateOneRequiredWithoutDriversNestedInput
     votes?: VoteUpdateManyWithoutDriverNestedInput
@@ -9315,6 +10768,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     number?: IntFieldUpdateOperationsInput | number
     country?: NullableStringFieldUpdateOperationsInput | string | null
+    active?: BoolFieldUpdateOperationsInput | boolean
     teamId?: StringFieldUpdateOperationsInput | string
     color?: NullableStringFieldUpdateOperationsInput | string | null
     votes?: VoteUncheckedUpdateManyWithoutDriverNestedInput
@@ -9391,6 +10845,7 @@ export namespace Prisma {
     name: string
     number: number
     country?: string | null
+    active?: boolean
     color?: string | null
     team: TeamCreateNestedOneWithoutDriversInput
     seasonVotes?: SeasonVoteCreateNestedManyWithoutDriverInput
@@ -9402,6 +10857,7 @@ export namespace Prisma {
     name: string
     number: number
     country?: string | null
+    active?: boolean
     teamId: string
     color?: string | null
     seasonVotes?: SeasonVoteUncheckedCreateNestedManyWithoutDriverInput
@@ -9468,6 +10924,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     number?: IntFieldUpdateOperationsInput | number
     country?: NullableStringFieldUpdateOperationsInput | string | null
+    active?: BoolFieldUpdateOperationsInput | boolean
     color?: NullableStringFieldUpdateOperationsInput | string | null
     team?: TeamUpdateOneRequiredWithoutDriversNestedInput
     seasonVotes?: SeasonVoteUpdateManyWithoutDriverNestedInput
@@ -9479,6 +10936,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     number?: IntFieldUpdateOperationsInput | number
     country?: NullableStringFieldUpdateOperationsInput | string | null
+    active?: BoolFieldUpdateOperationsInput | boolean
     teamId?: StringFieldUpdateOperationsInput | string
     color?: NullableStringFieldUpdateOperationsInput | string | null
     seasonVotes?: SeasonVoteUncheckedUpdateManyWithoutDriverNestedInput
@@ -9523,6 +10981,7 @@ export namespace Prisma {
     name: string
     number: number
     country?: string | null
+    active?: boolean
     color?: string | null
     team: TeamCreateNestedOneWithoutDriversInput
     votes?: VoteCreateNestedManyWithoutDriverInput
@@ -9534,6 +10993,7 @@ export namespace Prisma {
     name: string
     number: number
     country?: string | null
+    active?: boolean
     teamId: string
     color?: string | null
     votes?: VoteUncheckedCreateNestedManyWithoutDriverInput
@@ -9600,6 +11060,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     number?: IntFieldUpdateOperationsInput | number
     country?: NullableStringFieldUpdateOperationsInput | string | null
+    active?: BoolFieldUpdateOperationsInput | boolean
     color?: NullableStringFieldUpdateOperationsInput | string | null
     team?: TeamUpdateOneRequiredWithoutDriversNestedInput
     votes?: VoteUpdateManyWithoutDriverNestedInput
@@ -9611,6 +11072,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     number?: IntFieldUpdateOperationsInput | number
     country?: NullableStringFieldUpdateOperationsInput | string | null
+    active?: BoolFieldUpdateOperationsInput | boolean
     teamId?: StringFieldUpdateOperationsInput | string
     color?: NullableStringFieldUpdateOperationsInput | string | null
     votes?: VoteUncheckedUpdateManyWithoutDriverNestedInput
@@ -9634,6 +11096,7 @@ export namespace Prisma {
     name: string
     number: number
     country?: string | null
+    active?: boolean
     color?: string | null
   }
 
@@ -9682,6 +11145,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     number?: IntFieldUpdateOperationsInput | number
     country?: NullableStringFieldUpdateOperationsInput | string | null
+    active?: BoolFieldUpdateOperationsInput | boolean
     color?: NullableStringFieldUpdateOperationsInput | string | null
     votes?: VoteUpdateManyWithoutDriverNestedInput
     seasonVotes?: SeasonVoteUpdateManyWithoutDriverNestedInput
@@ -9693,6 +11157,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     number?: IntFieldUpdateOperationsInput | number
     country?: NullableStringFieldUpdateOperationsInput | string | null
+    active?: BoolFieldUpdateOperationsInput | boolean
     color?: NullableStringFieldUpdateOperationsInput | string | null
     votes?: VoteUncheckedUpdateManyWithoutDriverNestedInput
     seasonVotes?: SeasonVoteUncheckedUpdateManyWithoutDriverNestedInput
@@ -9704,6 +11169,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     number?: IntFieldUpdateOperationsInput | number
     country?: NullableStringFieldUpdateOperationsInput | string | null
+    active?: BoolFieldUpdateOperationsInput | boolean
     color?: NullableStringFieldUpdateOperationsInput | string | null
   }
 

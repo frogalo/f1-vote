@@ -41,6 +41,7 @@ export async function addDriver(formData: FormData) {
     const country = formData.get("country") as string;
     const teamId = formData.get("teamId") as string;
     const color = formData.get("color") as string;
+    const active = formData.get("active") === "true";
 
     if (!slug || !name || !number || !teamId) {
         return { error: "Brakuje wymaganych pól (slug, name, number, teamId)" };
@@ -53,7 +54,7 @@ export async function addDriver(formData: FormData) {
     }
 
     const driver = await prisma.driver.create({
-        data: { slug, name, number, country: country || null, teamId, color: color || null },
+        data: { slug, name, number, country: country || null, teamId, color: color || null, active },
         include: { team: { select: { name: true } } },
     });
 
@@ -69,6 +70,7 @@ export async function updateDriver(formData: FormData) {
     const country = formData.get("country") as string;
     const teamId = formData.get("teamId") as string;
     const color = formData.get("color") as string;
+    const active = formData.get("active") === "true";
 
     if (!slug || !name || !number || !teamId) {
         return { error: "Brakuje wymaganych pól" };
@@ -76,7 +78,7 @@ export async function updateDriver(formData: FormData) {
 
     const driver = await prisma.driver.update({
         where: { slug },
-        data: { name, number, country: country || null, teamId, color: color || null },
+        data: { name, number, country: country || null, teamId, color: color || null, active },
         include: { team: { select: { name: true } } },
     });
 
@@ -97,4 +99,81 @@ export async function deleteDriver(slug: string) {
     await prisma.driver.delete({ where: { slug } });
 
     return { success: true };
+}
+
+export async function getAllUsersWithVotes() {
+    await requireAdmin();
+
+    const users = await prisma.user.findMany({
+        orderBy: { name: "asc" },
+        include: {
+            votes: true,
+            seasonVotes: true,
+            team: { select: { name: true } },
+        }
+    });
+
+    return users.map(u => ({
+        id: u.id,
+        name: u.name,
+        username: u.username,
+        isAdmin: u.isAdmin,
+        team: u.team?.name || "Brak",
+        votesCount: u.votes.length,
+        seasonVotesCount: u.seasonVotes.length,
+        createdAt: u.createdAt
+    }));
+}
+
+export async function deleteUser(userId: string) {
+    await requireAdmin();
+    try {
+        await prisma.user.delete({ where: { id: userId } });
+        return { success: true };
+    } catch (e: any) {
+        return { error: e.message || "Błąd usuwania użytkownika" };
+    }
+}
+
+export async function getUserDetails(userId: string) {
+    await requireAdmin();
+    
+    // Fetch user with extended vote data
+    const user = await prisma.user.findUnique({
+        where: { id: userId },
+        include: {
+            seasonVotes: {
+                orderBy: { position: "asc" },
+                include: {
+                    driver: { select: { slug: true, name: true, team: { select: { name: true } } } }
+                }
+            },
+            votes: {
+                orderBy: { createdAt: "desc" },
+                include: {
+                    driver: { select: { slug: true, name: true } }
+                }
+            }
+        }
+    });
+
+    if (!user) return { error: "Nie znaleziono użytkownika" };
+
+    return {
+        user: {
+            id: user.id,
+            name: user.name,
+            username: user.username,
+            seasonVotes: user.seasonVotes.map(v => ({
+                position: v.position,
+                driver: v.driver.name,
+                team: v.driver.team.name
+            })),
+            raceVotes: user.votes.map(v => ({
+                raceRound: v.raceRound,
+                driver: v.driver.name,
+                createdAt: v.createdAt
+            }))
+        }
+    };
 }

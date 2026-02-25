@@ -5,6 +5,7 @@ import { drivers, races, getTeamLogo, raceResults } from "@/lib/data";
 import { useEffect, useState } from "react";
 import { clsx } from "clsx";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/app/providers/AuthProvider";
 
 type Props = {
     raceRound: number;
@@ -12,12 +13,17 @@ type Props = {
 
 export default function RaceResultsContent({ raceRound }: Props) {
     const { votes, userId: currentUserId, loadFromIndexedDB } = useStore();
+    const { user, loading: authLoading } = useAuth();
     const [loading, setLoading] = useState(true);
     const router = useRouter();
 
     useEffect(() => {
+        if (!authLoading && user?.isAdmin) {
+            router.push("/admin");
+            return;
+        }
         loadFromIndexedDB().then(() => setLoading(false));
-    }, [loadFromIndexedDB]);
+    }, [loadFromIndexedDB, user, authLoading, router]);
 
     const result = raceResults.find((r) => r.round === raceRound);
     const race = races.find((r) => r.round === raceRound);
@@ -108,7 +114,7 @@ export default function RaceResultsContent({ raceRound }: Props) {
                                             <img
                                                 src={getTeamLogo(driver.team)}
                                                 alt={driver.team}
-                                                className="w-3 h-3 object-contain brightness-0 invert opacity-40"
+                                                className="w-3 h-3 object-contain"
                                             />
                                             <div className="text-[10px] text-gray-500 uppercase font-medium">{driver.team}</div>
                                         </div>

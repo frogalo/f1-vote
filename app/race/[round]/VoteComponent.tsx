@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { clsx } from "clsx";
 import { GripVertical } from "lucide-react";
+import { useAuth } from "@/app/providers/AuthProvider";
+import ReactCountryFlag from "react-country-flag";
 import {
   DndContext,
   closestCenter,
@@ -32,6 +34,8 @@ type Props = {
 
 export function VoteComponent({ race, drivers }: Props) {
   const { votes, userId, setSessionVotes, loadFromIndexedDB } = useStore();
+  const { user, loading: authLoading } = useAuth();
+  const router = useRouter();
   const [timeLeft, setTimeLeft] = useState("");
   const [orderedDrivers, setOrderedDrivers] = useState(drivers);
   const [loading, setLoading] = useState(true);
@@ -49,12 +53,17 @@ export function VoteComponent({ race, drivers }: Props) {
   );
 
   useEffect(() => {
+    if (!authLoading && user?.isAdmin) {
+      router.push("/admin");
+      return;
+    }
+
     loadFromIndexedDB().then(() => {
       setLoading(false);
       const raceDate = new Date(race.date);
       setIsLocked(Date.now() > raceDate.getTime());
     });
-  }, [loadFromIndexedDB, race.date]);
+  }, [loadFromIndexedDB, race.date, user, authLoading, router]);
 
   // Restore previous order from votes
   useEffect(() => {
@@ -219,15 +228,20 @@ function SortableDriverItem({ driver, index, disabled }: { driver: Driver; index
       </span>
 
       <div className="text-left flex-1 min-w-0">
-        <div className="font-bold text-base text-white truncate flex items-center gap-1">
-          <span>{driver.country}</span>
+        <div className="font-bold text-base text-white truncate flex items-center gap-2">
+          <ReactCountryFlag
+            countryCode={driver.country}
+            svg
+            style={{ width: "1.2em", height: "1.2em", borderRadius: "50%", objectFit: "cover" }}
+            aria-label={driver.country}
+          />
           <span>{driver.name}</span>
         </div>
         <div className="flex items-center gap-2">
           <img
             src={getTeamLogo(driver.team)}
             alt={driver.team}
-            className="w-4 h-4 object-contain brightness-0 invert opacity-50"
+            className="w-4 h-4 object-contain"
           />
           <div className="text-xs text-gray-500 uppercase truncate font-medium">{driver.team}</div>
         </div>

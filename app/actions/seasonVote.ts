@@ -70,6 +70,7 @@ export async function getSeasonVotes() {
 
 export async function getAvailableDrivers() {
     const drivers = await prisma.driver.findMany({
+        where: { active: true },
         orderBy: { name: "asc" },
         include: { team: { select: { name: true } } },
     });

@@ -7,6 +7,7 @@ import { clsx } from "clsx";
 import Link from "next/link";
 import { loginUser } from "@/app/actions/auth";
 import { hasSeasonVotes } from "@/app/actions/seasonVote";
+import { getNextRound } from "@/app/actions/races";
 import { toast } from "sonner";
 
 export default function LoginPage() {
@@ -35,9 +36,20 @@ export default function LoginPage() {
             if (result.success && result.user) {
                 toast.success(`Witaj ponownie, ${result.user.name}!`);
                 setUserId(result.user.id);
+                
+                if (result.user.isAdmin) {
+                    router.push("/admin");
+                    return;
+                }
+
                 // Check if user needs to set up seasonal votes
                 const hasSeason = await hasSeasonVotes();
-                router.push(hasSeason ? "/" : "/season"); // Go to dashboard if has votes, else to seasonal voting
+                if (!hasSeason) {
+                    router.push("/season");
+                } else {
+                    const nextRound = await getNextRound();
+                    router.push(`/race/${nextRound}`);
+                }
             }
         } catch (err: any) {
             const msg = err.message || "An error occurred";

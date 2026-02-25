@@ -1,11 +1,14 @@
 "use client";
 
-import { races, raceResults } from "@/lib/data";
+import { raceResults } from "@/lib/data";
 import { clsx } from "clsx";
 import Link from "next/link";
 import { useStore } from "@/lib/store";
 import { calculateRaceScore } from "@/lib/scoring";
 import { useEffect, useState } from "react";
+import { useAuth } from "@/app/providers/AuthProvider";
+import { useRouter } from "next/navigation";
+import { getRaces } from "@/app/actions/races";
 
 const trackSlugs: Record<number, string> = {
     1: "melbourne",
@@ -34,17 +37,38 @@ const trackSlugs: Record<number, string> = {
     24: "yasmarina"
 };
 
+type Race = {
+    round: number;
+    name: string;
+    location: string;
+    date: Date;
+    trackImage: string | null;
+};
+
 export default function CalendarPage() {
     const { votes, userId: currentUserId, loadFromIndexedDB, addVote } = useStore();
+    const { user, loading: authLoading } = useAuth();
+    const router = useRouter();
     const [loading, setLoading] = useState(true);
+    const [races, setRaces] = useState<Race[]>([]);
     const now = new Date();
     const completedRaceCount = raceResults.length;
 
     useEffect(() => {
-        loadFromIndexedDB().then(() => {
-            setLoading(false);
-        });
-    }, [loadFromIndexedDB]);
+        if (!authLoading && user?.isAdmin) {
+            router.push("/admin");
+            return;
+        }
+        
+        const load = async () => {
+             await loadFromIndexedDB();
+             const fetchedRaces = await getRaces();
+             setRaces(fetchedRaces);
+             setLoading(false);
+        };
+        load();
+
+    }, [loadFromIndexedDB, user, authLoading, router]);
 
     const getRaceStatus = (raceRound: number) => {
         if (raceRound <= completedRaceCount) return "completed";
@@ -52,17 +76,15 @@ export default function CalendarPage() {
         return "future";
     };
 
-    const formatDate = (dateString: string) => {
-        const date = new Date(dateString);
-        return date.toLocaleDateString("pl-PL", {
+    const formatDate = (date: Date) => {
+        return new Date(date).toLocaleDateString("pl-PL", {
             day: "2-digit",
             month: "short",
         });
     };
 
-    const getCountdown = (dateString: string) => {
-        const date = new Date(dateString);
-        const diffTime = date.getTime() - now.getTime();
+    const getCountdown = (date: Date) => {
+        const diffTime = new Date(date).getTime() - now.getTime();
         if (diffTime < 0) return null;
         const days = Math.floor(diffTime / (1000 * 60 * 60 * 24));
         const hours = Math.floor((diffTime % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
@@ -142,7 +164,7 @@ export default function CalendarPage() {
                             <div className="relative h-24 mt-2 mb-4 flex items-center justify-center">
                                 {/* Track Image */}
                                 <img
-                                    src={`https://media.formula1.com/image/upload/c_lfill,w_1000/v1740000000/common/f1/2026/track/2026track${slug}blackoutline.svg`}
+                                    src={race.trackImage || `https://media.formula1.com/image/upload/c_lfill,w_1000/v1740000000/common/f1/2026/track/2026track${slug}blackoutline.svg`}
                                     alt={race.name}
                                     className={clsx(
                                         "h-full w-auto object-contain transition-transform duration-500 group-hover:scale-110",

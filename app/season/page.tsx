@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
 import { clsx } from "clsx";
 import { GripVertical, Plus, X, Lock, Trophy, Star } from "lucide-react";
+import ReactCountryFlag from "react-country-flag";
 import {
   DndContext,
   closestCenter,
@@ -107,15 +108,22 @@ function SortableDriverItem({
 
       {/* Driver Info */}
       <div className="text-left flex-1 min-w-0">
-        <div className="font-bold text-base leading-tight truncate flex items-center gap-1 text-white">
-          {driver.country && <span className="text-xs grayscale opacity-70">{driver.country}</span>}
+        <div className="font-bold text-base leading-tight truncate flex items-center gap-2 text-white">
+          {driver.country && (
+            <ReactCountryFlag
+              countryCode={driver.country}
+              svg
+              style={{ width: "1.2em", height: "1.2em", borderRadius: "50%", objectFit: "cover" }}
+              aria-label={driver.country}
+            />
+          )}
           <span className={clsx(isChampion && "text-yellow-500")}>{driver.name}</span>
         </div>
         <div className="flex items-center gap-1.5 mt-0.5">
           <img
             src={getTeamLogo(driver.team)}
             alt={driver.team}
-            className="w-3.5 h-3.5 object-contain brightness-0 invert opacity-40"
+            className="w-3.5 h-3.5 object-contain"
           />
           <div className="text-[10px] text-gray-500 uppercase truncate font-bold tracking-tight">
             {driver.team}
@@ -162,6 +170,7 @@ export default function SeasonVotePage() {
   const [allDrivers, setAllDrivers] = useState<DriverInfo[]>([]);
   const [saving, setSaving] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [timeLeft, setTimeLeft] = useState("");
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -203,10 +212,39 @@ export default function SeasonVotePage() {
     }
   }, [authLoading, user]);
 
-  // Redirect if not logged in
+  // Countdown
   useEffect(() => {
-    if (!authLoading && !user) {
-      router.push("/login");
+    const firstRaceDate = new Date("2026-03-08T05:00:00Z");
+    const updateCountdown = () => {
+      const now = new Date();
+      const diff = firstRaceDate.getTime() - now.getTime();
+
+      if (diff <= 0) {
+        setTimeLeft("ZABLOKOWANE");
+        setLocked(true);
+        return;
+      }
+
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
+      setTimeLeft(`${days}d ${hours}h ${minutes}m`);
+    };
+
+    updateCountdown();
+    const interval = setInterval(updateCountdown, 60000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Redirect if not logged in or is admin
+  useEffect(() => {
+    if (!authLoading) {
+      if (!user) {
+        router.push("/login");
+      } else if (user.isAdmin) {
+        router.push("/admin");
+      }
     }
   }, [authLoading, user, router]);
 
@@ -334,15 +372,19 @@ export default function SeasonVotePage() {
                 Twoje typowanie końcowe
               </p>
             </div>
-            {locked && (
-              <span className="bg-[#E60000]/10 text-[#E60000] text-[10px] font-bold px-2 py-1 rounded-lg border border-[#E60000]/20 flex items-center gap-1">
-                <Lock className="w-3 h-3" /> LOCKED
-              </span>
-            )}
+            
+            <span className={clsx(
+              "text-[10px] font-bold px-2 py-1 rounded-lg border flex items-center gap-1",
+              locked
+                ? "bg-[#E60000]/10 text-[#E60000] border-[#E60000]/20"
+                : "bg-[#2C2C2E] text-white border-white/10"
+            )}>
+              {locked ? <Lock className="w-3 h-3" /> : "⏰"} {timeLeft || "Ładowanie..."}
+            </span>
+
             {!locked && saving && (
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1.5 ml-2">
                 <div className="w-1.5 h-1.5 bg-[#E60000] rounded-full animate-pulse shadow-[0_0_8px_#E60000]" />
-                <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Saving</span>
               </div>
             )}
           </div>

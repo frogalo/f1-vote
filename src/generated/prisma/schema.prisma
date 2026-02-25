@@ -23,6 +23,7 @@ model Driver {
   name        String
   number      Int
   country     String?
+  active      Boolean      @default(true)
   teamId      String
   team        Team         @relation(fields: [teamId], references: [id])
   color       String?
@@ -75,4 +76,17 @@ model SeasonVote {
   @@unique([userId, position, season])
   @@unique([userId, driverId, season])
   @@index([userId, season])
+}
+
+model Race {
+  id         String   @id @default(cuid())
+  round      Int      @unique
+  name       String
+  location   String
+  date       DateTime
+  circuitId  String?
+  url        String?
+  country    String?
+  trackImage String?
+  isTesting  Boolean  @default(false)
 }

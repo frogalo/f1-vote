@@ -131,6 +131,7 @@ exports.Prisma.DriverScalarFieldEnum = {
   name: 'name',
   number: 'number',
   country: 'country',
+  active: 'active',
   teamId: 'teamId',
   color: 'color'
 };
@@ -166,6 +167,19 @@ exports.Prisma.SeasonVoteScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.RaceScalarFieldEnum = {
+  id: 'id',
+  round: 'round',
+  name: 'name',
+  location: 'location',
+  date: 'date',
+  circuitId: 'circuitId',
+  url: 'url',
+  country: 'country',
+  trackImage: 'trackImage',
+  isTesting: 'isTesting'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -187,7 +201,8 @@ exports.Prisma.ModelName = {
   Driver: 'Driver',
   User: 'User',
   Vote: 'Vote',
-  SeasonVote: 'SeasonVote'
+  SeasonVote: 'SeasonVote',
+  Race: 'Race'
 };
 
 /**

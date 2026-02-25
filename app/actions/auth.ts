@@ -42,6 +42,9 @@ export async function registerUser(formData: FormData) {
     },
   });
 
+  const cookieStore = await cookies();
+  cookieStore.set("userId", user.id, { httpOnly: true, secure: true });
+
   return { success: true, user: { id: user.id, name: user.name } };
 }
 
