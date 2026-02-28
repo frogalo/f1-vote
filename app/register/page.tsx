@@ -14,7 +14,7 @@ import { useAuth } from "@/app/providers/AuthProvider";
 export default function RegisterPage() {
     const router = useRouter();
     const { setUserId } = useStore();
-    const { user, loading: authLoading } = useAuth();
+    const { user, loading: authLoading, refreshUser } = useAuth();
     const [name, setName] = useState("");
     const [team, setTeam] = useState("");
     const [favoriteDriver, setFavoriteDriver] = useState("");
@@ -88,10 +88,11 @@ export default function RegisterPage() {
             if (result.success && result.user) {
                 toast.success("Zarejestrowano pomyślnie!");
                 setUserId(result.user.id); // Update local store
-                router.push("/season"); // Redirect to season voting
+                await refreshUser();       // Update auth context state
+                router.push("/season");    // Redirect to season voting
             }
-        } catch (err: any) {
-            const msg = err.message || "An error occurred";
+        } catch (err: unknown) {
+            const msg = (err instanceof Error ? err.message : String(err)) || "An error occurred";
             setError(msg);
             toast.error(msg);
         } finally {
@@ -134,6 +135,7 @@ export default function RegisterPage() {
                     >
                         {team ? (
                             <>
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
                                 <img
                                     src={getTeamLogo(team)}
                                     alt={team}
@@ -162,6 +164,7 @@ export default function RegisterPage() {
                                         team === t ? "text-[#E60000] bg-[#E60000]/5" : "text-white"
                                     )}
                                 >
+                                    {/* eslint-disable-next-line @next/next/no-img-element */}
                                     <img
                                         src={getTeamLogo(t)}
                                         alt={t}
@@ -190,6 +193,7 @@ export default function RegisterPage() {
                     >
                         {selectedDriver ? (
                             <>
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
                                 <img
                                     src={getTeamLogo(selectedDriver.team)}
                                     alt={selectedDriver.team}
@@ -218,6 +222,7 @@ export default function RegisterPage() {
                                         favoriteDriver === d.id ? "text-[#E60000] bg-[#E60000]/5" : "text-white"
                                     )}
                                 >
+                                    {/* eslint-disable-next-line @next/next/no-img-element */}
                                     <img
                                         src={getTeamLogo(d.team)}
                                         alt={d.team}

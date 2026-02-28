@@ -4,13 +4,14 @@ import { useAuth } from "@/app/providers/AuthProvider";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { getTeamLogo } from "@/lib/data";
-import { getTeams, getDrivers, addDriver, updateDriver, deleteDriver, getAllUsersWithVotes, deleteUser, getUserDetails } from "@/app/actions/admin";
+import { getTeams, getDrivers, addDriver, updateDriver, deleteDriver, getAllUsersWithVotes, deleteUser, getUserDetails, toggleDriverStatus } from "@/app/actions/admin";
 import { getRaces, addRace, updateRace, deleteRace, seedRaces } from "@/app/actions/races";
 import { toast } from "sonner";
-import { Plus, Trash2, Edit3, X, Shield, Users, ChevronDown, Trophy, Flag, LogOut } from "lucide-react";
+import { Plus, Trash2, Edit3, X, Shield, ChevronDown, Trophy, Flag, LogOut, CheckCircle2 } from "lucide-react";
 import { logoutUser } from "@/app/actions/auth";
 import { clsx } from "clsx";
 import ReactCountryFlag from "react-country-flag";
+import FinishRaceModal from "./FinishRaceModal";
 
 
 type Team = {
@@ -26,7 +27,8 @@ type DriverRow = {
     number: number;
     country: string | null;
     color: string | null;
-    active?: boolean;
+    active: boolean;
+    activeSeason: boolean;
     teamId: string;
     team: { name: string };
 };
@@ -59,6 +61,8 @@ type Race = {
     trackImage: string | null;
     country: string | null;
     circuitId: string | null;
+    completed?: boolean;
+    results?: string[];
 };
 
 export default function AdminPage() {
@@ -86,6 +90,7 @@ export default function AdminPage() {
     const [formTeamId, setFormTeamId] = useState("");
     const [formColor, setFormColor] = useState("");
     const [formActive, setFormActive] = useState(true);
+    const [formActiveSeason, setFormActiveSeason] = useState(true);
 
     // Form state (Races)
     const [formRaceId, setFormRaceId] = useState<string | null>(null);
@@ -99,6 +104,7 @@ export default function AdminPage() {
     // User details state
     const [selectedUser, setSelectedUser] = useState<UserDetails | null>(null);
     const [detailsLoading, setDetailsLoading] = useState(false);
+    const [finishingRace, setFinishingRace] = useState<Race | null>(null);
 
     useEffect(() => {
         if (!loading && (!user || !user.isAdmin)) {
@@ -125,7 +131,7 @@ export default function AdminPage() {
             setDrivers(driversData as DriverRow[]);
             setUsers(usersData as UserRow[]);
             setRaces(racesData as unknown as Race[]);
-        } catch (err) {
+        } catch {
             toast.error("Nie udało się załadować danych");
         } finally {
             setDataLoading(false);
@@ -163,8 +169,21 @@ export default function AdminPage() {
         setFormTeamId(driver.teamId);
         setFormColor(driver.color || "");
         setFormActive(driver.active ?? true);
+        setFormActiveSeason(driver.activeSeason ?? true);
         setEditingSlug(driver.slug);
         setShowForm(true);
+    }
+
+    async function handleToggleStatus(slug: string, field: "active" | "activeSeason", currentValue: boolean) {
+        try {
+            const result = await toggleDriverStatus(slug, field, !currentValue);
+            if (result.success) {
+                setDrivers(prev => prev.map(d => d.slug === slug ? { ...d, [field]: !currentValue } : d));
+                toast.success(field === "active" ? (!currentValue ? "Aktywny w wyścigach" : "Nieaktywny w wyścigach") : (!currentValue ? "Aktywny w sezonie" : "Nieaktywny w sezonie"));
+            }
+        } catch {
+            toast.error("Błąd zmiany statusu");
+        }
     }
 
     function openRaceForm(race?: Race) {
@@ -210,8 +229,8 @@ export default function AdminPage() {
             toast.success(formRaceId ? "Wyścig zaktualizowany" : "Wyścig dodany");
             resetForm();
             await loadData();
-        } catch (e: any) {
-            toast.error(e.message || "Błąd zapisu");
+        } catch (e: unknown) {
+            toast.error((e instanceof Error ? e.message : String(e)) || "Błąd zapisu");
         } finally {
             setFormLoading(false);
         }
@@ -227,7 +246,7 @@ export default function AdminPage() {
             } else {
                 toast.error(result.error);
             }
-        } catch (e) {
+        } catch {
             toast.error("Błąd usuwania");
         }
     }
@@ -261,6 +280,7 @@ export default function AdminPage() {
             formData.append("teamId", formTeamId);
             formData.append("color", formColor);
             formData.append("active", String(formActive));
+            formData.append("activeSeason", String(formActiveSeason));
 
             let result;
             if (editingSlug) {
@@ -277,8 +297,8 @@ export default function AdminPage() {
             toast.success(editingSlug ? "Kierowca zaktualizowany!" : "Kierowca dodany!");
             resetForm();
             await loadData();
-        } catch (err: any) {
-            toast.error(err.message || "Wystąpił błąd");
+        } catch {
+            toast.error("Wystąpił błąd");
         } finally {
             setFormLoading(false);
         }
@@ -293,8 +313,8 @@ export default function AdminPage() {
                 toast.success(`Usunięto ${name}`);
                 await loadData();
             }
-        } catch (err: any) {
-            toast.error(err.message || "Nie udało się usunąć");
+        } catch {
+            toast.error("Nie udało się usunąć");
         }
     }
 
@@ -315,9 +335,9 @@ export default function AdminPage() {
             if (result.error) {
                 toast.error(result.error);
             } else {
-                setSelectedUser(result.user as any); // Cast because of Date serialization over wire potentially
+                setSelectedUser(result.user as UserDetails);
             }
-        } catch (e) {
+        } catch {
             toast.error("Błąd pobierania szczegółów");
         } finally {
             setDetailsLoading(false);
@@ -336,7 +356,7 @@ export default function AdminPage() {
              } else {
                  toast.error(result.error);
              }
-         } catch (e) {
+         } catch {
              toast.error("Błąd usuwania");
          }
     }
@@ -538,17 +558,37 @@ export default function AdminPage() {
                                         />
                                     </div>
 
-                                    <div className="flex items-center gap-3 bg-[#2C2C2E] border border-white/10 p-3 rounded-xl">
-                                        <input
-                                            type="checkbox"
-                                            id="activeCheck"
-                                            checked={formActive}
-                                            onChange={(e) => setFormActive(e.target.checked)}
-                                            className="w-5 h-5 accent-[#E60000] rounded focus:ring-0 cursor-pointer"
-                                        />
-                                        <label htmlFor="activeCheck" className="text-white font-bold text-sm cursor-pointer select-none">
-                                            Aktywny (widoczny w głosowaniach)
-                                        </label>
+                                    <div className="space-y-2">
+                                        <div className="flex items-center gap-3 bg-[#2C2C2E] border border-white/10 p-3 rounded-xl">
+                                            <input
+                                                type="checkbox"
+                                                id="activeCheck"
+                                                checked={formActive}
+                                                onChange={(e) => setFormActive(e.target.checked)}
+                                                className="w-5 h-5 accent-[#E60000] rounded focus:ring-0 cursor-pointer"
+                                            />
+                                            <div className="flex-1">
+                                                <label htmlFor="activeCheck" className="text-white font-bold text-sm cursor-pointer select-none block">
+                                                    🏁 Aktywny w wyścigach
+                                                </label>
+                                                <span className="text-gray-500 text-[10px]">Widoczny na stronie głosowania /race/x</span>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-3 bg-[#2C2C2E] border border-white/10 p-3 rounded-xl">
+                                            <input
+                                                type="checkbox"
+                                                id="activeSeasonCheck"
+                                                checked={formActiveSeason}
+                                                onChange={(e) => setFormActiveSeason(e.target.checked)}
+                                                className="w-5 h-5 accent-[#E60000] rounded focus:ring-0 cursor-pointer"
+                                            />
+                                            <div className="flex-1">
+                                                <label htmlFor="activeSeasonCheck" className="text-white font-bold text-sm cursor-pointer select-none block">
+                                                    🏆 Aktywny w sezonie
+                                                </label>
+                                                <span className="text-gray-500 text-[10px]">Widoczny na stronie głosowania /season</span>
+                                            </div>
+                                        </div>
                                     </div>
 
                                     <button
@@ -584,6 +624,7 @@ export default function AdminPage() {
                                     <div key={team.id} className="bg-[#1C1C1E] border border-white/5 rounded-2xl overflow-hidden">
                                         <div className="flex items-center gap-3 px-5 py-4 border-b border-white/5">
                                             <div className="w-8 h-8 flex items-center justify-center bg-white/5 rounded-lg p-1">
+                                                {/* eslint-disable-next-line @next/next/no-img-element */}
                                                 <img src={getTeamLogo(team.name)} alt={team.name} className="w-full h-full object-contain" />
                                             </div>
                                             <h3 className="font-black text-white uppercase tracking-tight text-sm">{team.name}</h3>
@@ -602,7 +643,7 @@ export default function AdminPage() {
                                                         </div>
                                                         <div>
                                                             <div className="font-bold text-white text-sm">{driver.name}</div>
-                                                            <div className="text-gray-500 text-xs font-medium flex items-center gap-2">
+                                                            <div className="text-gray-500 text-xs font-medium flex items-center gap-2 flex-wrap">
                                                                 {driver.country && (
                                                                     <ReactCountryFlag 
                                                                         countryCode={driver.country} 
@@ -612,11 +653,32 @@ export default function AdminPage() {
                                                                     />
                                                                 )}
                                                                 <span>{driver.slug}</span>
-                                                                {driver.active === false && (
-                                                                    <span className="bg-red-900/40 text-red-300 text-[9px] px-1.5 py-0.5 rounded uppercase font-bold tracking-wider border border-red-500/20">
-                                                                        Nieaktywny
-                                                                    </span>
-                                                                )}
+                                                                {/* Race status toggle */}
+                                                                <button
+                                                                    onClick={(e) => { e.stopPropagation(); handleToggleStatus(driver.slug, "active", driver.active); }}
+                                                                    title={driver.active ? "Kliknij aby dezaktywować w wyścigach" : "Kliknij aby aktywować w wyścigach"}
+                                                                    className={clsx(
+                                                                        "text-[9px] px-1.5 py-0.5 rounded uppercase font-bold tracking-wider border transition-colors cursor-pointer",
+                                                                        driver.active
+                                                                            ? "bg-blue-900/30 text-blue-300 border-blue-500/30 hover:bg-red-900/40 hover:text-red-300 hover:border-red-500/20"
+                                                                            : "bg-red-900/40 text-red-300 border-red-500/20 hover:bg-blue-900/30 hover:text-blue-300 hover:border-blue-500/30"
+                                                                    )}
+                                                                >
+                                                                    🏁 {driver.active ? "Wyścig ✓" : "Wyścig ✗"}
+                                                                </button>
+                                                                {/* Season status toggle */}
+                                                                <button
+                                                                    onClick={(e) => { e.stopPropagation(); handleToggleStatus(driver.slug, "activeSeason", driver.activeSeason); }}
+                                                                    title={driver.activeSeason ? "Kliknij aby dezaktywować w sezonie" : "Kliknij aby aktywować w sezonie"}
+                                                                    className={clsx(
+                                                                        "text-[9px] px-1.5 py-0.5 rounded uppercase font-bold tracking-wider border transition-colors cursor-pointer",
+                                                                        driver.activeSeason
+                                                                            ? "bg-yellow-900/30 text-yellow-300 border-yellow-500/30 hover:bg-red-900/40 hover:text-red-300 hover:border-red-500/20"
+                                                                            : "bg-red-900/40 text-red-300 border-red-500/20 hover:bg-yellow-900/30 hover:text-yellow-300 hover:border-yellow-500/30"
+                                                                    )}
+                                                                >
+                                                                    🏆 {driver.activeSeason ? "Sezon ✓" : "Sezon ✗"}
+                                                                </button>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -783,15 +845,29 @@ export default function AdminPage() {
 
                     <div className="space-y-4">
                         {races.map(race => (
-                             <div key={race.id} className="bg-[#1C1C1E] border border-white/5 rounded-2xl p-5 hover:bg-[#252528] transition-all group">
+                             <div key={race.id} className={clsx(
+                                "bg-[#1C1C1E] border rounded-2xl p-5 hover:bg-[#252528] transition-all group",
+                                race.completed ? "border-green-500/20" : "border-white/5"
+                             )}>
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-4">
-                                         <div className="w-12 h-12 bg-[#2C2C2E] rounded-xl flex flex-col items-center justify-center border border-white/5">
+                                         <div className={clsx(
+                                            "w-12 h-12 rounded-xl flex flex-col items-center justify-center border",
+                                            race.completed ? "bg-green-900/20 border-green-500/20" : "bg-[#2C2C2E] border-white/5"
+                                         )}>
                                             <span className="text-[8px] uppercase text-gray-500 font-bold">Runda</span>
                                             <span className="text-xl font-black text-white">{race.round}</span>
                                         </div>
                                         <div>
-                                            <h3 className="font-bold text-white text-lg">{race.name}</h3>
+                                            <h3 className="font-bold text-white text-lg flex items-center gap-2">
+                                                {race.name}
+                                                {race.completed && (
+                                                    <span className="text-[10px] bg-green-900/30 text-green-400 px-2 py-0.5 rounded-full border border-green-500/20 font-bold uppercase tracking-wider flex items-center gap-1">
+                                                        <CheckCircle2 className="w-3 h-3" />
+                                                        Zakończony
+                                                    </span>
+                                                )}
+                                            </h3>
                                             <div className="text-gray-500 text-xs font-medium flex items-center gap-2">
                                                 <span>{race.location}</span>
                                                 <span>·</span>
@@ -803,6 +879,24 @@ export default function AdminPage() {
                                     </div>
                                     
                                     <div className="flex items-center gap-3">
+                                        {/* Finish/Results button */}
+                                        <button
+                                            onClick={() => setFinishingRace(race)}
+                                            className={clsx(
+                                                "text-[10px] px-3 py-1.5 rounded-lg font-bold uppercase tracking-wider border transition-all flex items-center gap-1.5",
+                                                race.completed
+                                                    ? "bg-green-900/30 text-green-400 border-green-500/20 hover:bg-green-900/50"
+                                                    : new Date(race.date) < new Date()
+                                                        ? "bg-[#E60000] text-white border-[#E60000] hover:bg-red-700 shadow-lg shadow-red-900/20"
+                                                        : "bg-[#2C2C2E] text-gray-400 border-white/10 hover:bg-white/10"
+                                            )}
+                                        >
+                                            {race.completed ? (
+                                                <><CheckCircle2 className="w-3 h-3" /> Wyniki</>
+                                            ) : (
+                                                <><Trophy className="w-3 h-3" /> Zakończ</>
+                                            )}
+                                        </button>
                                         {race.trackImage ? (
                                              <span className="text-[10px] bg-green-900/30 text-green-400 px-2 py-1 rounded border border-green-500/20 font-bold uppercase tracking-wider">
                                                  Mapa OK
@@ -833,6 +927,15 @@ export default function AdminPage() {
                              </div>
                         ))}
                     </div>
+
+                    {/* Finish Race Modal */}
+                    {finishingRace && (
+                        <FinishRaceModal
+                            race={finishingRace}
+                            onClose={() => setFinishingRace(null)}
+                            onFinished={() => { setFinishingRace(null); loadData(); }}
+                        />
+                    )}
                 </>
             )}
 

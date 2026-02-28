@@ -132,6 +132,7 @@ exports.Prisma.DriverScalarFieldEnum = {
   number: 'number',
   country: 'country',
   active: 'active',
+  activeSeason: 'activeSeason',
   teamId: 'teamId',
   color: 'color'
 };
@@ -177,12 +178,29 @@ exports.Prisma.RaceScalarFieldEnum = {
   url: 'url',
   country: 'country',
   trackImage: 'trackImage',
-  isTesting: 'isTesting'
+  isTesting: 'isTesting',
+  completed: 'completed',
+  results: 'results'
+};
+
+exports.Prisma.RaceScoreScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  raceRound: 'raceRound',
+  totalPoints: 'totalPoints',
+  perfectPredictions: 'perfectPredictions',
+  details: 'details',
+  createdAt: 'createdAt'
 };
 
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
+};
+
+exports.Prisma.NullableJsonNullValueInput = {
+  DbNull: Prisma.DbNull,
+  JsonNull: Prisma.JsonNull
 };
 
 exports.Prisma.QueryMode = {
@@ -195,6 +213,12 @@ exports.Prisma.NullsOrder = {
   last: 'last'
 };
 
+exports.Prisma.JsonNullValueFilter = {
+  DbNull: Prisma.DbNull,
+  JsonNull: Prisma.JsonNull,
+  AnyNull: Prisma.AnyNull
+};
+
 
 exports.Prisma.ModelName = {
   Team: 'Team',
@@ -202,7 +226,8 @@ exports.Prisma.ModelName = {
   User: 'User',
   Vote: 'Vote',
   SeasonVote: 'SeasonVote',
-  Race: 'Race'
+  Race: 'Race',
+  RaceScore: 'RaceScore'
 };
 
 /**

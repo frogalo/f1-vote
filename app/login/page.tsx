@@ -2,15 +2,17 @@
 
 import { useStore } from "@/lib/store";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { clsx } from "clsx";
 import Link from "next/link";
 import { loginUser } from "@/app/actions/auth";
 import { toast } from "sonner";
+import { useAuth } from "@/app/providers/AuthProvider";
 
 export default function LoginPage() {
     const router = useRouter();
     const { setUserId } = useStore();
+    const { refreshUser } = useAuth();
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
@@ -34,6 +36,7 @@ export default function LoginPage() {
             if (result.success && result.user) {
                 toast.success(`Witaj ponownie, ${result.user.name}!`);
                 setUserId(result.user.id);
+                await refreshUser();
 
                 if (result.user.isAdmin) {
                     router.replace("/admin");
@@ -42,8 +45,8 @@ export default function LoginPage() {
 
                 router.replace("/calendar");
             }
-        } catch (err: any) {
-            const msg = err.message || "An error occurred";
+        } catch (err: unknown) {
+            const msg = (err instanceof Error ? err.message : String(err)) || "An error occurred";
             setError(msg);
             toast.error(msg);
         } finally {

@@ -47,14 +47,18 @@ export async function getSeasonVotes() {
                         number: true,
                         country: true,
                         color: true,
+                        activeSeason: true,
                         team: { select: { name: true } },
                     },
                 },
             },
         });
 
-        return votes.map(v => ({
-            position: v.position,
+        // Only include drivers that still have activeSeason enabled
+        const activeVotes = votes.filter(v => v.driver.activeSeason);
+
+        return activeVotes.map((v, i) => ({
+            position: i + 1, // Re-compact positions after filtering
             driverSlug: v.driver.slug,
             driverName: v.driver.name,
             driverNumber: v.driver.number,
@@ -70,7 +74,7 @@ export async function getSeasonVotes() {
 
 export async function getAvailableDrivers() {
     const drivers = await prisma.driver.findMany({
-        where: { active: true },
+        where: { activeSeason: true },
         orderBy: { name: "asc" },
         include: { team: { select: { name: true } } },
     });

@@ -1,10 +1,11 @@
 import { Suspense } from "react";
 import RaceResultsContent from "./RaceResultsContent";
-import { races } from "@/lib/data";
+import { prisma } from "@/lib/prisma";
 
 export async function generateStaticParams() {
-    return races.map((race) => ({
-        round: race.round.toString(),
+    const races = await prisma.race.findMany({ select: { round: true } });
+    return races.map((r) => ({
+        round: r.round.toString(),
     }));
 }
 

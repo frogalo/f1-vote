@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { clsx } from 'clsx';
-import { Home, Calendar, Flag, Trophy, User, Shield } from 'lucide-react';
+import { Home, Calendar, Flag, Trophy, User } from 'lucide-react';
 import { useAuth } from '@/app/providers/AuthProvider';
 
 export default function Nav({ nextRound = 1 }: { nextRound?: number }) {
@@ -31,7 +31,7 @@ export default function Nav({ nextRound = 1 }: { nextRound?: number }) {
         <nav className="fixed bottom-6 left-4 right-4 md:left-1/2 md:-translate-x-1/2 md:max-w-md z-50">
           <div className="bg-[#1C1C1E]/90 backdrop-blur-xl border border-white/5 rounded-3xl h-20 shadow-2xl flex items-center justify-between px-2 relative">
 
-            {tabs.map((tab, idx) => {
+            {tabs.map((tab) => {
               const isActive = pathname === tab.href || (tab.href !== '/season' && pathname.startsWith(tab.href));
 
               if (tab.isFab) {

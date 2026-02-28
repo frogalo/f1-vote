@@ -1,6 +1,7 @@
 import type { Vote } from "./store";
-import { nanoid } from "./utils";
 import { raceResults, actualSeasonStandings } from "./data";
+
+const nanoid = () => Math.random().toString(36).substring(2, 11);
 
 // Friend user IDs
 export const friends = [

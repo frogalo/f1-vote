@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: f1-vote-app
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      # Use an internal Docker network connection string to hit the db container
+      - DATABASE_URL=postgresql://f1vote:f1votepassword@db:5432/f1vote_db?schema=public
+      - UPLOAD_DIR=./public/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      # Important to persist the uploads directory outside container cycles
+      - f1-vote-uploads:/app/public/uploads
+
+  db:
+    image: postgres:15-alpine
+    container_name: f1-vote-db
+    restart: always
+    environment:
+      - POSTGRES_USER=f1vote
+      - POSTGRES_PASSWORD=f1votepassword
+      - POSTGRES_DB=f1vote_db
+    ports:
+      - "5432:5432"
+    volumes:
+      # Data persistence for postgres
+      - f1-vote-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U f1vote -d f1vote_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  f1-vote-pgdata:
+  f1-vote-uploads:

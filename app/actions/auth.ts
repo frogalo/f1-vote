@@ -4,6 +4,8 @@ import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import fs from "fs/promises";
+import path from "path";
 
 export async function registerUser(formData: FormData) {
   const name = formData.get("name") as string;
@@ -42,9 +44,10 @@ export async function registerUser(formData: FormData) {
     },
   });
 
+  const isProd = process.env.NODE_ENV === "production";
   const cookieStore = await cookies();
-  cookieStore.set("userId", user.id, { httpOnly: true, secure: true });
-  cookieStore.set("isAdmin", "false", { httpOnly: true, secure: true });
+  cookieStore.set("userId", user.id, { httpOnly: true, secure: isProd });
+  cookieStore.set("isAdmin", "false", { httpOnly: true, secure: isProd });
 
   return { success: true, user: { id: user.id, name: user.name } };
 }
@@ -71,10 +74,11 @@ export async function loginUser(formData: FormData) {
     return { error: "Nieprawidłowa nazwa użytkownika lub hasło" };
   }
 
+  const isProd = process.env.NODE_ENV === "production";
   const cookieStore = await cookies();
-  cookieStore.set("userId", user.id, { httpOnly: true, secure: true });
+  cookieStore.set("userId", user.id, { httpOnly: true, secure: isProd });
   // Store role in a separate readable cookie for middleware routing
-  cookieStore.set("isAdmin", String(user.isAdmin), { httpOnly: true, secure: true });
+  cookieStore.set("isAdmin", String(user.isAdmin), { httpOnly: true, secure: isProd });
 
   return { success: true, user: { id: user.id, name: user.name, isAdmin: user.isAdmin } };
 }
@@ -146,13 +150,36 @@ export async function updateProfile(formData: FormData) {
     driverSlug = driver?.slug || null;
   }
 
+  const avatarFile = formData.get("avatar") as File | null;
+  let avatarUrl: string | undefined = undefined;
+
+  if (avatarFile && avatarFile.size > 0 && avatarFile.name) {
+    const uploadDir = process.env.UPLOAD_DIR || path.join(process.cwd(), "public", "uploads");
+    await fs.mkdir(uploadDir, { recursive: true });
+
+    const ext = avatarFile.name.split(".").pop() || "png";
+    const filename = `avatar-${userId}-${Date.now()}.${ext}`;
+    const destination = path.join(uploadDir, filename);
+
+    const buffer = Buffer.from(await avatarFile.arrayBuffer());
+    await fs.writeFile(destination, buffer);
+
+    avatarUrl = `/api/uploads/${filename}`;
+  }
+
+  const updateData: any = {
+    name: name.trim(),
+    teamId,
+    favoriteDriverId: driverSlug,
+  };
+
+  if (avatarUrl) {
+    updateData.avatar = avatarUrl;
+  }
+
   const updated = await prisma.user.update({
     where: { id: userId },
-    data: {
-      name: name.trim(),
-      teamId,
-      favoriteDriverId: driverSlug,
-    },
+    data: updateData,
     select: {
       id: true,
       name: true,

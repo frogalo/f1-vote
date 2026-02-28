@@ -148,3 +148,30 @@ export async function getNextRound() {
     const nextRace = races.find(r => r.date > now);
     return nextRace?.round || races[races.length - 1]?.round || 1;
 }
+
+export async function getLiveRaceVotes(round: number) {
+    const race = await prisma.race.findUnique({ where: { round } });
+    if (!race) return { error: 'Race not found', votes: [] };
+    
+    // Only return votes if race is locked (NA ŻYWO or completed)
+    if (Date.now() < race.date.getTime()) return { votes: [] };
+
+    const votes = await prisma.vote.findMany({
+        where: { raceRound: { startsWith: `race-${round}-position-` } },
+        include: {
+            user: {
+                select: { id: true, name: true, avatar: true }
+            }
+        }
+    });
+
+    return { 
+        votes: votes.map(v => ({
+            driverId: v.driverId,
+            position: parseInt(v.raceRound.split('-').pop() || '0'),
+            userId: v.user.id,
+            userName: v.user.name,
+            userAvatar: v.user.avatar
+        }))
+    };
+}

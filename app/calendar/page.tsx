@@ -1,10 +1,7 @@
 "use client";
 
-import { raceResults } from "@/lib/data";
 import { clsx } from "clsx";
 import Link from "next/link";
-import { useStore } from "@/lib/store";
-import { calculateRaceScore } from "@/lib/scoring";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/app/providers/AuthProvider";
 import { useRouter } from "next/navigation";
@@ -43,16 +40,26 @@ type Race = {
     location: string;
     date: Date;
     trackImage: string | null;
+    completed: boolean;
+};
+
+type UserScore = {
+    raceRound: number;
+    totalPoints: number;
 };
 
 export default function CalendarPage() {
-    const { votes, userId: currentUserId, loadFromIndexedDB, addVote } = useStore();
     const { user, loading: authLoading } = useAuth();
     const router = useRouter();
     const [loading, setLoading] = useState(true);
     const [races, setRaces] = useState<Race[]>([]);
-    const now = new Date();
-    const completedRaceCount = raceResults.length;
+    const [myScores, setMyScores] = useState<UserScore[]>([]);
+    const [now, setNow] = useState(new Date());
+
+    useEffect(() => {
+        const timer = setInterval(() => setNow(new Date()), 1000);
+        return () => clearInterval(timer);
+    }, []);
 
     useEffect(() => {
         if (!authLoading && user?.isAdmin) {
@@ -61,18 +68,33 @@ export default function CalendarPage() {
         }
         
         const load = async () => {
-             await loadFromIndexedDB();
-             const fetchedRaces = await getRaces();
-             setRaces(fetchedRaces);
-             setLoading(false);
+            const fetchedRaces = await getRaces();
+            setRaces(fetchedRaces as Race[]);
+
+            // Load user scores if logged in
+            if (user?.id) {
+                try {
+                    const { getLeaderboardScoresForUser } = await import("@/app/actions/raceResults");
+                    const scores = await getLeaderboardScoresForUser(user.id);
+                    setMyScores(scores);
+                } catch {
+                    // Scores not available yet
+                }
+            }
+
+            setLoading(false);
         };
         load();
 
-    }, [loadFromIndexedDB, user, authLoading, router]);
+    }, [user, authLoading, router]);
 
-    const getRaceStatus = (raceRound: number) => {
-        if (raceRound <= completedRaceCount) return "completed";
-        if (raceRound === completedRaceCount + 1) return "upcoming";
+    const getRaceStatus = (race: Race) => {
+        if (race.completed) return "completed";
+        // If date has passed but not completed, this race is live
+        if (new Date(race.date) < now && !race.completed) return "active";
+        // Find the first un-completed race whose date is still in the future (next up)
+        const nextRace = races.find(r => !r.completed && new Date(r.date) > now);
+        if (nextRace && race.round === nextRace.round) return "upcoming";
         return "future";
     };
 
@@ -83,14 +105,23 @@ export default function CalendarPage() {
         });
     };
 
-    const getCountdown = (date: Date) => {
+    const getCountdownInfo = (date: Date) => {
         const diffTime = new Date(date).getTime() - now.getTime();
         if (diffTime < 0) return null;
-        const days = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((diffTime % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        if (days === 0) return `${hours}h`;
-        if (days < 7) return `${days}d ${hours}h`;
-        return `${days}d`;
+        
+        const totalSeconds = Math.floor(diffTime / 1000);
+        const seconds = totalSeconds % 60;
+        const totalMinutes = Math.floor(totalSeconds / 60);
+        const minutes = totalMinutes % 60;
+        const totalHours = Math.floor(totalMinutes / 60);
+        const hours = totalHours % 24;
+        const days = Math.floor(totalHours / 24);
+        
+        if (totalSeconds < 60) return { text: `${totalSeconds}s`, type: 'urgent' };
+        if (days === 0 && hours === 0) return { text: `${minutes}m ${seconds}s`, type: 'seconds' };
+        if (days === 0) return { text: `${hours}h ${minutes}m`, type: 'hours' };
+        if (days < 7) return { text: `${days}d ${hours}h`, type: 'days' };
+        return { text: `${days}d`, type: 'days' };
     };
 
     if (loading) return (
@@ -109,42 +140,36 @@ export default function CalendarPage() {
             {/* Calendar Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 px-4">
                 {races.map((race) => {
-                    const status = getRaceStatus(race.round);
-                    const countdown = status !== "completed" ? getCountdown(race.date) : null;
+                    const status = getRaceStatus(race);
+                    const countdownInfo = status !== "completed" ? getCountdownInfo(race.date) : null;
                     const slug = trackSlugs[race.round] || "melbourne";
 
-                    // Calculate points for current user if completed
-                    let points = 0;
-                    if (status === "completed") {
-                        const score = calculateRaceScore(currentUserId || "", race.round, votes);
-                        points = score.totalPoints;
-                    }
+                    // Get user's score for this race from the database
+                    const raceScore = myScores.find(s => s.raceRound === race.round);
+                    const points = raceScore?.totalPoints || 0;
 
-                    const CardElement = ((status === "completed" || status === "upcoming") ? Link : "div") as any;
-                    const cardProps = status === "completed"
-                        ? { href: `/race/${race.round}/results` }
-                        : status === "upcoming"
-                            ? { href: `/race/${race.round}` }
-                            : {};
+                    const href = status === "completed"
+                        ? `/race/${race.round}/results`
+                        : status === "active" || status === "upcoming"
+                            ? `/race/${race.round}`
+                            : null;
 
-                    return (
-                        <CardElement
-                            key={race.round}
-                            {...cardProps}
-                            className={clsx(
-                                "block p-6 rounded-[2rem] transition-all relative overflow-hidden group",
-                                // Dark Grey Card Background
-                                "bg-[#1C1C1E] border border-white/5",
-                                status === "completed" && "opacity-80 hover:opacity-100",
-                                status === "upcoming" && "bg-gradient-to-br from-[#1C1C1E] to-[#2C2C2E] border-[#E60000]/30 shadow-2xl shadow-red-900/10 scale-[1.02] z-10",
-                                status === "future" && "opacity-40"
-                            )}
-                        >
+                    const cardClasses = clsx(
+                        "block p-6 rounded-[2rem] transition-all relative overflow-hidden group",
+                        "bg-[#1C1C1E] border border-white/5",
+                        status === "completed" && "opacity-80 hover:opacity-100",
+                        status === "active" && "bg-gradient-to-br from-[#1C1C1E] to-[#2C2C2E] border-[#E60000]/30 shadow-2xl shadow-red-900/10 scale-[1.02] z-10",
+                        status === "upcoming" && "bg-gradient-to-br from-[#1C1C1E] to-[#2C2C2E] border-white/20 shadow-lg scale-[1.01]",
+                        status === "future" && "opacity-40"
+                    );
+
+                    const cardContent = (
+                        <>
                             <div className="flex items-start justify-between mb-2">
                                 <div className="flex flex-col">
                                     <span className={clsx(
                                         "text-[10px] font-black uppercase tracking-[0.2em] mb-1",
-                                        status === "upcoming" ? "text-[#E60000]" : "text-gray-600"
+                                        status === "active" ? "text-[#E60000]" : "text-gray-600"
                                     )}>
                                         R{String(race.round).padStart(2, '0')}
                                     </span>
@@ -154,21 +179,27 @@ export default function CalendarPage() {
                                     <div className="text-xs text-gray-400 font-bold uppercase tracking-wide">{race.location}</div>
                                 </div>
 
-                                {status === "upcoming" && (
+                                {status === "active" && (
                                     <div className="bg-[#E60000] text-white text-[10px] font-black px-2 py-1 rounded-lg animate-pulse">
                                         NA ŻYWO
+                                    </div>
+                                )}
+                                {status === "upcoming" && (
+                                    <div className="bg-[#2C2C2E] text-gray-400 text-[10px] font-black px-2 py-1 rounded-lg">
+                                        NASTĘPNY
                                     </div>
                                 )}
                             </div>
 
                             <div className="relative h-24 mt-2 mb-4 flex items-center justify-center">
                                 {/* Track Image */}
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
                                 <img
                                     src={race.trackImage || `https://media.formula1.com/image/upload/c_lfill,w_1000/v1740000000/common/f1/2026/track/2026track${slug}blackoutline.svg`}
                                     alt={race.name}
                                     className={clsx(
                                         "h-full w-auto object-contain transition-transform duration-500 group-hover:scale-110",
-                                        status === "upcoming" ? "opacity-30 invert" : "opacity-10 invert"
+                                        status === "active" ? "opacity-30 invert" : "opacity-10 invert"
                                     )}
                                 />
 
@@ -192,21 +223,34 @@ export default function CalendarPage() {
                                     <div className="text-xs font-black text-gray-500 uppercase flex items-center gap-1 group-hover:text-white transition-colors">
                                         WYNIKI <span>→</span>
                                     </div>
-                                ) : countdown ? (
+                                ) : countdownInfo ? (
                                     <div className={clsx(
-                                        "px-3 py-1 rounded-xl text-[10px] font-black uppercase tracking-widest",
-                                        status === "upcoming" ? "bg-[#E60000] text-white" : "bg-[#2C2C2E] text-gray-500"
+                                        "px-3 py-1 rounded-xl font-black uppercase tracking-widest flex items-center justify-center transition-all duration-300",
+                                        (status === "active" || countdownInfo.type === 'urgent') ? "bg-gradient-to-r from-[#E60000] to-[#ff4d4d] text-white" : "bg-[#2C2C2E] text-gray-400",
+                                        countdownInfo.type === 'urgent' ? "text-xl scale-125 animate-bounce shadow-[0_0_30px_rgba(230,0,0,0.4)] z-50 border border-white/20" :
+                                        countdownInfo.type === 'seconds' ? "text-sm text-white border border-white/10" :
+                                        countdownInfo.type === 'hours' ? "text-sm" : "text-[10px]"
                                     )}>
-                                        {countdown}
+                                        {countdownInfo.text}
                                     </div>
                                 ) : null}
                             </div>
 
                             {/* Accent Glow */}
-                            {status === "upcoming" && (
+                            {status === "active" && (
                                 <div className="absolute -top-10 -left-10 w-32 h-32 bg-[#E60000] opacity-5 blur-[40px] rounded-full pointer-events-none" />
                             )}
-                        </CardElement>
+                        </>
+                    );
+
+                    return href ? (
+                        <Link key={race.round} href={href} className={cardClasses}>
+                            {cardContent}
+                        </Link>
+                    ) : (
+                        <div key={race.round} className={cardClasses}>
+                            {cardContent}
+                        </div>
                     );
                 })}
             </div>

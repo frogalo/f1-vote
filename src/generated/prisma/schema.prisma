@@ -19,17 +19,18 @@ model Team {
 }
 
 model Driver {
-  slug        String       @id // The ID from data.ts ("ver", etc)
-  name        String
-  number      Int
-  country     String?
-  active      Boolean      @default(true)
-  teamId      String
-  team        Team         @relation(fields: [teamId], references: [id])
-  color       String?
-  votes       Vote[]
-  seasonVotes SeasonVote[]
-  favorited   User[]
+  slug         String       @id // The ID from data.ts ("ver", etc)
+  name         String
+  number       Int
+  country      String?
+  active       Boolean      @default(true) // For individual races
+  activeSeason Boolean      @default(true) // For full season predictions
+  teamId       String
+  team         Team         @relation(fields: [teamId], references: [id])
+  color        String?
+  votes        Vote[]
+  seasonVotes  SeasonVote[]
+  favorited    User[]
 }
 
 model User {
@@ -45,6 +46,7 @@ model User {
   avatar           String? // URL to avatar image
   votes            Vote[]
   seasonVotes      SeasonVote[]
+  raceScores       RaceScore[]
   createdAt        DateTime     @default(now())
   updatedAt        DateTime     @updatedAt
 }
@@ -79,8 +81,8 @@ model SeasonVote {
 }
 
 model Race {
-  id         String   @id @default(cuid())
-  round      Int      @unique
+  id         String      @id @default(cuid())
+  round      Int         @unique
   name       String
   location   String
   date       DateTime
@@ -88,5 +90,24 @@ model Race {
   url        String?
   country    String?
   trackImage String?
-  isTesting  Boolean  @default(false)
+  isTesting  Boolean     @default(false)
+  completed  Boolean     @default(false)
+  results    String[] // Array of driver slugs in finish order
+  scores     RaceScore[]
+}
+
+model RaceScore {
+  id                 String   @id @default(cuid())
+  userId             String
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  raceRound          Int
+  race               Race     @relation(fields: [raceRound], references: [round], onDelete: Cascade)
+  totalPoints        Int      @default(0)
+  perfectPredictions Int      @default(0)
+  details            Json? // Detailed breakdown of predictions vs results
+  createdAt          DateTime @default(now())
+
+  @@unique([userId, raceRound])
+  @@index([userId])
+  @@index([raceRound])
 }

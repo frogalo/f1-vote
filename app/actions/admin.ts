@@ -42,6 +42,7 @@ export async function addDriver(formData: FormData) {
     const teamId = formData.get("teamId") as string;
     const color = formData.get("color") as string;
     const active = formData.get("active") === "true";
+    const activeSeason = formData.get("activeSeason") === "true";
 
     if (!slug || !name || !number || !teamId) {
         return { error: "Brakuje wymaganych pól (slug, name, number, teamId)" };
@@ -54,7 +55,7 @@ export async function addDriver(formData: FormData) {
     }
 
     const driver = await prisma.driver.create({
-        data: { slug, name, number, country: country || null, teamId, color: color || null, active },
+        data: { slug, name, number, country: country || null, teamId, color: color || null, active, activeSeason },
         include: { team: { select: { name: true } } },
     });
 
@@ -71,6 +72,7 @@ export async function updateDriver(formData: FormData) {
     const teamId = formData.get("teamId") as string;
     const color = formData.get("color") as string;
     const active = formData.get("active") === "true";
+    const activeSeason = formData.get("activeSeason") === "true";
 
     if (!slug || !name || !number || !teamId) {
         return { error: "Brakuje wymaganych pól" };
@@ -78,8 +80,19 @@ export async function updateDriver(formData: FormData) {
 
     const driver = await prisma.driver.update({
         where: { slug },
-        data: { name, number, country: country || null, teamId, color: color || null, active },
+        data: { name, number, country: country || null, teamId, color: color || null, active, activeSeason },
         include: { team: { select: { name: true } } },
+    });
+
+    return { success: true, driver };
+}
+
+export async function toggleDriverStatus(slug: string, field: "active" | "activeSeason", value: boolean) {
+    await requireAdmin();
+
+    const driver = await prisma.driver.update({
+        where: { slug },
+        data: { [field]: value },
     });
 
     return { success: true, driver };
@@ -88,13 +101,15 @@ export async function updateDriver(formData: FormData) {
 export async function deleteDriver(slug: string) {
     await requireAdmin();
 
-    // Delete related votes first
-    await prisma.vote.deleteMany({ where: { driverId: slug } });
-    // Remove favorite references
-    await prisma.user.updateMany({
-        where: { favoriteDriverId: slug },
-        data: { favoriteDriverId: null },
-    });
+    // Delete all related votes (race + season) and clean up user references
+    await Promise.all([
+        prisma.vote.deleteMany({ where: { driverId: slug } }),
+        prisma.seasonVote.deleteMany({ where: { driverId: slug } }),
+        prisma.user.updateMany({
+            where: { favoriteDriverId: slug },
+            data: { favoriteDriverId: null },
+        }),
+    ]);
 
     await prisma.driver.delete({ where: { slug } });
 
@@ -130,8 +145,8 @@ export async function deleteUser(userId: string) {
     try {
         await prisma.user.delete({ where: { id: userId } });
         return { success: true };
-    } catch (e: any) {
-        return { error: e.message || "Błąd usuwania użytkownika" };
+    } catch (e: unknown) {
+        return { error: (e instanceof Error ? e.message : String(e)) || "Błąd usuwania użytkownika" };
     }
 }
 

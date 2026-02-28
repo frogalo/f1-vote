@@ -3,7 +3,7 @@
 import { cleanupOutdatedCaches, precacheAndRoute } from "workbox-precaching";
 import { clientsClaim } from "workbox-core";
 import { registerRoute } from "workbox-routing";
-import { CacheFirst, StaleWhileRevalidate, NetworkFirst } from "workbox-strategies";
+import { CacheFirst, StaleWhileRevalidate } from "workbox-strategies";
 import { ExpirationPlugin } from "workbox-expiration";
 
 declare const self: ServiceWorkerGlobalScope;

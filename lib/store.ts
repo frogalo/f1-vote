@@ -1,7 +1,14 @@
 import { create } from 'zustand';
 import { get, set } from 'idb-keyval';
 import { drivers as staticDrivers, Driver } from './data';
-import { nanoid, userId } from './utils';
+import { nanoid } from 'nanoid';
+
+/** Read the userId cookie set by the server on login. */
+function userId(): string | null {
+  if (typeof document === 'undefined') return null;
+  const match = document.cookie.match(/(?:^|;\s*)userId=([^;]+)/);
+  return match ? decodeURIComponent(match[1]) : null;
+}
 
 export type Vote = {
   id: string;
@@ -67,7 +74,7 @@ export const useStore = create<Store>((setState, getState) => ({
   },
 
   setSessionVotes: async (raceRoundPrefix, voterId, driverIds) => {
-    const uid = getState().userId || userId();
+    const uid: string = getState().userId || userId() || '';
     const now = Date.now();
     
     // Create new votes for this session

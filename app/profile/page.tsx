@@ -3,11 +3,12 @@
 import { useAuth } from "@/app/providers/AuthProvider";
 import { logoutUser, updateProfile } from "@/app/actions/auth";
 import { getProfileOptions } from "@/app/actions/profile";
-import { User, LogOut, Edit3, Check, X, ChevronDown } from "lucide-react";
+import { User, LogOut, Edit3, Check, X, ChevronDown, Camera } from "lucide-react";
 import { getTeamLogo } from "@/lib/data";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import Resizer from "react-image-file-resizer";
 
 type Team = { id: string; name: string };
 type DriverOption = { slug: string; name: string; number: number; team: { name: string } };
@@ -28,6 +29,8 @@ export default function ProfilePage() {
     const [name, setName] = useState("");
     const [selectedTeam, setSelectedTeam] = useState("");
     const [selectedDriver, setSelectedDriver] = useState("");
+    const [avatarFile, setAvatarFile] = useState<File | null>(null);
+    const [previewAvatar, setPreviewAvatar] = useState<string | null>(null);
 
     // Dropdown options from DB
     const [teams, setTeams] = useState<Team[]>([]);
@@ -66,6 +69,9 @@ export default function ProfilePage() {
             formData.set("name", name);
             formData.set("team", selectedTeam);
             formData.set("favoriteDriver", selectedDriver);
+            if (avatarFile) {
+                formData.set("avatar", avatarFile);
+            }
 
             const result = await updateProfile(formData);
             if (result.error) {
@@ -75,7 +81,7 @@ export default function ProfilePage() {
                 await refreshUser();
                 setEditing(false);
             }
-        } catch (err) {
+        } catch {
             toast.error("Błąd podczas zapisywania profilu");
         } finally {
             setSaving(false);
@@ -89,6 +95,8 @@ export default function ProfilePage() {
             setSelectedTeam(user.team || "");
             setSelectedDriver(user.favoriteDriverSlug || "");
         }
+        setAvatarFile(null);
+        setPreviewAvatar(null);
         setEditing(false);
     };
 
@@ -141,14 +149,52 @@ export default function ProfilePage() {
             {/* Avatar & Name Card */}
             <div className="bg-[#1C1C1E] rounded-[2rem] p-8 border border-white/5 mb-6 text-center">
                 <div className="relative inline-block mb-4">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                        src={user.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || "U")}&background=E60000&color=fff&bold=true&size=150`}
+                        src={previewAvatar || user.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || "U")}&background=E60000&color=fff&bold=true&size=150`}
                         alt={user.name || "User Avatar"}
-                        className="w-24 h-24 rounded-full border-4 border-[#E60000] shadow-lg shadow-red-900/20"
+                        className="w-24 h-24 rounded-full object-cover border-4 border-[#E60000] shadow-lg shadow-red-900/20"
                     />
-                    <div className="absolute -bottom-1 -right-1 bg-[#E60000] p-2 rounded-full border-2 border-[#1C1C1E]">
-                        <User className="w-4 h-4 text-white" />
-                    </div>
+                    
+                    {editing ? (
+                        <label className="absolute -bottom-1 -right-1 bg-[#E60000] p-2 flex items-center justify-center rounded-full border-2 border-[#1C1C1E] cursor-pointer hover:scale-110 active:scale-95 transition-all">
+                            <Camera className="w-4 h-4 text-white" />
+                            <input
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                                onChange={async (e) => {
+                                    if (e.target.files && e.target.files.length > 0) {
+                                        const file = e.target.files[0];
+                                        
+                                        try {
+                                            Resizer.imageFileResizer(
+                                                file,
+                                                400, // maxWidth
+                                                400, // maxHeight
+                                                "JPEG", // compressFormat
+                                                80, // quality
+                                                0, // rotation
+                                                (uri) => {
+                                                    const resizedFile = uri as File;
+                                                    setAvatarFile(resizedFile);
+                                                    setPreviewAvatar(URL.createObjectURL(resizedFile));
+                                                },
+                                                "file" // outputType
+                                            );
+                                        } catch (err) {
+                                            console.error("Błąd kompresji obrazka", err);
+                                            toast.error("Błąd podczas kompresji zdjęcia");
+                                        }
+                                    }
+                                }}
+                            />
+                        </label>
+                    ) : (
+                        <div className="absolute -bottom-1 -right-1 bg-[#E60000] p-2 rounded-full border-2 border-[#1C1C1E]">
+                            <User className="w-4 h-4 text-white" />
+                        </div>
+                    )}
                 </div>
 
                 {editing ? (
@@ -191,6 +237,7 @@ export default function ProfilePage() {
                         </div>
                     ) : (
                         <div className="flex items-center gap-3">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
                                 src={getTeamLogo(user.team || "Independent")}
                                 alt={user.team || "Independent"}
