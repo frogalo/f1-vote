@@ -6,4 +6,7 @@ README.md
 .next
 .git
 .vscode
+.env
+.env.*
 public/uploads/*
+
