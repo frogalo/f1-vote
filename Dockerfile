@@ -17,15 +17,15 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Generate Prisma Client
-RUN npx prisma generate
-
-# Provide a dummy DATABASE_URL for the build step so Next.js can pre-render
-# Server Components without failing. The real URL is injected at runtime.
+# Provide a dummy DATABASE_URL for the build step so prisma generate
+# and Next.js build can complete. The real URL is injected at runtime.
 ARG DATABASE_URL="postgresql://placeholder:placeholder@localhost:5432/placeholder"
 ARG POSTGRES_URL="postgresql://placeholder:placeholder@localhost:5432/placeholder"
 ENV DATABASE_URL=${DATABASE_URL}
 ENV POSTGRES_URL=${POSTGRES_URL}
+
+# Generate Prisma Client
+RUN npx prisma generate
 
 # Build Next.js application
 RUN npm run build
