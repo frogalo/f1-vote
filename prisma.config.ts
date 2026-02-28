@@ -10,6 +10,6 @@ export default defineConfig({
         seed: "npx tsx prisma/seed.ts"
     },
     datasource: {
-        url: env("POSTGRES_URL")
+        url: env("POSTGRES_URL") || env("DATABASE_URL")
     }
 })
