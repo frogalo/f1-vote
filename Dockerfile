@@ -20,6 +20,13 @@ COPY . .
 # Generate Prisma Client
 RUN npx prisma generate
 
+# Provide a dummy DATABASE_URL for the build step so Next.js can pre-render
+# Server Components without failing. The real URL is injected at runtime.
+ARG DATABASE_URL="postgresql://placeholder:placeholder@localhost:5432/placeholder"
+ARG POSTGRES_URL="postgresql://placeholder:placeholder@localhost:5432/placeholder"
+ENV DATABASE_URL=${DATABASE_URL}
+ENV POSTGRES_URL=${POSTGRES_URL}
+
 # Build Next.js application
 RUN npm run build
 
@@ -42,6 +49,8 @@ COPY --from=builder /app/package-lock.json ./package-lock.json
 COPY --from=builder /app/next.config.* ./
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/prisma.config.ts ./prisma.config.ts
+COPY --from=builder /app/src/generated ./src/generated
 
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next ./.next
@@ -54,3 +63,4 @@ USER nextjs
 EXPOSE 3009
 
 CMD ["npm", "start"]
+
