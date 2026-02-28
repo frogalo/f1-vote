@@ -12,6 +12,7 @@ services:
     environment:
       # Use an internal Docker network connection string to hit the db container
       - DATABASE_URL=postgresql://f1vote:f1votepassword@db:5432/f1vote_db?schema=public
+      - POSTGRES_URL=postgresql://f1vote:f1votepassword@db:5432/f1vote_db?schema=public
       - UPLOAD_DIR=./public/uploads
     depends_on:
       db:
