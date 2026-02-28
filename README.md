@@ -5,18 +5,21 @@ A modern, mobile-first Progressive Web App (PWA) for making predictions about th
 ## Features
 
 ### ✅ Complete 2026 Season Data
+
 - **22 Drivers** across all 11 teams (Alpine, Aston Martin, Williams, Audi, Cadillac, Ferrari, Haas, McLaren, Mercedes, Racing Bulls, Red Bull Racing)
 - **24 Races** with full calendar (Australia through Abu Dhabi)
 - Updated driver numbers and team assignments
 - Country flags for each driver
 
 ### 🎯 Interactive Predictions
+
 - **Drag-to-Reorder Rankings**: Intuitive drag-and-drop interface to order drivers for championship predictions
 - **Race-by-Race Voting**: Vote for race winners with countdown timers to FP1
 - **Full Calendar View**: See all 24 races with status indicators and countdowns
 - **Leaderboard**: Track predictions and results
 
 ### 📱 Mobile-First Design
+
 - **Responsive Layout**: Optimized for phones, tablets, and desktop
 - **Touch-Optimized**: Large tap targets (64px+) for easy interaction
 - **Safe Area Support**: Respects notches and rounded corners on modern devices
@@ -26,6 +29,7 @@ A modern, mobile-first Progressive Web App (PWA) for making predictions about th
 - **No Tap Highlight**: Clean, native-feeling interactions
 
 ### 🎨 Modern UI/UX
+
 - **Gradient Headers**: Eye-catching red-to-orange F1-themed gradients
 - **Team Colors**: Each driver card shows team colors for quick identification
 - **Dark Mode**: Native dark theme for comfortable viewing
@@ -35,22 +39,26 @@ A modern, mobile-first Progressive Web App (PWA) for making predictions about th
 ## Pages
 
 ### 🏆 Season Predictions (`/season`)
+
 - Rank all 22 drivers by dragging them into your predicted championship order
 - Top 10 predictions are saved
 - Real-time reordering with position numbers
 
 ### 📅 Calendar (`/calendar`)
+
 - Full 2026 race calendar
 - Highlighted next race with countdown
 - Color-coded race status (completed, today, upcoming, future)
 - Countdown timers showing days/hours until each race
 
 ### 🏁 Race Voting (`/race/[round]`)
+
 - Vote for individual race winners
 - Countdown to FP1 session
 - All drivers listed with team colors and country flags
 
 ### 📊 Leaderboard (`/leaderboard`)
+
 - View prediction statistics
 - Track voting history
 
@@ -79,7 +87,7 @@ npm run build
 npm start
 ```
 
-Open [http://localhost:3000](http://localhost:3000) to view the app.
+Open [http://localhost:3009](http://localhost:3009) to view the app.
 
 ## Mobile Optimization Features
 
@@ -93,14 +101,18 @@ Open [http://localhost:3000](http://localhost:3000) to view the app.
 ## Data Structure
 
 ### Drivers
+
 Each driver includes:
+
 - Name, number, team
 - Team colors (for visual identification)
 - Country flag emoji
 - Unique ID
 
 ### Races
+
 Each race includes:
+
 - Round number (1-24)
 - Official name and location
 - Date/time (ISO format)
@@ -109,6 +121,7 @@ Each race includes:
 ## Progressive Web App (PWA)
 
 The app works offline and can be installed on:
+
 - iOS (Add to Home Screen)
 - Android (Install App)
 - Desktop (Chrome, Edge)

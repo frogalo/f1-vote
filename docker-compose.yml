@@ -8,7 +8,7 @@ services:
     container_name: f1-vote-app
     restart: always
     ports:
-      - "3000:3000"
+      - "3009:3009"
     environment:
       # Use an internal Docker network connection string to hit the db container
       - DATABASE_URL=postgresql://f1vote:f1votepassword@db:5432/f1vote_db?schema=public

@@ -30,7 +30,7 @@ RUN apk add --no-cache openssl
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
-ENV PORT=3000
+ENV PORT=3009
 
 # Create non-root user/group for security
 RUN addgroup --system --gid 1001 nodejs
@@ -51,6 +51,6 @@ RUN mkdir -p /app/public/uploads && chown -R nextjs:nodejs /app/public/uploads
 
 USER nextjs
 
-EXPOSE 3000
+EXPOSE 3009
 
 CMD ["npm", "start"]
