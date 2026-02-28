@@ -3,10 +3,15 @@ import RaceResultsContent from "./RaceResultsContent";
 import { prisma } from "@/lib/prisma";
 
 export async function generateStaticParams() {
-    const races = await prisma.race.findMany({ select: { round: true } });
-    return races.map((r) => ({
-        round: r.round.toString(),
-    }));
+    try {
+        const races = await prisma.race.findMany({ select: { round: true } });
+        return races.map((r) => ({
+            round: r.round.toString(),
+        }));
+    } catch (error) {
+        console.warn("Could not fetch races for static generation. Building pages dynamically instead.");
+        return [];
+    }
 }
 
 
