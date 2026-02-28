@@ -3,7 +3,7 @@
 import { useAuth } from "@/app/providers/AuthProvider";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import Link from "next/link";
+
 
 export default function LandingPage() {
     const { user, loading } = useAuth();
@@ -191,19 +191,19 @@ export default function LandingPage() {
                     </h1>
 
                     <div className="grid gap-4 w-full pt-8">
-                        <Link
-                            href="/login"
+                        <button
+                            onClick={() => router.push("/login")}
                             className="w-full bg-[#E60000] hover:bg-red-700 text-white p-5 rounded-2xl font-black uppercase tracking-wider text-xl shadow-[0_0_30px_-5px_rgba(230,0,0,0.4)] active:scale-95 transition-all flex items-center justify-center gap-2"
                         >
                             Zaloguj
-                        </Link>
+                        </button>
 
-                        <Link
-                            href="/register"
+                        <button
+                            onClick={() => router.push("/register")}
                             className="w-full bg-[#1C1C1E] hover:bg-[#2C2C2E] border border-white/5 text-white p-5 rounded-2xl font-black uppercase tracking-wider text-xl active:scale-95 transition-all text-center"
                         >
                             Zarejestruj
-                        </Link>
+                        </button>
                     </div>
 
                     <div className="pt-12 flex justify-center gap-8 opacity-50">

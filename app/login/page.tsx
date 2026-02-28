@@ -59,7 +59,7 @@ export default function LoginPage() {
             <h1 className="text-4xl font-black text-white mb-2 uppercase tracking-tighter text-center">
                 F1 Vote <span className="text-[#E60000]">2026</span>
             </h1>
-            <p className="text-gray-500 mb-8 font-bold tracking-widest text-sm uppercase text-center">Zaloguj do Padoku</p>
+            <p className="text-gray-500 mb-8 font-bold tracking-widest text-sm uppercase text-center">Zaloguj do Gry</p>
 
             <form onSubmit={handleSubmit} className="w-full max-w-sm space-y-4">
                 <div>
@@ -100,7 +100,7 @@ export default function LoginPage() {
 
                 <div className="text-center mt-6">
                     <Link href="/register" className="text-gray-500 text-sm font-medium hover:text-white transition-colors">
-                        Nowy rekrut? <span className="text-[#E60000] font-bold">Zarejestruj się</span>
+                        Nowy gracz? <span className="text-[#E60000] font-bold">Zarejestruj się</span>
                     </Link>
                 </div>
             </form>
