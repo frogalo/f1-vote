@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 
 // Routes that require NO authentication
-const PUBLIC_ROUTES = ["/login", "/register", "/privacy-policy"];
+const PUBLIC_ROUTES = ["/login", "/register", "/privacy-policy", "/invite", "/race"];
 
 // Routes that are ONLY for admins
 const ADMIN_ROUTES = ["/admin"];
 
 // Routes that are ONLY for regular users (not admins)
-const USER_ONLY_ROUTES = ["/calendar", "/season", "/race", "/profile", "/leaderboard"];
+const USER_ONLY_ROUTES = ["/calendar", "/season", "/profile", "/leaderboard"];
 
 export function middleware(req: NextRequest) {
     const { pathname } = req.nextUrl;

@@ -196,7 +196,7 @@ export function VoteComponent({ race, drivers }: Props) {
 
   const handleDragEnd = async (event: DragEndEvent) => {
     setActiveId(null);
-    if (isLocked) return;
+    if (isLocked || !user) return;
     const { active, over } = event;
     if (over && active.id !== over.id) {
       const oldIdx = orderedDrivers.findIndex((d) => d.id === active.id);
@@ -212,7 +212,7 @@ export function VoteComponent({ race, drivers }: Props) {
 
   // ── Mobile tap-to-swap ─────────────────────────────────────────────────────
   const handleTapBadge = async (driverId: string) => {
-    if (isLocked) return;
+    if (isLocked || !user) return;
     if (!selectedId) { setSelectedId(driverId); return; }
     if (selectedId === driverId) { setSelectedId(null); return; }
 
@@ -264,13 +264,18 @@ export function VoteComponent({ race, drivers }: Props) {
           </Badge>
         </div>
 
-        {!isLocked && (
+        {!isLocked && user && (
           <p className="text-muted-foreground text-xs uppercase tracking-widest font-bold">
             {isMobile
               ? selectedId
                 ? "👆 Dotknij numer pozycji, aby zamienić miejsca"
                 : "👆 Dotknij numer pozycji, aby wybrać kierowcę"
               : "Przeciągnij ⠿, aby zmienić kolejność"}
+          </p>
+        )}
+        {!isLocked && !user && (
+          <p className="text-[#E60000] text-xs uppercase tracking-widest font-bold mt-2">
+            Zaloguj się, aby wytypować wyniki tej rundy
           </p>
         )}
         {isLocked && (
@@ -327,7 +332,7 @@ export function VoteComponent({ race, drivers }: Props) {
               key={driver.id}
               driver={driver}
               index={index}
-              disabled={isLocked}
+              disabled={isLocked || !user}
               isSelected={selectedId === driver.id}
               isSwapTarget={selectedId !== null && selectedId !== driver.id}
               onTapBadge={() => handleTapBadge(driver.id)}
@@ -351,7 +356,7 @@ export function VoteComponent({ race, drivers }: Props) {
                   key={driver.id}
                   driver={driver}
                   index={index}
-                  disabled={isLocked}
+                  disabled={isLocked || !user}
                   isBeingDragged={driver.id === activeId}
                   otherVotes={liveVotes.filter(v => v.driverId === driver.id && v.userId !== user?.id)}
                 />

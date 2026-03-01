@@ -27,6 +27,7 @@ export async function generateMetadata(
   const raceName = race.name.replace(" Grand Prix", "");
   const title = `F1 ${raceName} - Typuj wyniki!`;
   const description = `Czas na GP ${race.location}. Zaloguj się. Wejdź i podaj swoich faworytów!`;
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://f1.jakub-urbanski.me";
   
   return {
     title,
@@ -34,6 +35,7 @@ export async function generateMetadata(
     openGraph: {
       title,
       description,
+      url: `${baseUrl}/race/${round}`,
       type: "website",
       siteName: "F1 Typy 2026",
     },
