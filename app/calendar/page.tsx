@@ -102,7 +102,7 @@ export default function CalendarPage() {
 
     const handleShare = (e: React.MouseEvent, round: number, raceName: string) => {
         e.preventDefault();
-        const url = `${window.location.origin}/?invite=${round}`;
+        const url = `${window.location.origin}/race/${round}`;
         const cleanName = raceName.replace(" Grand Prix", "");
         
         if (navigator.share) {
@@ -118,7 +118,7 @@ export default function CalendarPage() {
     };
 
     const handleGlobalShare = () => {
-        const url = `${window.location.origin}`;
+        const url = `${window.location.origin}/invite`;
         if (navigator.share) {
             navigator.share({
                 title: `F1 Typy 2026 - Dołącz do gry!`,

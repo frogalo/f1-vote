@@ -31,6 +31,24 @@ export async function hasSeasonVotes(): Promise<boolean> {
     }
 }
 
+export async function hasCompletedSeasonPicks(): Promise<boolean> {
+    const userId = await getAuthUserId();
+    if (!userId || !prisma.seasonVote || !prisma.driver) return true; // fail open for unauth
+
+    try {
+        const count = await prisma.seasonVote.count({
+            where: { userId, season: CURRENT_SEASON },
+        });
+        const total = await prisma.driver.count({
+            where: { activeSeason: true },
+        });
+
+        return count >= total;
+    } catch (e) {
+        return true;
+    }
+}
+
 export async function getSeasonVotes() {
     const userId = await getAuthUserId();
     if (!userId || !prisma.seasonVote) return [];

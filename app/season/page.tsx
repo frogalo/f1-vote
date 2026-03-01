@@ -317,6 +317,9 @@ export default function SeasonVotePage() {
         toast.error(result.error);
       } else {
         if (newPosition === 1) toast.success(`MISTRZ: ${driver.name}!`);
+        if (newPosition === allDrivers.length) {
+          router.refresh();
+        }
       }
     } catch {
       setPickedDrivers((prev) => prev.filter((d) => d.slug !== driver.slug));
@@ -339,6 +342,9 @@ export default function SeasonVotePage() {
     try {
       const result = await removeSeasonVote(slug);
       if (result.error) { setPickedDrivers(backup); toast.error(result.error); }
+      else if (backup.length === allDrivers.length) {
+        router.refresh();
+      }
     } catch {
       setPickedDrivers(backup);
       toast.error("Błąd podczas usuwania");
@@ -545,7 +551,7 @@ export default function SeasonVotePage() {
               )}
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 max-h-44 overflow-y-auto">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
               {filteredAvailable.map((driver) => (
                 <button
                   key={driver.slug}

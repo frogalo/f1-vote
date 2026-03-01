@@ -26,7 +26,7 @@ export async function generateMetadata(
 
   const raceName = race.name.replace(" Grand Prix", "");
   const title = `F1 ${raceName} - Typuj wyniki!`;
-  const description = `Czas na GP ${race.location}. Zaloguj się, zapnij pasy i weź udział w darmowym typowaniu F1 ze znajomymi. Wejdź i podaj swoich faworytów!`;
+  const description = `Czas na GP ${race.location}. Zaloguj się. Wejdź i podaj swoich faworytów!`;
   
   return {
     title,
@@ -45,6 +45,8 @@ export async function generateMetadata(
   };
 }
 
+import { notFound } from "next/navigation";
+
 export default async function Page({ params }: { params: Promise<{ round: string }> }) {
   const { round: roundStr } = await params;
   const round = Number(roundStr);
@@ -56,7 +58,7 @@ export default async function Page({ params }: { params: Promise<{ round: string
     include: { team: { select: { name: true } } }
   });
 
-  if (!race) return null;
+  if (!race) notFound();
 
   // Map Prisma drivers to Component drivers
   const mappedDrivers = drivers.map(d => ({

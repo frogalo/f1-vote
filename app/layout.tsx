@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: "F1 Typy 2026",
-    description: "Czas na wyścigi. Zaloguj się, zapnij pasy i weź udział w darmowym typowaniu F1 ze znajomymi. Wejdź i podaj swoich faworytów!",
+    description: "Czas na wyścig. Wejdź i podaj swoich faworytów!",
     type: "website",
     siteName: "F1 Typy 2026",
     url: "/",
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "F1 Typy 2026",
-    description: "Typuj i przewiduj wyniki sezonu F1 2026 ze znajomymi!",
+    description: "Typuj i przewiduj wyniki sezonu F1 2026!",
   },
 };
 
@@ -37,6 +37,8 @@ export const viewport: Viewport = {
 };
 
 import { prisma } from "@/lib/prisma";
+import { hasCompletedSeasonPicks } from "@/app/actions/seasonVote";
+import SeasonGuard from "@/app/components/SeasonGuard";
 
 export default async function RootLayout({
   children,
@@ -44,6 +46,8 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   let nextRound = 1;
+  let isComplete = true; // Default to true (allows safe fallback)
+  
   try {
     const races = await prisma.race.findMany({ select: { round: true, date: true } });
     nextRound = races.sort((a, b) => a.round - b.round).find(r => new Date(r.date) > new Date())?.round || 1;
@@ -51,14 +55,20 @@ export default async function RootLayout({
     console.warn("Could not fetch races for layout. Defaulting nextRound to 1.");
   }
 
+  try {
+    isComplete = await hasCompletedSeasonPicks();
+  } catch (error) {
+    console.warn("Could not check if picks are completed. Defaulting to true.");
+  }
+
   return (
     <html lang="pl">
       <body className="min-h-screen text-base md:text-lg bg-[#0D0D0D] text-white">
         <Toaster position="top-center" richColors theme="dark" closeButton />
-        {/* Mobile: Top spacing for content, nav at bottom. Desktop: Top nav. */}
         <div className="md:pt-16 pb-20 md:pb-0">
           <AuthProvider>
-            <Nav nextRound={nextRound} />
+            <SeasonGuard isComplete={isComplete} />
+            <Nav nextRound={nextRound} hidden={!isComplete} />
             <main className="max-w-md mx-auto p-4 md:max-w-4xl min-h-[calc(100vh-80px)]">
               {children}
             </main>

@@ -6,10 +6,11 @@ import { clsx } from 'clsx';
 import { Home, Calendar, Flag, Trophy, User } from 'lucide-react';
 import { useAuth } from '@/app/providers/AuthProvider';
 
-export default function Nav({ nextRound = 1 }: { nextRound?: number }) {
+export default function Nav({ nextRound = 1, hidden = false }: { nextRound?: number; hidden?: boolean }) {
   const pathname = usePathname();
   const { user, loading } = useAuth();
 
+  if (hidden) return null;
   if (loading || !user) return null;
   if (pathname === "/login" || pathname === "/register") return null;
 

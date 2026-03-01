@@ -57,11 +57,6 @@ export default function ProfilePage() {
         }
     }, [editing, optionsLoaded]);
 
-    // Filter drivers by selected team
-    const filteredDrivers = selectedTeam
-        ? drivers.filter(d => d.team.name === selectedTeam)
-        : drivers;
-
     const handleSave = async () => {
         setSaving(true);
         try {
@@ -223,8 +218,6 @@ export default function ProfilePage() {
                                 value={selectedTeam}
                                 onChange={e => {
                                     setSelectedTeam(e.target.value);
-                                    // Reset driver when team changes
-                                    setSelectedDriver("");
                                 }}
                                 className="w-full bg-[#2C2C2E] border border-white/10 rounded-xl px-4 py-3 text-white font-bold appearance-none cursor-pointer focus:outline-none focus:border-[#E60000] transition-colors"
                             >
@@ -259,7 +252,7 @@ export default function ProfilePage() {
                                 className="w-full bg-[#2C2C2E] border border-white/10 rounded-xl px-4 py-3 text-white font-bold appearance-none cursor-pointer focus:outline-none focus:border-[#E60000] transition-colors"
                             >
                                 <option value="">Brak ulubionego</option>
-                                {filteredDrivers.map(d => (
+                                {drivers.map(d => (
                                     <option key={d.slug} value={d.slug}>#{d.number} {d.name} ({d.team.name})</option>
                                 ))}
                             </select>
