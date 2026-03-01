@@ -31,8 +31,13 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const races = await prisma.race.findMany({ select: { round: true, date: true } });
-  const nextRound = races.sort((a, b) => a.round - b.round).find(r => new Date(r.date) > new Date())?.round || 1;
+  let nextRound = 1;
+  try {
+    const races = await prisma.race.findMany({ select: { round: true, date: true } });
+    nextRound = races.sort((a, b) => a.round - b.round).find(r => new Date(r.date) > new Date())?.round || 1;
+  } catch (error) {
+    console.warn("Could not fetch races for layout. Defaulting nextRound to 1.");
+  }
 
   return (
     <html lang="pl">
