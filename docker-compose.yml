@@ -12,6 +12,7 @@ services:
       - DATABASE_URL=postgresql://f1vote:f1votepassword@db:5432/f1vote_db?schema=public
       - POSTGRES_URL=postgresql://f1vote:f1votepassword@db:5432/f1vote_db?schema=public
       - UPLOAD_DIR=./public/uploads
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin123}
     depends_on:
       db:
         condition: service_healthy

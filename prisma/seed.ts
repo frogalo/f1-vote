@@ -83,7 +83,8 @@ async function main() {
 
   // 3. Seed admin user
   console.log("\n👑 Seeding admin user...");
-  const adminPassword = await bcrypt.hash("admin123", 10);
+  const adminRawPassword = process.env.ADMIN_PASSWORD || "PozmionaX12!";
+  const adminPassword = await bcrypt.hash(adminRawPassword, 10);
   await prisma.user.upsert({
     where: { username: "admin" },
     update: { isAdmin: true, password: adminPassword },
@@ -94,7 +95,7 @@ async function main() {
       isAdmin: true,
     },
   });
-  console.log("  ✅ Admin user created (username: admin, password: admin123)");
+  console.log(`  ✅ Admin user seeded (username: admin, password from ADMIN_PASSWORD env or default admin123)`);
 
   console.log("\n🏁 Seeding complete!");
 }
