@@ -130,7 +130,7 @@ function DriverCard({
 
         {/* Driver info */}
         <div className="flex-1 min-w-0">
-          <div className="font-bold text-sm text-foreground truncate flex items-center gap-2">
+          <div className="font-bold text-sm text-foreground flex flex-wrap items-center gap-2">
             {driver.country && (
               <ReactCountryFlag
                 countryCode={normalizeCountryCode(driver.country)}
@@ -144,7 +144,7 @@ function DriverCard({
           <div className="flex items-center gap-1.5 mt-0.5">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={getTeamLogo(driver.team)} alt={driver.team} className="w-3.5 h-3.5 object-contain" />
-            <span className="text-[10px] text-muted-foreground uppercase truncate font-medium">
+            <span className="text-[10px] text-muted-foreground uppercase font-medium">
               {driver.team}
             </span>
           </div>
@@ -426,11 +426,10 @@ export default function SeasonVotePage() {
     : "Przeciągnij ⠿, aby zmienić kolejność";
 
   return (
-    <div className="flex flex-col h-screen max-h-screen overflow-hidden bg-background">
-      {/* Scrollable list area */}
-      <div className="flex-1 overflow-y-auto px-4 pt-8 pb-4">
-        {/* Sticky header */}
-        <div className="sticky top-0 z-20 bg-background/95 backdrop-blur-sm -mx-4 px-4 pb-4">
+    <div className="flex flex-col min-h-screen bg-background pb-20">
+      {/* Main content area - grows to fit drivers */}
+      <div className="flex-1 px-4 pt-8 pb-8">
+        <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-sm -mx-4 px-4 pb-4 pt-2">
           <div className="flex items-center justify-between mb-1">
             <div>
               <h1 className="text-3xl font-black text-foreground uppercase tracking-tighter leading-none">
@@ -535,7 +534,7 @@ export default function SeasonVotePage() {
       {/* Bottom drawer — available drivers */}
       {!locked && (
         availableDrivers.length > 0 ? (
-          <div className="bg-card border-t border-border p-4 pb-28 md:pb-6 shadow-2xl z-30">
+          <div className="bg-card border border-border p-4 rounded-3xl mx-4 mb-24 shadow-2xl z-30">
             <div className="flex items-center justify-between mb-3">
               <p className="text-xs font-black text-muted-foreground uppercase tracking-widest">
                 DOSTĘPNI ({availableDrivers.length})
@@ -563,11 +562,11 @@ export default function SeasonVotePage() {
                     saving && "opacity-50 pointer-events-none"
                   )}
                 >
-                  <div className="flex-1 min-w-0">
-                    <div className="font-bold text-sm text-foreground group-hover:text-foreground truncate">
+                  <div className="flex-1 min-w-0 pr-2">
+                    <div className="font-bold text-sm text-foreground group-hover:text-foreground break-words">
                       {driver.name}
                     </div>
-                    <div className="text-[9px] text-muted-foreground uppercase font-bold truncate">
+                    <div className="text-[9px] text-muted-foreground uppercase font-bold break-words">
                       {driver.team}
                     </div>
                   </div>
@@ -577,7 +576,7 @@ export default function SeasonVotePage() {
             </div>
           </div>
         ) : (
-          <div className="bg-card border-t border-border p-6 text-center pb-28 md:pb-6">
+          <div className="bg-card border border-border rounded-3xl p-6 text-center mx-4 mb-24">
             <div className="text-[#E60000] font-black text-xs uppercase tracking-widest mb-2 flex items-center justify-center gap-2">
               <Trophy className="w-4 h-4" /> Stawka kompletna
             </div>
