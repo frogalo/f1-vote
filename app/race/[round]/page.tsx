@@ -1,5 +1,6 @@
 import { VoteComponent } from "./VoteComponent";
 import { prisma } from "@/lib/prisma";
+import { Metadata, ResolvingMetadata } from "next";
 
 export async function generateStaticParams() {
   try {
@@ -9,6 +10,39 @@ export async function generateStaticParams() {
     console.warn("Could not fetch races for static generation. Building pages dynamically instead.");
     return [];
   }
+}
+
+export async function generateMetadata(
+  { params }: { params: Promise<{ round: string }> },
+  parent: ResolvingMetadata
+): Promise<Metadata> {
+  const { round: roundStr } = await params;
+  const round = Number(roundStr);
+  const race = await prisma.race.findUnique({ where: { round } });
+
+  if (!race) {
+    return { title: "Wyścig F1" };
+  }
+
+  const raceName = race.name.replace(" Grand Prix", "");
+  const title = `F1 ${raceName} - Typuj wyniki!`;
+  const description = `Czas na GP ${race.location}. Zaloguj się, zapnij pasy i weź udział w darmowym typowaniu F1 ze znajomymi. Wejdź i podaj swoich faworytów!`;
+  
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: "website",
+      siteName: "F1 Typy 2026",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+    }
+  };
 }
 
 export default async function Page({ params }: { params: Promise<{ round: string }> }) {

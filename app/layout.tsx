@@ -14,6 +14,18 @@ export const metadata: Metadata = {
     title: "F1 Typy",
     statusBarStyle: "black-translucent",
   },
+  openGraph: {
+    title: "F1 Typy 2026",
+    description: "Czas na wyścigi. Zaloguj się, zapnij pasy i weź udział w darmowym typowaniu F1 ze znajomymi. Wejdź i podaj swoich faworytów!",
+    type: "website",
+    siteName: "F1 Typy 2026",
+    url: "/",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "F1 Typy 2026",
+    description: "Typuj i przewiduj wyniki sezonu F1 2026 ze znajomymi!",
+  },
 };
 
 export const viewport: Viewport = {

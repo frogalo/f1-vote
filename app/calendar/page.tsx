@@ -6,6 +6,8 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/app/providers/AuthProvider";
 import { useRouter } from "next/navigation";
 import { getRaces } from "@/app/actions/races";
+import { Share2 } from "lucide-react";
+import { toast } from "sonner";
 
 const trackSlugs: Record<number, string> = {
     1: "melbourne",
@@ -98,6 +100,37 @@ export default function CalendarPage() {
         return "future";
     };
 
+    const handleShare = (e: React.MouseEvent, round: number, raceName: string) => {
+        e.preventDefault();
+        const url = `${window.location.origin}/?invite=${round}`;
+        const cleanName = raceName.replace(" Grand Prix", "");
+        
+        if (navigator.share) {
+            navigator.share({
+                title: `F1 ${cleanName} - Typuj wyniki!`,
+                text: 'Wejdź i zagłosuj w typerze F1 razem ze mną!',
+                url: url,
+            }).catch(console.error);
+        } else {
+            navigator.clipboard.writeText(url);
+            toast.success("Skopiowano link do schowka!");
+        }
+    };
+
+    const handleGlobalShare = () => {
+        const url = `${window.location.origin}`;
+        if (navigator.share) {
+            navigator.share({
+                title: `F1 Typy 2026 - Dołącz do gry!`,
+                text: 'Załóż darmowe konto i typuj ze mną wyniki F1 w tym sezonie!',
+                url: url,
+            }).catch(console.error);
+        } else {
+            navigator.clipboard.writeText(url);
+            toast.success("Skopiowano link do schowka!");
+        }
+    };
+
     const formatDate = (date: Date) => {
         return new Date(date).toLocaleDateString("pl-PL", {
             day: "2-digit",
@@ -132,10 +165,20 @@ export default function CalendarPage() {
 
     return (
         <div className="pb-32 max-w-4xl mx-auto pt-8">
-            <h1 className="text-4xl font-black mb-1 px-4 text-white uppercase tracking-tighter">
-                Terminarz F1 <span className="text-[#E60000]">2026</span>
-            </h1>
-            <p className="text-gray-500 px-4 mb-8 text-sm font-bold tracking-widest">24 WYŚCIGI • MISTRZOSTWA ŚWIATA</p>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-4 mb-8">
+                <div>
+                    <h1 className="text-4xl font-black mb-1 text-white uppercase tracking-tighter">
+                        Terminarz F1 <span className="text-[#E60000]">2026</span>
+                    </h1>
+                    <p className="text-gray-500 text-xs sm:text-sm font-bold tracking-widest">24 WYŚCIGI • MISTRZOSTWA ŚWIATA</p>
+                </div>
+                <button
+                    onClick={handleGlobalShare}
+                    className="w-full sm:w-auto bg-[#E60000]/10 hover:bg-[#E60000]/20 text-[#E60000] border border-[#E60000]/20 px-5 py-3 rounded-2xl font-black uppercase tracking-wider text-xs sm:text-sm active:scale-95 transition-all flex items-center justify-center gap-2"
+                >
+                    <Share2 className="w-4 h-4" /> Zaproś do gry
+                </button>
+            </div>
 
             {/* Calendar Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 px-4">
@@ -179,16 +222,26 @@ export default function CalendarPage() {
                                     <div className="text-xs text-gray-400 font-bold uppercase tracking-wide">{race.location}</div>
                                 </div>
 
-                                {status === "active" && (
-                                    <div className="bg-[#E60000] text-white text-[10px] font-black px-2 py-1 rounded-lg animate-pulse">
-                                        NA ŻYWO
-                                    </div>
-                                )}
-                                {status === "upcoming" && (
-                                    <div className="bg-[#2C2C2E] text-gray-400 text-[10px] font-black px-2 py-1 rounded-lg">
-                                        NASTĘPNY
-                                    </div>
-                                )}
+                                <div className="flex items-center gap-2">
+                                    <button 
+                                        onClick={(e) => handleShare(e, race.round, race.name)}
+                                        className="p-1.5 bg-white/5 hover:bg-white/10 rounded-full text-white/70 hover:text-white transition-colors backdrop-blur-sm z-20"
+                                        title="Udostępnij i zaproś znajomych"
+                                    >
+                                        <Share2 className="w-4 h-4" />
+                                    </button>
+
+                                    {status === "active" && (
+                                        <div className="bg-[#E60000] text-white text-[10px] font-black px-2 py-1 rounded-lg animate-pulse">
+                                            NA ŻYWO
+                                        </div>
+                                    )}
+                                    {status === "upcoming" && (
+                                        <div className="bg-[#2C2C2E] text-gray-400 text-[10px] font-black px-2 py-1 rounded-lg">
+                                            NASTĘPNY
+                                        </div>
+                                    )}
+                                </div>
                             </div>
 
                             <div className="relative h-24 mt-2 mb-4 flex items-center justify-center">
