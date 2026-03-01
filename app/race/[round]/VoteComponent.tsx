@@ -1,7 +1,7 @@
 "use client";
 
 import { useStore } from "@/lib/store";
-import { Driver, getTeamLogo } from "@/lib/data";
+import { Driver, getTeamLogo, normalizeCountryCode } from "@/lib/data";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { clsx } from "clsx";
@@ -500,7 +500,7 @@ function DriverCard({
               <div className="font-bold text-sm text-foreground flex items-start gap-2">
                 <div className="flex-shrink-0 mt-0.5">
                   <ReactCountryFlag
-                    countryCode={driver.country}
+                    countryCode={normalizeCountryCode(driver.country)}
                     svg
                     style={{ width: "1.1em", height: "1.1em", borderRadius: "50%", objectFit: "cover" }}
                     aria-label={driver.country}

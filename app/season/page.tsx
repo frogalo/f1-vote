@@ -23,7 +23,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { getTeamLogo } from "@/lib/data";
+import { getTeamLogo, normalizeCountryCode } from "@/lib/data";
 import { toast } from "sonner";
 import { useAuth } from "@/app/providers/AuthProvider";
 import { Card, CardContent } from "@/components/ui/card";
@@ -133,7 +133,7 @@ function DriverCard({
           <div className="font-bold text-sm text-foreground truncate flex items-center gap-2">
             {driver.country && (
               <ReactCountryFlag
-                countryCode={driver.country}
+                countryCode={normalizeCountryCode(driver.country)}
                 svg
                 style={{ width: "1.1em", height: "1.1em", borderRadius: "50%", objectFit: "cover" }}
                 aria-label={driver.country}

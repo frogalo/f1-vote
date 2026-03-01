@@ -34,6 +34,19 @@ export const getTeamLogo = (team: string) => {
   return `https://media.formula1.com/image/upload/c_lfill,w_48/q_auto/v1740000000/common/f1/2026/${slug}/2026${slug}logowhite.webp`;
 };
 
+export const normalizeCountryCode = (country: string | null | undefined): string => {
+  if (!country) return "XX";
+  if (/^[a-zA-Z]{2}$/.test(country)) return country.toUpperCase();
+  
+  const emojiMap: Record<string, string> = {
+    "🇫🇷": "FR", "🇦🇷": "AR", "🇪🇸": "ES", "🇨🇦": "CA", "🇹🇭": "TH", "🇧🇷": "BR",
+    "🇩🇪": "DE", "🇲🇽": "MX", "🇫🇮": "FI", "🇲🇨": "MC", "🇬🇧": "GB", "🇦🇺": "AU",
+    "🇮🇹": "IT", "🇳🇿": "NZ", "🇳🇱": "NL"
+  };
+  return emojiMap[country] || "XX";
+};
+
+
 export const drivers: Driver[] = [
   // Alpine
   {

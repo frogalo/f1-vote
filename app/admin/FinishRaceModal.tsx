@@ -5,6 +5,7 @@ import { X, CheckCircle2, RotateCcw, Trophy, ArrowRightLeft, Undo2 } from "lucid
 import { clsx } from "clsx";
 import { getActiveDriversForResults, finishRace, reopenRace } from "@/app/actions/raceResults";
 import { toast } from "sonner";
+import { getTeamLogo, normalizeCountryCode } from "@/lib/data";
 import ReactCountryFlag from "react-country-flag";
 
 type DriverOption = {
@@ -252,11 +253,11 @@ export default function FinishRaceModal({ race, onClose, onFinished }: Props) {
                                                         <div className="font-bold text-white text-sm truncate flex items-center gap-1">
                                                             {driver.country && (
                                                                 <ReactCountryFlag 
-                                                                    countryCode={driver.country} 
+                                                                    countryCode={normalizeCountryCode(driver.country)} 
                                                                     svg 
-                                                                    style={{ width: "0.9em", height: "0.9em", borderRadius: "50%", objectFit: "cover" }} 
-                                                                />
-                                                            )}
+                                                                    style={{ width: "1.2em", height: "1.2em", borderRadius: "50%", objectFit: "cover" }} 
+                                                                    aria-label={driver.country} 
+                                                                />)}
                                                             {driver.name}
                                                         </div>
                                                         <div className="text-[9px] text-gray-500 uppercase tracking-wider">{driver.team}</div>
@@ -295,11 +296,11 @@ export default function FinishRaceModal({ race, onClose, onFinished }: Props) {
                                                     <div className="font-bold text-white text-xs truncate flex items-center gap-1">
                                                         {driver.country && (
                                                             <ReactCountryFlag 
-                                                                countryCode={driver.country} 
+                                                                countryCode={normalizeCountryCode(driver.country)} 
                                                                 svg 
-                                                                style={{ width: "0.8em", height: "0.8em", borderRadius: "50%", objectFit: "cover" }} 
-                                                            />
-                                                        )}
+                                                                style={{ width: "1.2em", height: "1.2em", borderRadius: "50%", objectFit: "cover" }} 
+                                                                aria-label={driver.country} 
+                                                            />)}
                                                         {driver.name}
                                                     </div>
                                                     <div className="text-[8px] text-gray-600 uppercase tracking-wider">{driver.team}</div>

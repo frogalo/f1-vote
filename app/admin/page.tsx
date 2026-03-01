@@ -3,7 +3,7 @@
 import { useAuth } from "@/app/providers/AuthProvider";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { getTeamLogo } from "@/lib/data";
+import { getTeamLogo, normalizeCountryCode } from "@/lib/data";
 import { getTeams, getDrivers, addDriver, updateDriver, deleteDriver, getAllUsersWithVotes, deleteUser, getUserDetails, toggleDriverStatus } from "@/app/actions/admin";
 import { getRaces, addRace, updateRace, deleteRace, seedRaces } from "@/app/actions/races";
 import { toast } from "sonner";
@@ -646,7 +646,7 @@ export default function AdminPage() {
                                                             <div className="text-gray-500 text-xs font-medium flex items-center gap-2 flex-wrap">
                                                                 {driver.country && (
                                                                     <ReactCountryFlag 
-                                                                        countryCode={driver.country} 
+                                                                        countryCode={normalizeCountryCode(driver.country)} 
                                                                         svg 
                                                                         style={{ width: "1.2em", height: "1.2em", borderRadius: "50%", objectFit: "cover" }} 
                                                                         aria-label={driver.country} 
