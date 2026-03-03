@@ -16,6 +16,7 @@ export async function getLeaderboardUsers() {
             name: true,
             avatar: true,
             team: { select: { name: true } },
+            favoriteDriver: { select: { name: true, slug: true } },
             raceScores: {
                 select: {
                     raceRound: true,
@@ -46,6 +47,7 @@ export async function getLeaderboardUsers() {
             id: u.id,
             name: u.name || "Anonim",
             team: u.team?.name || "Brak zespołu",
+            favoriteDriver: u.favoriteDriver ? { name: u.favoriteDriver.name, slug: u.favoriteDriver.slug } : null,
             avatar: u.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name || "U")}&background=E60000&color=fff&bold=true`,
             voteCount: u._count.votes + u._count.seasonVotes,
             totalPoints,

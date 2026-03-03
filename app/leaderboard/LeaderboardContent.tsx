@@ -14,6 +14,7 @@ import {
   Medal,
   TrendingUp,
   Zap,
+  User,
 } from "lucide-react";
 
 type LeaderboardUser = {
@@ -21,6 +22,7 @@ type LeaderboardUser = {
   name: string;
   team: string;
   avatar: string;
+  favoriteDriver: { name: string; slug: string } | null;
   voteCount: number;
   totalPoints: number;
   perfectPredictions: number;
@@ -153,7 +155,7 @@ export default function LeaderboardContent() {
           <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-[#E60000]/20 bg-[#E60000]/10 px-3 py-1">
             <Flame className="h-3 w-3 text-[#E60000]" />
             <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#E60000]">
-              Sezon 2025
+              Sezon 2026
             </span>
           </div>
           <h1 className="text-4xl font-black uppercase tracking-tighter text-white">
@@ -412,7 +414,7 @@ export default function LeaderboardContent() {
                   setExpandedUser(isExpanded ? null : u.id)
                 }
                 className={clsx(
-                  "group relative flex w-full items-center overflow-hidden rounded-2xl border p-3.5 text-left transition-all duration-300 active:scale-[0.98]",
+                  "group relative flex w-full items-center overflow-hidden rounded-2xl border p-4 sm:p-5 text-left transition-all duration-300 active:scale-[0.98]",
                   isMe
                     ? "border-[#E60000]/25 bg-gradient-to-r from-[#E60000]/10 to-[#1A1A1D]"
                     : rank <= 3
@@ -472,12 +474,16 @@ export default function LeaderboardContent() {
                 {/* Avatar */}
                 <div
                   className={clsx(
-                    "relative z-10 mr-3.5 h-11 w-11 shrink-0 overflow-hidden rounded-full border-2 bg-gray-800",
+                    "relative z-10 mr-4 h-16 w-16 shrink-0 overflow-hidden rounded-full border-[3px] bg-gray-800",
                     rank === 1
-                      ? "border-[#E60000]/50"
-                      : isMe
-                        ? "border-[#E60000]/30"
-                        : "border-white/10"
+                      ? "border-[#E60000]"
+                      : rank === 2
+                        ? "border-gray-400"
+                        : rank === 3
+                          ? "border-orange-600"
+                          : isMe
+                            ? "border-[#E60000]/50"
+                            : "border-white/10"
                   )}
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -492,50 +498,60 @@ export default function LeaderboardContent() {
                 <div className="relative z-10 min-w-0 flex-1">
                   <div
                     className={clsx(
-                      "truncate text-sm font-bold",
+                      "truncate text-lg font-black",
                       isMe ? "text-[#E60000]" : "text-white"
                     )}
                   >
                     {u.name}
                     {isMe && (
-                      <span className="ml-1.5 rounded-md bg-[#E60000]/20 px-1.5 py-0.5 text-[9px] font-black text-[#E60000]">
+                      <span className="ml-2 rounded-md bg-[#E60000]/20 px-2 py-0.5 text-[10px] font-black text-[#E60000]">
                         TY
                       </span>
                     )}
                   </div>
-                  <div className="mt-0.5 flex items-center gap-1.5">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={getTeamLogo(u.team)}
-                      alt=""
-                      className="h-3 w-3 object-contain opacity-40 brightness-0 invert"
-                    />
-                    <span className="text-[9px] font-semibold uppercase tracking-wider text-gray-500">
-                      {u.team}
-                    </span>
+                  <div className="mt-1 flex flex-col gap-1">
+                    <div className="flex items-center gap-2">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={getTeamLogo(u.team)}
+                        alt=""
+                        className="h-4 w-4 object-contain opacity-60 brightness-0 invert"
+                      />
+                      <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">
+                        {u.team}
+                      </span>
+                    </div>
+                    {u.favoriteDriver && (
+                      <div className="flex items-center gap-1.5 opacity-80">
+                         <User className="w-3 h-3 text-gray-500" />
+                         <span className="text-[10px] font-bold text-gray-300">
+                            {u.favoriteDriver.name}
+                         </span>
+                      </div>
+                    )}
                   </div>
                 </div>
 
                 {/* Score + chevron */}
-                <div className="relative z-10 flex items-center gap-2">
+                <div className="relative z-10 flex items-center gap-3">
                   <div className="text-right">
-                    <div className="flex items-baseline justify-end gap-1">
-                      <span className="text-lg font-black tabular-nums text-white">
+                    <div className="flex items-baseline justify-end gap-1.5">
+                      <span className="text-2xl font-black tabular-nums text-white">
                         {scoreValue}
                       </span>
-                      <span className="text-[9px] font-bold text-[#E60000]">
+                      <span className="text-[10px] font-bold text-[#E60000]">
                         {scoreLabel}
                       </span>
                     </div>
                     {hasScores && u.perfectPredictions > 0 && (
-                      <div className="text-[9px] font-bold text-green-400/80">
+                      <div className="text-[10px] font-bold text-green-400/80">
                         ✨ {u.perfectPredictions}
                       </div>
                     )}
                   </div>
                   <ChevronDown
                     className={clsx(
-                      "h-4 w-4 text-gray-600 transition-transform duration-300",
+                      "h-5 w-5 text-gray-600 transition-transform duration-300",
                       isExpanded && "rotate-180 text-gray-400"
                     )}
                   />

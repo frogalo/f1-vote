@@ -43,7 +43,25 @@ export async function hasCompletedSeasonPicks(): Promise<boolean> {
             where: { activeSeason: true },
         });
 
-        return count >= total;
+        const user = await prisma.user.findUnique({
+            where: { id: userId },
+            select: { 
+                fastestLapDriverId: true, 
+                fastestPitstopTeamId: true,
+                mostDotdDriverId: true,
+                mostDnfRange: true,
+                firstRaceCollision: true,
+                firstRaceRain: true,
+            }
+        });
+
+        return count >= total && 
+               !!user?.fastestLapDriverId && 
+               !!user?.fastestPitstopTeamId &&
+               !!user?.mostDotdDriverId &&
+               !!user?.mostDnfRange &&
+               user?.firstRaceCollision !== null &&
+               user?.firstRaceRain !== null;
     } catch (e) {
         return true;
     }
@@ -105,6 +123,126 @@ export async function getAvailableDrivers() {
         color: d.color,
         team: d.team.name,
     }));
+}
+
+export async function getAvailableTeams() {
+    const teams = await prisma.team.findMany({
+        orderBy: { name: "asc" }
+    });
+    return teams.map(t => ({ id: t.id, name: t.name }));
+}
+
+export async function getSeasonExtras() {
+    const userId = await getAuthUserId();
+    if (!userId) return null;
+    
+    return prisma.user.findUnique({
+        where: { id: userId },
+        select: {
+            fastestLapDriverId: true,
+            fastestPitstopTeamId: true,
+            mostDotdDriverId: true,
+            mostDnfRange: true,
+            firstRaceCollision: true,
+            firstRaceRain: true,
+        }
+    });
+}
+
+export async function setSeasonExtraLap(driverSlug: string) {
+    const userId = await getAuthUserId();
+    if (!userId) return { error: "Nie zalogowano" };
+    if (await isSeasonLocked()) return { error: "Sezon zablokowany" };
+
+    try {
+        await prisma.user.update({
+            where: { id: userId },
+            data: { fastestLapDriverId: driverSlug || null }
+        });
+        return { success: true };
+    } catch(e) {
+        return { error: "Błąd podczas zapisu" };
+    }
+}
+
+export async function setSeasonExtraPitstop(teamId: string) {
+    const userId = await getAuthUserId();
+    if (!userId) return { error: "Nie zalogowano" };
+    if (await isSeasonLocked()) return { error: "Sezon zablokowany" };
+
+    try {
+        await prisma.user.update({
+            where: { id: userId },
+            data: { fastestPitstopTeamId: teamId || null }
+        });
+        return { success: true };
+    } catch(e) {
+        return { error: "Błąd podczas zapisu" };
+    }
+}
+
+export async function setSeasonExtraMostDotd(driverSlug: string) {
+    const userId = await getAuthUserId();
+    if (!userId) return { error: "Nie zalogowano" };
+    if (await isSeasonLocked()) return { error: "Sezon zablokowany" };
+
+    try {
+        await prisma.user.update({
+            where: { id: userId },
+            data: { mostDotdDriverId: driverSlug || null }
+        });
+        return { success: true };
+    } catch(e) {
+        return { error: "Błąd podczas zapisu" };
+    }
+}
+
+export async function setSeasonExtraMostDnf(range: string) {
+    const userId = await getAuthUserId();
+    if (!userId) return { error: "Nie zalogowano" };
+    if (await isSeasonLocked()) return { error: "Sezon zablokowany" };
+
+    try {
+        await prisma.user.update({
+            where: { id: userId },
+            data: { mostDnfRange: range || null }
+        });
+        return { success: true };
+    } catch(e) {
+        return { error: "Błąd podczas zapisu" };
+    }
+}
+
+export async function setSeasonExtraFirstRaceCollision(value: boolean) {
+    const userId = await getAuthUserId();
+    if (!userId) return { error: "Nie zalogowano" };
+    if (await isSeasonLocked()) return { error: "Sezon zablokowany" };
+
+    try {
+        await prisma.user.update({
+            where: { id: userId },
+            data: { firstRaceCollision: value }
+        });
+        return { success: true };
+    } catch(e) {
+        return { error: "Błąd podczas zapisu" };
+    }
+}
+
+export async function setSeasonExtraFirstRaceRain(value: boolean) {
+    const userId = await getAuthUserId();
+    if (!userId) return { error: "Nie zalogowano" };
+    if (await isSeasonLocked()) return { error: "Sezon zablokowany" };
+
+    try {
+        await prisma.user.update({
+            where: { id: userId },
+            data: { firstRaceRain: value }
+        });
+        return { success: true };
+    } catch(e) {
+        return { error: "Błąd podczas zapisu" };
+    }
 }
 
 // Add a single driver at the next position

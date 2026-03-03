@@ -1,9 +1,9 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { clsx } from "clsx";
-import { GripVertical, Plus, X, Lock, Trophy, Star, ArrowUpDown } from "lucide-react";
+import { GripVertical, Plus, X, Lock, Trophy, Star, ArrowUpDown, ChevronDown } from "lucide-react";
 import ReactCountryFlag from "react-country-flag";
 import {
   DndContext,
@@ -35,6 +35,14 @@ import {
   removeSeasonVote,
   reorderSeasonVotes,
   isSeasonLocked,
+  getAvailableTeams,
+  getSeasonExtras,
+  setSeasonExtraLap,
+  setSeasonExtraPitstop,
+  setSeasonExtraMostDotd,
+  setSeasonExtraMostDnf,
+  setSeasonExtraFirstRaceCollision,
+  setSeasonExtraFirstRaceRain,
 } from "@/app/actions/seasonVote";
 
 type DriverInfo = {
@@ -47,6 +55,78 @@ type DriverInfo = {
 };
 
 type PickedDriver = DriverInfo & { position: number };
+
+// ─── Custom Select Component ───────────────────────────────────────────────
+function CustomSelect({
+  label,
+  value,
+  options,
+  placeholder,
+  disabled,
+  onChange
+}: {
+  label: string;
+  value: string;
+  options: { value: string; label: React.ReactNode; filterText?: string }[];
+  placeholder: string;
+  disabled?: boolean;
+  onChange: (val: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
+
+  const selectedOption = options.find(o => o.value === value);
+
+  return (
+    <div ref={ref} className="flex flex-col gap-1.5 relative">
+      <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{label}</label>
+      <button
+          type="button"
+          disabled={disabled}
+          onClick={() => setOpen(!open)}
+          className={clsx(
+              "w-full bg-background border border-border p-3 rounded-xl text-sm font-medium text-left flex items-center justify-between transition-colors outline-none",
+              selectedOption ? "text-foreground" : "text-muted-foreground",
+              open && "border-[#E60000]",
+              disabled && "opacity-50 cursor-not-allowed",
+              !disabled && "hover:border-white/20"
+          )}
+      >
+          <span className="flex-1 truncate">{selectedOption ? selectedOption.label : placeholder}</span>
+          <ChevronDown className={clsx("w-4 h-4 text-muted-foreground transition-transform flex-shrink-0 ml-2", open && "rotate-180")} />
+      </button>
+
+      {open && !disabled && (
+          <div className="absolute z-50 top-full mt-1 left-0 right-0 bg-background border border-border rounded-xl shadow-2xl overflow-y-auto" style={{ maxHeight: "250px" }}>
+              {options.map(o => (
+                  <button
+                      key={o.value}
+                      type="button"
+                      onClick={() => {
+                          onChange(o.value);
+                          setOpen(false);
+                      }}
+                      className={clsx(
+                          "w-full flex items-center gap-2 px-3 py-2.5 text-left hover:bg-accent hover:text-foreground transition-colors text-sm",
+                          value === o.value ? "text-[#E60000] bg-[#E60000]/5" : "text-foreground/80"
+                      )}
+                  >
+                      {o.label}
+                  </button>
+              ))}
+          </div>
+      )}
+    </div>
+  );
+}
 
 // ─── Shared driver card ────────────────────────────────────────────────────
 function DriverCard({
@@ -222,6 +302,14 @@ export default function SeasonVotePage() {
   const [isMobile, setIsMobile] = useState(false);
   const [selectedSlug, setSelectedSlug] = useState<string | null>(null);
 
+  const [allTeams, setAllTeams] = useState<{id: string, name: string}[]>([]);
+  const [fastestLapDriverId, setFastestLapDriverId] = useState<string | null>(null);
+  const [fastestPitstopTeamId, setFastestPitstopTeamId] = useState<string | null>(null);
+  const [mostDotdDriverId, setMostDotdDriverId] = useState<string | null>(null);
+  const [mostDnfRange, setMostDnfRange] = useState<string | null>(null);
+  const [firstRaceCollision, setFirstRaceCollision] = useState<boolean | null>(null);
+  const [firstRaceRain, setFirstRaceRain] = useState<boolean | null>(null);
+
   // Screen-width based mobile detection
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 768);
@@ -241,13 +329,24 @@ export default function SeasonVotePage() {
   useEffect(() => {
     async function loadData() {
       try {
-        const [lockStatus, votes, driversData] = await Promise.all([
+        const [lockStatus, votes, driversData, teamsData, extras] = await Promise.all([
           isSeasonLocked(),
           getSeasonVotes(),
           getAvailableDrivers(),
+          getAvailableTeams(),
+          getSeasonExtras(),
         ]);
         setLocked(lockStatus);
         setAllDrivers(driversData);
+        setAllTeams(teamsData);
+        if (extras) {
+          setFastestLapDriverId(extras.fastestLapDriverId);
+          setFastestPitstopTeamId(extras.fastestPitstopTeamId);
+          setMostDotdDriverId(extras.mostDotdDriverId);
+          setMostDnfRange(extras.mostDnfRange);
+          setFirstRaceCollision(extras.firstRaceCollision);
+          setFirstRaceRain(extras.firstRaceRain);
+        }
         setPickedDrivers(
           votes.map((v) => ({
             slug: v.driverSlug,
@@ -419,6 +518,40 @@ export default function SeasonVotePage() {
 
   const progress = allDrivers.length > 0 ? (pickedDrivers.length / allDrivers.length) * 100 : 0;
 
+  // Render options for CustomSelects
+  const driverOptions = allDrivers.map(d => ({
+    value: d.slug,
+    label: (
+       <div className="flex items-center gap-2 truncate">
+         <span className="truncate">{d.name}</span>
+         {/* eslint-disable-next-line @next/next/no-img-element */}
+         <img src={getTeamLogo(d.team)} alt={d.team} className="w-3.5 h-3.5 object-contain flex-shrink-0" />
+         <span className="text-[10px] text-muted-foreground uppercase shrink-0">{d.team}</span>
+       </div>
+    )
+  }));
+
+  const teamOptions = allTeams.map(t => ({
+    value: t.id,
+    label: (
+       <div className="flex items-center gap-2 truncate">
+         {/* eslint-disable-next-line @next/next/no-img-element */}
+         <img src={getTeamLogo(t.name)} alt={t.name} className="w-4 h-4 object-contain flex-shrink-0" />
+         <span className="truncate">{t.name}</span>
+       </div>
+    )
+  }));
+
+  const dnfOptions = ["0-2", "3-5", "6-8", "9-11", "12+"].map(o => ({
+    value: o,
+    label: <span className="font-medium">{o}</span>
+  }));
+
+  const yesNoOptions = [
+    { value: "true", label: <span className="font-medium text-green-500">Tak</span> },
+    { value: "false", label: <span className="font-medium text-[#E60000]">Nie</span> }
+  ];
+
   const hintText = isMobile
     ? selectedSlug
       ? "👆 Dotknij numer pozycji, aby zamienić miejsca"
@@ -467,6 +600,108 @@ export default function SeasonVotePage() {
               />
             </div>
           )}
+        </div>
+
+        {/* Extra Predictions */}
+        <div className="mt-4 mb-8 space-y-3">
+           <div className="bg-card border border-border p-4 rounded-3xl flex flex-col gap-2">
+              <span className="text-xs font-black text-muted-foreground uppercase tracking-widest">
+                Dodatkowe Typowanie
+              </span>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 mt-1">
+                <CustomSelect
+                  label="Najszybsze okrążenie (kierowca)"
+                  placeholder="Wybierz kierowcę..."
+                  value={fastestLapDriverId || ""}
+                  options={driverOptions}
+                  disabled={locked || saving}
+                  onChange={async (val) => {
+                     setFastestLapDriverId(val);
+                     setSaving(true);
+                     await setSeasonExtraLap(val);
+                     setSaving(false);
+                     refreshUser();
+                  }}
+                />
+                
+                <CustomSelect
+                  label="Najszybszy pitstop (zespół)"
+                  placeholder="Wybierz zespół..."
+                  value={fastestPitstopTeamId || ""}
+                  options={teamOptions}
+                  disabled={locked || saving}
+                  onChange={async (val) => {
+                     setFastestPitstopTeamId(val);
+                     setSaving(true);
+                     await setSeasonExtraPitstop(val);
+                     setSaving(false);
+                     refreshUser();
+                  }}
+                />
+
+                <CustomSelect
+                  label="Najwięcej Driver of the day"
+                  placeholder="Wybierz kierowcę..."
+                  value={mostDotdDriverId || ""}
+                  options={driverOptions}
+                  disabled={locked || saving}
+                  onChange={async (val) => {
+                     setMostDotdDriverId(val);
+                     setSaving(true);
+                     await setSeasonExtraMostDotd(val);
+                     setSaving(false);
+                     refreshUser();
+                  }}
+                />
+
+                <CustomSelect
+                  label="Najwięcej DNF w wyścigów"
+                  placeholder="Wybierz przedział..."
+                  value={mostDnfRange || ""}
+                  options={dnfOptions}
+                  disabled={locked || saving}
+                  onChange={async (val) => {
+                     setMostDnfRange(val);
+                     setSaving(true);
+                     await setSeasonExtraMostDnf(val);
+                     setSaving(false);
+                     refreshUser();
+                  }}
+                />
+
+                <CustomSelect
+                  label="Czy będzie kolizja na starcie?"
+                  placeholder="Tak / Nie"
+                  value={firstRaceCollision === null ? "" : String(firstRaceCollision)}
+                  options={yesNoOptions}
+                  disabled={locked || saving}
+                  onChange={async (val) => {
+                     const b = val === "true";
+                     setFirstRaceCollision(b);
+                     setSaving(true);
+                     await setSeasonExtraFirstRaceCollision(b);
+                     setSaving(false);
+                     refreshUser();
+                  }}
+                />
+
+                <CustomSelect
+                  label="Czy będzie deszcz na wyścigu?"
+                  placeholder="Tak / Nie"
+                  value={firstRaceRain === null ? "" : String(firstRaceRain)}
+                  options={yesNoOptions}
+                  disabled={locked || saving}
+                  onChange={async (val) => {
+                     const b = val === "true";
+                     setFirstRaceRain(b);
+                     setSaving(true);
+                     await setSeasonExtraFirstRaceRain(b);
+                     setSaving(false);
+                     refreshUser();
+                  }}
+                />
+              </div>
+           </div>
         </div>
 
         {/* Picked driver list */}

@@ -145,6 +145,12 @@ exports.Prisma.UserScalarFieldEnum = {
   isAdmin: 'isAdmin',
   teamId: 'teamId',
   favoriteDriverId: 'favoriteDriverId',
+  fastestLapDriverId: 'fastestLapDriverId',
+  fastestPitstopTeamId: 'fastestPitstopTeamId',
+  mostDotdDriverId: 'mostDotdDriverId',
+  mostDnfRange: 'mostDnfRange',
+  firstRaceCollision: 'firstRaceCollision',
+  firstRaceRain: 'firstRaceRain',
   avatar: 'avatar',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'

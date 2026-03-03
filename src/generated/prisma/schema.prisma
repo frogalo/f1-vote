@@ -11,44 +11,56 @@ datasource db {
 }
 
 model Team {
-  id      String   @id @default(cuid())
-  name    String   @unique
-  color   String? // Tailwind class or specific style
-  users   User[]
-  drivers Driver[]
+  id                  String   @id @default(cuid())
+  name                String   @unique
+  color               String? // Tailwind class or specific style
+  users               User[]   @relation("UserTeam")
+  fastestPitstopUsers User[]   @relation("FastestPitstop")
+  drivers             Driver[]
 }
 
 model Driver {
-  slug         String       @id // The ID from data.ts ("ver", etc)
-  name         String
-  number       Int
-  country      String?
-  active       Boolean      @default(true) // For individual races
-  activeSeason Boolean      @default(true) // For full season predictions
-  teamId       String
-  team         Team         @relation(fields: [teamId], references: [id])
-  color        String?
-  votes        Vote[]
-  seasonVotes  SeasonVote[]
-  favorited    User[]
+  slug            String       @id // The ID from data.ts ("ver", etc)
+  name            String
+  number          Int
+  country         String?
+  active          Boolean      @default(true) // For individual races
+  activeSeason    Boolean      @default(true) // For full season predictions
+  teamId          String
+  team            Team         @relation(fields: [teamId], references: [id])
+  color           String?
+  votes           Vote[]
+  seasonVotes     SeasonVote[]
+  favorited       User[]       @relation("FavoriteDriver")
+  fastestLapUsers User[]       @relation("FastestLap")
+  mostDotdUsers   User[]       @relation("MostDotd")
 }
 
 model User {
-  id               String       @id @default(cuid())
-  username         String       @unique
-  password         String // Hashed password
-  name             String?
-  isAdmin          Boolean      @default(false)
-  teamId           String?
-  team             Team?        @relation(fields: [teamId], references: [id])
-  favoriteDriverId String?
-  favoriteDriver   Driver?      @relation(fields: [favoriteDriverId], references: [slug])
-  avatar           String? // URL to avatar image
-  votes            Vote[]
-  seasonVotes      SeasonVote[]
-  raceScores       RaceScore[]
-  createdAt        DateTime     @default(now())
-  updatedAt        DateTime     @updatedAt
+  id                   String       @id @default(cuid())
+  username             String       @unique
+  password             String // Hashed password
+  name                 String?
+  isAdmin              Boolean      @default(false)
+  teamId               String?
+  team                 Team?        @relation("UserTeam", fields: [teamId], references: [id])
+  favoriteDriverId     String?
+  favoriteDriver       Driver?      @relation("FavoriteDriver", fields: [favoriteDriverId], references: [slug])
+  fastestLapDriverId   String?
+  fastestLapDriver     Driver?      @relation("FastestLap", fields: [fastestLapDriverId], references: [slug])
+  fastestPitstopTeamId String?
+  fastestPitstopTeam   Team?        @relation("FastestPitstop", fields: [fastestPitstopTeamId], references: [id])
+  mostDotdDriverId     String?
+  mostDotdDriver       Driver?      @relation("MostDotd", fields: [mostDotdDriverId], references: [slug])
+  mostDnfRange         String?
+  firstRaceCollision   Boolean?
+  firstRaceRain        Boolean?
+  avatar               String? // URL to avatar image
+  votes                Vote[]
+  seasonVotes          SeasonVote[]
+  raceScores           RaceScore[]
+  createdAt            DateTime     @default(now())
+  updatedAt            DateTime     @updatedAt
 }
 
 model Vote {

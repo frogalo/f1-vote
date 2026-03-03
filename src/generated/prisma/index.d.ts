@@ -1409,11 +1409,13 @@ export namespace Prisma {
 
   export type TeamCountOutputType = {
     users: number
+    fastestPitstopUsers: number
     drivers: number
   }
 
   export type TeamCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     users?: boolean | TeamCountOutputTypeCountUsersArgs
+    fastestPitstopUsers?: boolean | TeamCountOutputTypeCountFastestPitstopUsersArgs
     drivers?: boolean | TeamCountOutputTypeCountDriversArgs
   }
 
@@ -1438,6 +1440,13 @@ export namespace Prisma {
   /**
    * TeamCountOutputType without action
    */
+  export type TeamCountOutputTypeCountFastestPitstopUsersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: UserWhereInput
+  }
+
+  /**
+   * TeamCountOutputType without action
+   */
   export type TeamCountOutputTypeCountDriversArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: DriverWhereInput
   }
@@ -1451,12 +1460,16 @@ export namespace Prisma {
     votes: number
     seasonVotes: number
     favorited: number
+    fastestLapUsers: number
+    mostDotdUsers: number
   }
 
   export type DriverCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     votes?: boolean | DriverCountOutputTypeCountVotesArgs
     seasonVotes?: boolean | DriverCountOutputTypeCountSeasonVotesArgs
     favorited?: boolean | DriverCountOutputTypeCountFavoritedArgs
+    fastestLapUsers?: boolean | DriverCountOutputTypeCountFastestLapUsersArgs
+    mostDotdUsers?: boolean | DriverCountOutputTypeCountMostDotdUsersArgs
   }
 
   // Custom InputTypes
@@ -1488,6 +1501,20 @@ export namespace Prisma {
    * DriverCountOutputType without action
    */
   export type DriverCountOutputTypeCountFavoritedArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: UserWhereInput
+  }
+
+  /**
+   * DriverCountOutputType without action
+   */
+  export type DriverCountOutputTypeCountFastestLapUsersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: UserWhereInput
+  }
+
+  /**
+   * DriverCountOutputType without action
+   */
+  export type DriverCountOutputTypeCountMostDotdUsersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: UserWhereInput
   }
 
@@ -1725,6 +1752,7 @@ export namespace Prisma {
     name?: boolean
     color?: boolean
     users?: boolean | Team$usersArgs<ExtArgs>
+    fastestPitstopUsers?: boolean | Team$fastestPitstopUsersArgs<ExtArgs>
     drivers?: boolean | Team$driversArgs<ExtArgs>
     _count?: boolean | TeamCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["team"]>
@@ -1750,6 +1778,7 @@ export namespace Prisma {
   export type TeamOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "color", ExtArgs["result"]["team"]>
   export type TeamInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     users?: boolean | Team$usersArgs<ExtArgs>
+    fastestPitstopUsers?: boolean | Team$fastestPitstopUsersArgs<ExtArgs>
     drivers?: boolean | Team$driversArgs<ExtArgs>
     _count?: boolean | TeamCountOutputTypeDefaultArgs<ExtArgs>
   }
@@ -1760,6 +1789,7 @@ export namespace Prisma {
     name: "Team"
     objects: {
       users: Prisma.$UserPayload<ExtArgs>[]
+      fastestPitstopUsers: Prisma.$UserPayload<ExtArgs>[]
       drivers: Prisma.$DriverPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
@@ -2161,6 +2191,7 @@ export namespace Prisma {
   export interface Prisma__TeamClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     users<T extends Team$usersArgs<ExtArgs> = {}>(args?: Subset<T, Team$usersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    fastestPitstopUsers<T extends Team$fastestPitstopUsersArgs<ExtArgs> = {}>(args?: Subset<T, Team$fastestPitstopUsersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     drivers<T extends Team$driversArgs<ExtArgs> = {}>(args?: Subset<T, Team$driversArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DriverPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -2606,6 +2637,30 @@ export namespace Prisma {
   }
 
   /**
+   * Team.fastestPitstopUsers
+   */
+  export type Team$fastestPitstopUsersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the User
+     */
+    select?: UserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the User
+     */
+    omit?: UserOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
+    where?: UserWhereInput
+    orderBy?: UserOrderByWithRelationInput | UserOrderByWithRelationInput[]
+    cursor?: UserWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: UserScalarFieldEnum | UserScalarFieldEnum[]
+  }
+
+  /**
    * Team.drivers
    */
   export type Team$driversArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -2874,6 +2929,8 @@ export namespace Prisma {
     votes?: boolean | Driver$votesArgs<ExtArgs>
     seasonVotes?: boolean | Driver$seasonVotesArgs<ExtArgs>
     favorited?: boolean | Driver$favoritedArgs<ExtArgs>
+    fastestLapUsers?: boolean | Driver$fastestLapUsersArgs<ExtArgs>
+    mostDotdUsers?: boolean | Driver$mostDotdUsersArgs<ExtArgs>
     _count?: boolean | DriverCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["driver"]>
 
@@ -2918,6 +2975,8 @@ export namespace Prisma {
     votes?: boolean | Driver$votesArgs<ExtArgs>
     seasonVotes?: boolean | Driver$seasonVotesArgs<ExtArgs>
     favorited?: boolean | Driver$favoritedArgs<ExtArgs>
+    fastestLapUsers?: boolean | Driver$fastestLapUsersArgs<ExtArgs>
+    mostDotdUsers?: boolean | Driver$mostDotdUsersArgs<ExtArgs>
     _count?: boolean | DriverCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type DriverIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -2934,6 +2993,8 @@ export namespace Prisma {
       votes: Prisma.$VotePayload<ExtArgs>[]
       seasonVotes: Prisma.$SeasonVotePayload<ExtArgs>[]
       favorited: Prisma.$UserPayload<ExtArgs>[]
+      fastestLapUsers: Prisma.$UserPayload<ExtArgs>[]
+      mostDotdUsers: Prisma.$UserPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       slug: string
@@ -3342,6 +3403,8 @@ export namespace Prisma {
     votes<T extends Driver$votesArgs<ExtArgs> = {}>(args?: Subset<T, Driver$votesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$VotePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     seasonVotes<T extends Driver$seasonVotesArgs<ExtArgs> = {}>(args?: Subset<T, Driver$seasonVotesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SeasonVotePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     favorited<T extends Driver$favoritedArgs<ExtArgs> = {}>(args?: Subset<T, Driver$favoritedArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    fastestLapUsers<T extends Driver$fastestLapUsersArgs<ExtArgs> = {}>(args?: Subset<T, Driver$fastestLapUsersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    mostDotdUsers<T extends Driver$mostDotdUsersArgs<ExtArgs> = {}>(args?: Subset<T, Driver$mostDotdUsersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -3847,6 +3910,54 @@ export namespace Prisma {
   }
 
   /**
+   * Driver.fastestLapUsers
+   */
+  export type Driver$fastestLapUsersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the User
+     */
+    select?: UserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the User
+     */
+    omit?: UserOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
+    where?: UserWhereInput
+    orderBy?: UserOrderByWithRelationInput | UserOrderByWithRelationInput[]
+    cursor?: UserWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: UserScalarFieldEnum | UserScalarFieldEnum[]
+  }
+
+  /**
+   * Driver.mostDotdUsers
+   */
+  export type Driver$mostDotdUsersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the User
+     */
+    select?: UserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the User
+     */
+    omit?: UserOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
+    where?: UserWhereInput
+    orderBy?: UserOrderByWithRelationInput | UserOrderByWithRelationInput[]
+    cursor?: UserWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: UserScalarFieldEnum | UserScalarFieldEnum[]
+  }
+
+  /**
    * Driver without action
    */
   export type DriverDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -3883,6 +3994,12 @@ export namespace Prisma {
     isAdmin: boolean | null
     teamId: string | null
     favoriteDriverId: string | null
+    fastestLapDriverId: string | null
+    fastestPitstopTeamId: string | null
+    mostDotdDriverId: string | null
+    mostDnfRange: string | null
+    firstRaceCollision: boolean | null
+    firstRaceRain: boolean | null
     avatar: string | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -3896,6 +4013,12 @@ export namespace Prisma {
     isAdmin: boolean | null
     teamId: string | null
     favoriteDriverId: string | null
+    fastestLapDriverId: string | null
+    fastestPitstopTeamId: string | null
+    mostDotdDriverId: string | null
+    mostDnfRange: string | null
+    firstRaceCollision: boolean | null
+    firstRaceRain: boolean | null
     avatar: string | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -3909,6 +4032,12 @@ export namespace Prisma {
     isAdmin: number
     teamId: number
     favoriteDriverId: number
+    fastestLapDriverId: number
+    fastestPitstopTeamId: number
+    mostDotdDriverId: number
+    mostDnfRange: number
+    firstRaceCollision: number
+    firstRaceRain: number
     avatar: number
     createdAt: number
     updatedAt: number
@@ -3924,6 +4053,12 @@ export namespace Prisma {
     isAdmin?: true
     teamId?: true
     favoriteDriverId?: true
+    fastestLapDriverId?: true
+    fastestPitstopTeamId?: true
+    mostDotdDriverId?: true
+    mostDnfRange?: true
+    firstRaceCollision?: true
+    firstRaceRain?: true
     avatar?: true
     createdAt?: true
     updatedAt?: true
@@ -3937,6 +4072,12 @@ export namespace Prisma {
     isAdmin?: true
     teamId?: true
     favoriteDriverId?: true
+    fastestLapDriverId?: true
+    fastestPitstopTeamId?: true
+    mostDotdDriverId?: true
+    mostDnfRange?: true
+    firstRaceCollision?: true
+    firstRaceRain?: true
     avatar?: true
     createdAt?: true
     updatedAt?: true
@@ -3950,6 +4091,12 @@ export namespace Prisma {
     isAdmin?: true
     teamId?: true
     favoriteDriverId?: true
+    fastestLapDriverId?: true
+    fastestPitstopTeamId?: true
+    mostDotdDriverId?: true
+    mostDnfRange?: true
+    firstRaceCollision?: true
+    firstRaceRain?: true
     avatar?: true
     createdAt?: true
     updatedAt?: true
@@ -4036,6 +4183,12 @@ export namespace Prisma {
     isAdmin: boolean
     teamId: string | null
     favoriteDriverId: string | null
+    fastestLapDriverId: string | null
+    fastestPitstopTeamId: string | null
+    mostDotdDriverId: string | null
+    mostDnfRange: string | null
+    firstRaceCollision: boolean | null
+    firstRaceRain: boolean | null
     avatar: string | null
     createdAt: Date
     updatedAt: Date
@@ -4066,11 +4219,20 @@ export namespace Prisma {
     isAdmin?: boolean
     teamId?: boolean
     favoriteDriverId?: boolean
+    fastestLapDriverId?: boolean
+    fastestPitstopTeamId?: boolean
+    mostDotdDriverId?: boolean
+    mostDnfRange?: boolean
+    firstRaceCollision?: boolean
+    firstRaceRain?: boolean
     avatar?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     team?: boolean | User$teamArgs<ExtArgs>
     favoriteDriver?: boolean | User$favoriteDriverArgs<ExtArgs>
+    fastestLapDriver?: boolean | User$fastestLapDriverArgs<ExtArgs>
+    fastestPitstopTeam?: boolean | User$fastestPitstopTeamArgs<ExtArgs>
+    mostDotdDriver?: boolean | User$mostDotdDriverArgs<ExtArgs>
     votes?: boolean | User$votesArgs<ExtArgs>
     seasonVotes?: boolean | User$seasonVotesArgs<ExtArgs>
     raceScores?: boolean | User$raceScoresArgs<ExtArgs>
@@ -4085,11 +4247,20 @@ export namespace Prisma {
     isAdmin?: boolean
     teamId?: boolean
     favoriteDriverId?: boolean
+    fastestLapDriverId?: boolean
+    fastestPitstopTeamId?: boolean
+    mostDotdDriverId?: boolean
+    mostDnfRange?: boolean
+    firstRaceCollision?: boolean
+    firstRaceRain?: boolean
     avatar?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     team?: boolean | User$teamArgs<ExtArgs>
     favoriteDriver?: boolean | User$favoriteDriverArgs<ExtArgs>
+    fastestLapDriver?: boolean | User$fastestLapDriverArgs<ExtArgs>
+    fastestPitstopTeam?: boolean | User$fastestPitstopTeamArgs<ExtArgs>
+    mostDotdDriver?: boolean | User$mostDotdDriverArgs<ExtArgs>
   }, ExtArgs["result"]["user"]>
 
   export type UserSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -4100,11 +4271,20 @@ export namespace Prisma {
     isAdmin?: boolean
     teamId?: boolean
     favoriteDriverId?: boolean
+    fastestLapDriverId?: boolean
+    fastestPitstopTeamId?: boolean
+    mostDotdDriverId?: boolean
+    mostDnfRange?: boolean
+    firstRaceCollision?: boolean
+    firstRaceRain?: boolean
     avatar?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     team?: boolean | User$teamArgs<ExtArgs>
     favoriteDriver?: boolean | User$favoriteDriverArgs<ExtArgs>
+    fastestLapDriver?: boolean | User$fastestLapDriverArgs<ExtArgs>
+    fastestPitstopTeam?: boolean | User$fastestPitstopTeamArgs<ExtArgs>
+    mostDotdDriver?: boolean | User$mostDotdDriverArgs<ExtArgs>
   }, ExtArgs["result"]["user"]>
 
   export type UserSelectScalar = {
@@ -4115,15 +4295,24 @@ export namespace Prisma {
     isAdmin?: boolean
     teamId?: boolean
     favoriteDriverId?: boolean
+    fastestLapDriverId?: boolean
+    fastestPitstopTeamId?: boolean
+    mostDotdDriverId?: boolean
+    mostDnfRange?: boolean
+    firstRaceCollision?: boolean
+    firstRaceRain?: boolean
     avatar?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "username" | "password" | "name" | "isAdmin" | "teamId" | "favoriteDriverId" | "avatar" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "username" | "password" | "name" | "isAdmin" | "teamId" | "favoriteDriverId" | "fastestLapDriverId" | "fastestPitstopTeamId" | "mostDotdDriverId" | "mostDnfRange" | "firstRaceCollision" | "firstRaceRain" | "avatar" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
   export type UserInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     team?: boolean | User$teamArgs<ExtArgs>
     favoriteDriver?: boolean | User$favoriteDriverArgs<ExtArgs>
+    fastestLapDriver?: boolean | User$fastestLapDriverArgs<ExtArgs>
+    fastestPitstopTeam?: boolean | User$fastestPitstopTeamArgs<ExtArgs>
+    mostDotdDriver?: boolean | User$mostDotdDriverArgs<ExtArgs>
     votes?: boolean | User$votesArgs<ExtArgs>
     seasonVotes?: boolean | User$seasonVotesArgs<ExtArgs>
     raceScores?: boolean | User$raceScoresArgs<ExtArgs>
@@ -4132,10 +4321,16 @@ export namespace Prisma {
   export type UserIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     team?: boolean | User$teamArgs<ExtArgs>
     favoriteDriver?: boolean | User$favoriteDriverArgs<ExtArgs>
+    fastestLapDriver?: boolean | User$fastestLapDriverArgs<ExtArgs>
+    fastestPitstopTeam?: boolean | User$fastestPitstopTeamArgs<ExtArgs>
+    mostDotdDriver?: boolean | User$mostDotdDriverArgs<ExtArgs>
   }
   export type UserIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     team?: boolean | User$teamArgs<ExtArgs>
     favoriteDriver?: boolean | User$favoriteDriverArgs<ExtArgs>
+    fastestLapDriver?: boolean | User$fastestLapDriverArgs<ExtArgs>
+    fastestPitstopTeam?: boolean | User$fastestPitstopTeamArgs<ExtArgs>
+    mostDotdDriver?: boolean | User$mostDotdDriverArgs<ExtArgs>
   }
 
   export type $UserPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -4143,6 +4338,9 @@ export namespace Prisma {
     objects: {
       team: Prisma.$TeamPayload<ExtArgs> | null
       favoriteDriver: Prisma.$DriverPayload<ExtArgs> | null
+      fastestLapDriver: Prisma.$DriverPayload<ExtArgs> | null
+      fastestPitstopTeam: Prisma.$TeamPayload<ExtArgs> | null
+      mostDotdDriver: Prisma.$DriverPayload<ExtArgs> | null
       votes: Prisma.$VotePayload<ExtArgs>[]
       seasonVotes: Prisma.$SeasonVotePayload<ExtArgs>[]
       raceScores: Prisma.$RaceScorePayload<ExtArgs>[]
@@ -4155,6 +4353,12 @@ export namespace Prisma {
       isAdmin: boolean
       teamId: string | null
       favoriteDriverId: string | null
+      fastestLapDriverId: string | null
+      fastestPitstopTeamId: string | null
+      mostDotdDriverId: string | null
+      mostDnfRange: string | null
+      firstRaceCollision: boolean | null
+      firstRaceRain: boolean | null
       avatar: string | null
       createdAt: Date
       updatedAt: Date
@@ -4554,6 +4758,9 @@ export namespace Prisma {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     team<T extends User$teamArgs<ExtArgs> = {}>(args?: Subset<T, User$teamArgs<ExtArgs>>): Prisma__TeamClient<$Result.GetResult<Prisma.$TeamPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     favoriteDriver<T extends User$favoriteDriverArgs<ExtArgs> = {}>(args?: Subset<T, User$favoriteDriverArgs<ExtArgs>>): Prisma__DriverClient<$Result.GetResult<Prisma.$DriverPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    fastestLapDriver<T extends User$fastestLapDriverArgs<ExtArgs> = {}>(args?: Subset<T, User$fastestLapDriverArgs<ExtArgs>>): Prisma__DriverClient<$Result.GetResult<Prisma.$DriverPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    fastestPitstopTeam<T extends User$fastestPitstopTeamArgs<ExtArgs> = {}>(args?: Subset<T, User$fastestPitstopTeamArgs<ExtArgs>>): Prisma__TeamClient<$Result.GetResult<Prisma.$TeamPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    mostDotdDriver<T extends User$mostDotdDriverArgs<ExtArgs> = {}>(args?: Subset<T, User$mostDotdDriverArgs<ExtArgs>>): Prisma__DriverClient<$Result.GetResult<Prisma.$DriverPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     votes<T extends User$votesArgs<ExtArgs> = {}>(args?: Subset<T, User$votesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$VotePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     seasonVotes<T extends User$seasonVotesArgs<ExtArgs> = {}>(args?: Subset<T, User$seasonVotesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SeasonVotePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     raceScores<T extends User$raceScoresArgs<ExtArgs> = {}>(args?: Subset<T, User$raceScoresArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RaceScorePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -4593,6 +4800,12 @@ export namespace Prisma {
     readonly isAdmin: FieldRef<"User", 'Boolean'>
     readonly teamId: FieldRef<"User", 'String'>
     readonly favoriteDriverId: FieldRef<"User", 'String'>
+    readonly fastestLapDriverId: FieldRef<"User", 'String'>
+    readonly fastestPitstopTeamId: FieldRef<"User", 'String'>
+    readonly mostDotdDriverId: FieldRef<"User", 'String'>
+    readonly mostDnfRange: FieldRef<"User", 'String'>
+    readonly firstRaceCollision: FieldRef<"User", 'Boolean'>
+    readonly firstRaceRain: FieldRef<"User", 'Boolean'>
     readonly avatar: FieldRef<"User", 'String'>
     readonly createdAt: FieldRef<"User", 'DateTime'>
     readonly updatedAt: FieldRef<"User", 'DateTime'>
@@ -5014,6 +5227,63 @@ export namespace Prisma {
    * User.favoriteDriver
    */
   export type User$favoriteDriverArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Driver
+     */
+    select?: DriverSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Driver
+     */
+    omit?: DriverOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DriverInclude<ExtArgs> | null
+    where?: DriverWhereInput
+  }
+
+  /**
+   * User.fastestLapDriver
+   */
+  export type User$fastestLapDriverArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Driver
+     */
+    select?: DriverSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Driver
+     */
+    omit?: DriverOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DriverInclude<ExtArgs> | null
+    where?: DriverWhereInput
+  }
+
+  /**
+   * User.fastestPitstopTeam
+   */
+  export type User$fastestPitstopTeamArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Team
+     */
+    select?: TeamSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Team
+     */
+    omit?: TeamOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TeamInclude<ExtArgs> | null
+    where?: TeamWhereInput
+  }
+
+  /**
+   * User.mostDotdDriver
+   */
+  export type User$mostDotdDriverArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
      * Select specific fields to fetch from the Driver
      */
@@ -9682,6 +9952,12 @@ export namespace Prisma {
     isAdmin: 'isAdmin',
     teamId: 'teamId',
     favoriteDriverId: 'favoriteDriverId',
+    fastestLapDriverId: 'fastestLapDriverId',
+    fastestPitstopTeamId: 'fastestPitstopTeamId',
+    mostDotdDriverId: 'mostDotdDriverId',
+    mostDnfRange: 'mostDnfRange',
+    firstRaceCollision: 'firstRaceCollision',
+    firstRaceRain: 'firstRaceRain',
     avatar: 'avatar',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
@@ -9879,6 +10155,7 @@ export namespace Prisma {
     name?: StringFilter<"Team"> | string
     color?: StringNullableFilter<"Team"> | string | null
     users?: UserListRelationFilter
+    fastestPitstopUsers?: UserListRelationFilter
     drivers?: DriverListRelationFilter
   }
 
@@ -9887,6 +10164,7 @@ export namespace Prisma {
     name?: SortOrder
     color?: SortOrderInput | SortOrder
     users?: UserOrderByRelationAggregateInput
+    fastestPitstopUsers?: UserOrderByRelationAggregateInput
     drivers?: DriverOrderByRelationAggregateInput
   }
 
@@ -9898,6 +10176,7 @@ export namespace Prisma {
     NOT?: TeamWhereInput | TeamWhereInput[]
     color?: StringNullableFilter<"Team"> | string | null
     users?: UserListRelationFilter
+    fastestPitstopUsers?: UserListRelationFilter
     drivers?: DriverListRelationFilter
   }, "id" | "name">
 
@@ -9935,6 +10214,8 @@ export namespace Prisma {
     votes?: VoteListRelationFilter
     seasonVotes?: SeasonVoteListRelationFilter
     favorited?: UserListRelationFilter
+    fastestLapUsers?: UserListRelationFilter
+    mostDotdUsers?: UserListRelationFilter
   }
 
   export type DriverOrderByWithRelationInput = {
@@ -9950,6 +10231,8 @@ export namespace Prisma {
     votes?: VoteOrderByRelationAggregateInput
     seasonVotes?: SeasonVoteOrderByRelationAggregateInput
     favorited?: UserOrderByRelationAggregateInput
+    fastestLapUsers?: UserOrderByRelationAggregateInput
+    mostDotdUsers?: UserOrderByRelationAggregateInput
   }
 
   export type DriverWhereUniqueInput = Prisma.AtLeast<{
@@ -9968,6 +10251,8 @@ export namespace Prisma {
     votes?: VoteListRelationFilter
     seasonVotes?: SeasonVoteListRelationFilter
     favorited?: UserListRelationFilter
+    fastestLapUsers?: UserListRelationFilter
+    mostDotdUsers?: UserListRelationFilter
   }, "slug">
 
   export type DriverOrderByWithAggregationInput = {
@@ -10011,11 +10296,20 @@ export namespace Prisma {
     isAdmin?: BoolFilter<"User"> | boolean
     teamId?: StringNullableFilter<"User"> | string | null
     favoriteDriverId?: StringNullableFilter<"User"> | string | null
+    fastestLapDriverId?: StringNullableFilter<"User"> | string | null
+    fastestPitstopTeamId?: StringNullableFilter<"User"> | string | null
+    mostDotdDriverId?: StringNullableFilter<"User"> | string | null
+    mostDnfRange?: StringNullableFilter<"User"> | string | null
+    firstRaceCollision?: BoolNullableFilter<"User"> | boolean | null
+    firstRaceRain?: BoolNullableFilter<"User"> | boolean | null
     avatar?: StringNullableFilter<"User"> | string | null
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
     team?: XOR<TeamNullableScalarRelationFilter, TeamWhereInput> | null
     favoriteDriver?: XOR<DriverNullableScalarRelationFilter, DriverWhereInput> | null
+    fastestLapDriver?: XOR<DriverNullableScalarRelationFilter, DriverWhereInput> | null
+    fastestPitstopTeam?: XOR<TeamNullableScalarRelationFilter, TeamWhereInput> | null
+    mostDotdDriver?: XOR<DriverNullableScalarRelationFilter, DriverWhereInput> | null
     votes?: VoteListRelationFilter
     seasonVotes?: SeasonVoteListRelationFilter
     raceScores?: RaceScoreListRelationFilter
@@ -10029,11 +10323,20 @@ export namespace Prisma {
     isAdmin?: SortOrder
     teamId?: SortOrderInput | SortOrder
     favoriteDriverId?: SortOrderInput | SortOrder
+    fastestLapDriverId?: SortOrderInput | SortOrder
+    fastestPitstopTeamId?: SortOrderInput | SortOrder
+    mostDotdDriverId?: SortOrderInput | SortOrder
+    mostDnfRange?: SortOrderInput | SortOrder
+    firstRaceCollision?: SortOrderInput | SortOrder
+    firstRaceRain?: SortOrderInput | SortOrder
     avatar?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     team?: TeamOrderByWithRelationInput
     favoriteDriver?: DriverOrderByWithRelationInput
+    fastestLapDriver?: DriverOrderByWithRelationInput
+    fastestPitstopTeam?: TeamOrderByWithRelationInput
+    mostDotdDriver?: DriverOrderByWithRelationInput
     votes?: VoteOrderByRelationAggregateInput
     seasonVotes?: SeasonVoteOrderByRelationAggregateInput
     raceScores?: RaceScoreOrderByRelationAggregateInput
@@ -10050,11 +10353,20 @@ export namespace Prisma {
     isAdmin?: BoolFilter<"User"> | boolean
     teamId?: StringNullableFilter<"User"> | string | null
     favoriteDriverId?: StringNullableFilter<"User"> | string | null
+    fastestLapDriverId?: StringNullableFilter<"User"> | string | null
+    fastestPitstopTeamId?: StringNullableFilter<"User"> | string | null
+    mostDotdDriverId?: StringNullableFilter<"User"> | string | null
+    mostDnfRange?: StringNullableFilter<"User"> | string | null
+    firstRaceCollision?: BoolNullableFilter<"User"> | boolean | null
+    firstRaceRain?: BoolNullableFilter<"User"> | boolean | null
     avatar?: StringNullableFilter<"User"> | string | null
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
     team?: XOR<TeamNullableScalarRelationFilter, TeamWhereInput> | null
     favoriteDriver?: XOR<DriverNullableScalarRelationFilter, DriverWhereInput> | null
+    fastestLapDriver?: XOR<DriverNullableScalarRelationFilter, DriverWhereInput> | null
+    fastestPitstopTeam?: XOR<TeamNullableScalarRelationFilter, TeamWhereInput> | null
+    mostDotdDriver?: XOR<DriverNullableScalarRelationFilter, DriverWhereInput> | null
     votes?: VoteListRelationFilter
     seasonVotes?: SeasonVoteListRelationFilter
     raceScores?: RaceScoreListRelationFilter
@@ -10068,6 +10380,12 @@ export namespace Prisma {
     isAdmin?: SortOrder
     teamId?: SortOrderInput | SortOrder
     favoriteDriverId?: SortOrderInput | SortOrder
+    fastestLapDriverId?: SortOrderInput | SortOrder
+    fastestPitstopTeamId?: SortOrderInput | SortOrder
+    mostDotdDriverId?: SortOrderInput | SortOrder
+    mostDnfRange?: SortOrderInput | SortOrder
+    firstRaceCollision?: SortOrderInput | SortOrder
+    firstRaceRain?: SortOrderInput | SortOrder
     avatar?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -10087,6 +10405,12 @@ export namespace Prisma {
     isAdmin?: BoolWithAggregatesFilter<"User"> | boolean
     teamId?: StringNullableWithAggregatesFilter<"User"> | string | null
     favoriteDriverId?: StringNullableWithAggregatesFilter<"User"> | string | null
+    fastestLapDriverId?: StringNullableWithAggregatesFilter<"User"> | string | null
+    fastestPitstopTeamId?: StringNullableWithAggregatesFilter<"User"> | string | null
+    mostDotdDriverId?: StringNullableWithAggregatesFilter<"User"> | string | null
+    mostDnfRange?: StringNullableWithAggregatesFilter<"User"> | string | null
+    firstRaceCollision?: BoolNullableWithAggregatesFilter<"User"> | boolean | null
+    firstRaceRain?: BoolNullableWithAggregatesFilter<"User"> | boolean | null
     avatar?: StringNullableWithAggregatesFilter<"User"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
@@ -10390,6 +10714,7 @@ export namespace Prisma {
     name: string
     color?: string | null
     users?: UserCreateNestedManyWithoutTeamInput
+    fastestPitstopUsers?: UserCreateNestedManyWithoutFastestPitstopTeamInput
     drivers?: DriverCreateNestedManyWithoutTeamInput
   }
 
@@ -10398,6 +10723,7 @@ export namespace Prisma {
     name: string
     color?: string | null
     users?: UserUncheckedCreateNestedManyWithoutTeamInput
+    fastestPitstopUsers?: UserUncheckedCreateNestedManyWithoutFastestPitstopTeamInput
     drivers?: DriverUncheckedCreateNestedManyWithoutTeamInput
   }
 
@@ -10406,6 +10732,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     color?: NullableStringFieldUpdateOperationsInput | string | null
     users?: UserUpdateManyWithoutTeamNestedInput
+    fastestPitstopUsers?: UserUpdateManyWithoutFastestPitstopTeamNestedInput
     drivers?: DriverUpdateManyWithoutTeamNestedInput
   }
 
@@ -10414,6 +10741,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     color?: NullableStringFieldUpdateOperationsInput | string | null
     users?: UserUncheckedUpdateManyWithoutTeamNestedInput
+    fastestPitstopUsers?: UserUncheckedUpdateManyWithoutFastestPitstopTeamNestedInput
     drivers?: DriverUncheckedUpdateManyWithoutTeamNestedInput
   }
 
@@ -10447,6 +10775,8 @@ export namespace Prisma {
     votes?: VoteCreateNestedManyWithoutDriverInput
     seasonVotes?: SeasonVoteCreateNestedManyWithoutDriverInput
     favorited?: UserCreateNestedManyWithoutFavoriteDriverInput
+    fastestLapUsers?: UserCreateNestedManyWithoutFastestLapDriverInput
+    mostDotdUsers?: UserCreateNestedManyWithoutMostDotdDriverInput
   }
 
   export type DriverUncheckedCreateInput = {
@@ -10461,6 +10791,8 @@ export namespace Prisma {
     votes?: VoteUncheckedCreateNestedManyWithoutDriverInput
     seasonVotes?: SeasonVoteUncheckedCreateNestedManyWithoutDriverInput
     favorited?: UserUncheckedCreateNestedManyWithoutFavoriteDriverInput
+    fastestLapUsers?: UserUncheckedCreateNestedManyWithoutFastestLapDriverInput
+    mostDotdUsers?: UserUncheckedCreateNestedManyWithoutMostDotdDriverInput
   }
 
   export type DriverUpdateInput = {
@@ -10475,6 +10807,8 @@ export namespace Prisma {
     votes?: VoteUpdateManyWithoutDriverNestedInput
     seasonVotes?: SeasonVoteUpdateManyWithoutDriverNestedInput
     favorited?: UserUpdateManyWithoutFavoriteDriverNestedInput
+    fastestLapUsers?: UserUpdateManyWithoutFastestLapDriverNestedInput
+    mostDotdUsers?: UserUpdateManyWithoutMostDotdDriverNestedInput
   }
 
   export type DriverUncheckedUpdateInput = {
@@ -10489,6 +10823,8 @@ export namespace Prisma {
     votes?: VoteUncheckedUpdateManyWithoutDriverNestedInput
     seasonVotes?: SeasonVoteUncheckedUpdateManyWithoutDriverNestedInput
     favorited?: UserUncheckedUpdateManyWithoutFavoriteDriverNestedInput
+    fastestLapUsers?: UserUncheckedUpdateManyWithoutFastestLapDriverNestedInput
+    mostDotdUsers?: UserUncheckedUpdateManyWithoutMostDotdDriverNestedInput
   }
 
   export type DriverCreateManyInput = {
@@ -10529,11 +10865,17 @@ export namespace Prisma {
     password: string
     name?: string | null
     isAdmin?: boolean
+    mostDnfRange?: string | null
+    firstRaceCollision?: boolean | null
+    firstRaceRain?: boolean | null
     avatar?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     team?: TeamCreateNestedOneWithoutUsersInput
     favoriteDriver?: DriverCreateNestedOneWithoutFavoritedInput
+    fastestLapDriver?: DriverCreateNestedOneWithoutFastestLapUsersInput
+    fastestPitstopTeam?: TeamCreateNestedOneWithoutFastestPitstopUsersInput
+    mostDotdDriver?: DriverCreateNestedOneWithoutMostDotdUsersInput
     votes?: VoteCreateNestedManyWithoutUserInput
     seasonVotes?: SeasonVoteCreateNestedManyWithoutUserInput
     raceScores?: RaceScoreCreateNestedManyWithoutUserInput
@@ -10547,6 +10889,12 @@ export namespace Prisma {
     isAdmin?: boolean
     teamId?: string | null
     favoriteDriverId?: string | null
+    fastestLapDriverId?: string | null
+    fastestPitstopTeamId?: string | null
+    mostDotdDriverId?: string | null
+    mostDnfRange?: string | null
+    firstRaceCollision?: boolean | null
+    firstRaceRain?: boolean | null
     avatar?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -10561,11 +10909,17 @@ export namespace Prisma {
     password?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
     isAdmin?: BoolFieldUpdateOperationsInput | boolean
+    mostDnfRange?: NullableStringFieldUpdateOperationsInput | string | null
+    firstRaceCollision?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    firstRaceRain?: NullableBoolFieldUpdateOperationsInput | boolean | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     team?: TeamUpdateOneWithoutUsersNestedInput
     favoriteDriver?: DriverUpdateOneWithoutFavoritedNestedInput
+    fastestLapDriver?: DriverUpdateOneWithoutFastestLapUsersNestedInput
+    fastestPitstopTeam?: TeamUpdateOneWithoutFastestPitstopUsersNestedInput
+    mostDotdDriver?: DriverUpdateOneWithoutMostDotdUsersNestedInput
     votes?: VoteUpdateManyWithoutUserNestedInput
     seasonVotes?: SeasonVoteUpdateManyWithoutUserNestedInput
     raceScores?: RaceScoreUpdateManyWithoutUserNestedInput
@@ -10579,6 +10933,12 @@ export namespace Prisma {
     isAdmin?: BoolFieldUpdateOperationsInput | boolean
     teamId?: NullableStringFieldUpdateOperationsInput | string | null
     favoriteDriverId?: NullableStringFieldUpdateOperationsInput | string | null
+    fastestLapDriverId?: NullableStringFieldUpdateOperationsInput | string | null
+    fastestPitstopTeamId?: NullableStringFieldUpdateOperationsInput | string | null
+    mostDotdDriverId?: NullableStringFieldUpdateOperationsInput | string | null
+    mostDnfRange?: NullableStringFieldUpdateOperationsInput | string | null
+    firstRaceCollision?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    firstRaceRain?: NullableBoolFieldUpdateOperationsInput | boolean | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -10595,6 +10955,12 @@ export namespace Prisma {
     isAdmin?: boolean
     teamId?: string | null
     favoriteDriverId?: string | null
+    fastestLapDriverId?: string | null
+    fastestPitstopTeamId?: string | null
+    mostDotdDriverId?: string | null
+    mostDnfRange?: string | null
+    firstRaceCollision?: boolean | null
+    firstRaceRain?: boolean | null
     avatar?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -10606,6 +10972,9 @@ export namespace Prisma {
     password?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
     isAdmin?: BoolFieldUpdateOperationsInput | boolean
+    mostDnfRange?: NullableStringFieldUpdateOperationsInput | string | null
+    firstRaceCollision?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    firstRaceRain?: NullableBoolFieldUpdateOperationsInput | boolean | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -10619,6 +10988,12 @@ export namespace Prisma {
     isAdmin?: BoolFieldUpdateOperationsInput | boolean
     teamId?: NullableStringFieldUpdateOperationsInput | string | null
     favoriteDriverId?: NullableStringFieldUpdateOperationsInput | string | null
+    fastestLapDriverId?: NullableStringFieldUpdateOperationsInput | string | null
+    fastestPitstopTeamId?: NullableStringFieldUpdateOperationsInput | string | null
+    mostDotdDriverId?: NullableStringFieldUpdateOperationsInput | string | null
+    mostDnfRange?: NullableStringFieldUpdateOperationsInput | string | null
+    firstRaceCollision?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    firstRaceRain?: NullableBoolFieldUpdateOperationsInput | boolean | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -11138,6 +11513,11 @@ export namespace Prisma {
     _max?: NestedBoolFilter<$PrismaModel>
   }
 
+  export type BoolNullableFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel> | null
+    not?: NestedBoolNullableFilter<$PrismaModel> | boolean | null
+  }
+
   export type DateTimeFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
@@ -11177,6 +11557,12 @@ export namespace Prisma {
     isAdmin?: SortOrder
     teamId?: SortOrder
     favoriteDriverId?: SortOrder
+    fastestLapDriverId?: SortOrder
+    fastestPitstopTeamId?: SortOrder
+    mostDotdDriverId?: SortOrder
+    mostDnfRange?: SortOrder
+    firstRaceCollision?: SortOrder
+    firstRaceRain?: SortOrder
     avatar?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -11190,6 +11576,12 @@ export namespace Prisma {
     isAdmin?: SortOrder
     teamId?: SortOrder
     favoriteDriverId?: SortOrder
+    fastestLapDriverId?: SortOrder
+    fastestPitstopTeamId?: SortOrder
+    mostDotdDriverId?: SortOrder
+    mostDnfRange?: SortOrder
+    firstRaceCollision?: SortOrder
+    firstRaceRain?: SortOrder
     avatar?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -11203,9 +11595,23 @@ export namespace Prisma {
     isAdmin?: SortOrder
     teamId?: SortOrder
     favoriteDriverId?: SortOrder
+    fastestLapDriverId?: SortOrder
+    fastestPitstopTeamId?: SortOrder
+    mostDotdDriverId?: SortOrder
+    mostDnfRange?: SortOrder
+    firstRaceCollision?: SortOrder
+    firstRaceRain?: SortOrder
     avatar?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+  }
+
+  export type BoolNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel> | null
+    not?: NestedBoolNullableWithAggregatesFilter<$PrismaModel> | boolean | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedBoolNullableFilter<$PrismaModel>
+    _max?: NestedBoolNullableFilter<$PrismaModel>
   }
 
   export type DateTimeWithAggregatesFilter<$PrismaModel = never> = {
@@ -11473,6 +11879,13 @@ export namespace Prisma {
     connect?: UserWhereUniqueInput | UserWhereUniqueInput[]
   }
 
+  export type UserCreateNestedManyWithoutFastestPitstopTeamInput = {
+    create?: XOR<UserCreateWithoutFastestPitstopTeamInput, UserUncheckedCreateWithoutFastestPitstopTeamInput> | UserCreateWithoutFastestPitstopTeamInput[] | UserUncheckedCreateWithoutFastestPitstopTeamInput[]
+    connectOrCreate?: UserCreateOrConnectWithoutFastestPitstopTeamInput | UserCreateOrConnectWithoutFastestPitstopTeamInput[]
+    createMany?: UserCreateManyFastestPitstopTeamInputEnvelope
+    connect?: UserWhereUniqueInput | UserWhereUniqueInput[]
+  }
+
   export type DriverCreateNestedManyWithoutTeamInput = {
     create?: XOR<DriverCreateWithoutTeamInput, DriverUncheckedCreateWithoutTeamInput> | DriverCreateWithoutTeamInput[] | DriverUncheckedCreateWithoutTeamInput[]
     connectOrCreate?: DriverCreateOrConnectWithoutTeamInput | DriverCreateOrConnectWithoutTeamInput[]
@@ -11484,6 +11897,13 @@ export namespace Prisma {
     create?: XOR<UserCreateWithoutTeamInput, UserUncheckedCreateWithoutTeamInput> | UserCreateWithoutTeamInput[] | UserUncheckedCreateWithoutTeamInput[]
     connectOrCreate?: UserCreateOrConnectWithoutTeamInput | UserCreateOrConnectWithoutTeamInput[]
     createMany?: UserCreateManyTeamInputEnvelope
+    connect?: UserWhereUniqueInput | UserWhereUniqueInput[]
+  }
+
+  export type UserUncheckedCreateNestedManyWithoutFastestPitstopTeamInput = {
+    create?: XOR<UserCreateWithoutFastestPitstopTeamInput, UserUncheckedCreateWithoutFastestPitstopTeamInput> | UserCreateWithoutFastestPitstopTeamInput[] | UserUncheckedCreateWithoutFastestPitstopTeamInput[]
+    connectOrCreate?: UserCreateOrConnectWithoutFastestPitstopTeamInput | UserCreateOrConnectWithoutFastestPitstopTeamInput[]
+    createMany?: UserCreateManyFastestPitstopTeamInputEnvelope
     connect?: UserWhereUniqueInput | UserWhereUniqueInput[]
   }
 
@@ -11516,6 +11936,20 @@ export namespace Prisma {
     deleteMany?: UserScalarWhereInput | UserScalarWhereInput[]
   }
 
+  export type UserUpdateManyWithoutFastestPitstopTeamNestedInput = {
+    create?: XOR<UserCreateWithoutFastestPitstopTeamInput, UserUncheckedCreateWithoutFastestPitstopTeamInput> | UserCreateWithoutFastestPitstopTeamInput[] | UserUncheckedCreateWithoutFastestPitstopTeamInput[]
+    connectOrCreate?: UserCreateOrConnectWithoutFastestPitstopTeamInput | UserCreateOrConnectWithoutFastestPitstopTeamInput[]
+    upsert?: UserUpsertWithWhereUniqueWithoutFastestPitstopTeamInput | UserUpsertWithWhereUniqueWithoutFastestPitstopTeamInput[]
+    createMany?: UserCreateManyFastestPitstopTeamInputEnvelope
+    set?: UserWhereUniqueInput | UserWhereUniqueInput[]
+    disconnect?: UserWhereUniqueInput | UserWhereUniqueInput[]
+    delete?: UserWhereUniqueInput | UserWhereUniqueInput[]
+    connect?: UserWhereUniqueInput | UserWhereUniqueInput[]
+    update?: UserUpdateWithWhereUniqueWithoutFastestPitstopTeamInput | UserUpdateWithWhereUniqueWithoutFastestPitstopTeamInput[]
+    updateMany?: UserUpdateManyWithWhereWithoutFastestPitstopTeamInput | UserUpdateManyWithWhereWithoutFastestPitstopTeamInput[]
+    deleteMany?: UserScalarWhereInput | UserScalarWhereInput[]
+  }
+
   export type DriverUpdateManyWithoutTeamNestedInput = {
     create?: XOR<DriverCreateWithoutTeamInput, DriverUncheckedCreateWithoutTeamInput> | DriverCreateWithoutTeamInput[] | DriverUncheckedCreateWithoutTeamInput[]
     connectOrCreate?: DriverCreateOrConnectWithoutTeamInput | DriverCreateOrConnectWithoutTeamInput[]
@@ -11541,6 +11975,20 @@ export namespace Prisma {
     connect?: UserWhereUniqueInput | UserWhereUniqueInput[]
     update?: UserUpdateWithWhereUniqueWithoutTeamInput | UserUpdateWithWhereUniqueWithoutTeamInput[]
     updateMany?: UserUpdateManyWithWhereWithoutTeamInput | UserUpdateManyWithWhereWithoutTeamInput[]
+    deleteMany?: UserScalarWhereInput | UserScalarWhereInput[]
+  }
+
+  export type UserUncheckedUpdateManyWithoutFastestPitstopTeamNestedInput = {
+    create?: XOR<UserCreateWithoutFastestPitstopTeamInput, UserUncheckedCreateWithoutFastestPitstopTeamInput> | UserCreateWithoutFastestPitstopTeamInput[] | UserUncheckedCreateWithoutFastestPitstopTeamInput[]
+    connectOrCreate?: UserCreateOrConnectWithoutFastestPitstopTeamInput | UserCreateOrConnectWithoutFastestPitstopTeamInput[]
+    upsert?: UserUpsertWithWhereUniqueWithoutFastestPitstopTeamInput | UserUpsertWithWhereUniqueWithoutFastestPitstopTeamInput[]
+    createMany?: UserCreateManyFastestPitstopTeamInputEnvelope
+    set?: UserWhereUniqueInput | UserWhereUniqueInput[]
+    disconnect?: UserWhereUniqueInput | UserWhereUniqueInput[]
+    delete?: UserWhereUniqueInput | UserWhereUniqueInput[]
+    connect?: UserWhereUniqueInput | UserWhereUniqueInput[]
+    update?: UserUpdateWithWhereUniqueWithoutFastestPitstopTeamInput | UserUpdateWithWhereUniqueWithoutFastestPitstopTeamInput[]
+    updateMany?: UserUpdateManyWithWhereWithoutFastestPitstopTeamInput | UserUpdateManyWithWhereWithoutFastestPitstopTeamInput[]
     deleteMany?: UserScalarWhereInput | UserScalarWhereInput[]
   }
 
@@ -11585,6 +12033,20 @@ export namespace Prisma {
     connect?: UserWhereUniqueInput | UserWhereUniqueInput[]
   }
 
+  export type UserCreateNestedManyWithoutFastestLapDriverInput = {
+    create?: XOR<UserCreateWithoutFastestLapDriverInput, UserUncheckedCreateWithoutFastestLapDriverInput> | UserCreateWithoutFastestLapDriverInput[] | UserUncheckedCreateWithoutFastestLapDriverInput[]
+    connectOrCreate?: UserCreateOrConnectWithoutFastestLapDriverInput | UserCreateOrConnectWithoutFastestLapDriverInput[]
+    createMany?: UserCreateManyFastestLapDriverInputEnvelope
+    connect?: UserWhereUniqueInput | UserWhereUniqueInput[]
+  }
+
+  export type UserCreateNestedManyWithoutMostDotdDriverInput = {
+    create?: XOR<UserCreateWithoutMostDotdDriverInput, UserUncheckedCreateWithoutMostDotdDriverInput> | UserCreateWithoutMostDotdDriverInput[] | UserUncheckedCreateWithoutMostDotdDriverInput[]
+    connectOrCreate?: UserCreateOrConnectWithoutMostDotdDriverInput | UserCreateOrConnectWithoutMostDotdDriverInput[]
+    createMany?: UserCreateManyMostDotdDriverInputEnvelope
+    connect?: UserWhereUniqueInput | UserWhereUniqueInput[]
+  }
+
   export type VoteUncheckedCreateNestedManyWithoutDriverInput = {
     create?: XOR<VoteCreateWithoutDriverInput, VoteUncheckedCreateWithoutDriverInput> | VoteCreateWithoutDriverInput[] | VoteUncheckedCreateWithoutDriverInput[]
     connectOrCreate?: VoteCreateOrConnectWithoutDriverInput | VoteCreateOrConnectWithoutDriverInput[]
@@ -11603,6 +12065,20 @@ export namespace Prisma {
     create?: XOR<UserCreateWithoutFavoriteDriverInput, UserUncheckedCreateWithoutFavoriteDriverInput> | UserCreateWithoutFavoriteDriverInput[] | UserUncheckedCreateWithoutFavoriteDriverInput[]
     connectOrCreate?: UserCreateOrConnectWithoutFavoriteDriverInput | UserCreateOrConnectWithoutFavoriteDriverInput[]
     createMany?: UserCreateManyFavoriteDriverInputEnvelope
+    connect?: UserWhereUniqueInput | UserWhereUniqueInput[]
+  }
+
+  export type UserUncheckedCreateNestedManyWithoutFastestLapDriverInput = {
+    create?: XOR<UserCreateWithoutFastestLapDriverInput, UserUncheckedCreateWithoutFastestLapDriverInput> | UserCreateWithoutFastestLapDriverInput[] | UserUncheckedCreateWithoutFastestLapDriverInput[]
+    connectOrCreate?: UserCreateOrConnectWithoutFastestLapDriverInput | UserCreateOrConnectWithoutFastestLapDriverInput[]
+    createMany?: UserCreateManyFastestLapDriverInputEnvelope
+    connect?: UserWhereUniqueInput | UserWhereUniqueInput[]
+  }
+
+  export type UserUncheckedCreateNestedManyWithoutMostDotdDriverInput = {
+    create?: XOR<UserCreateWithoutMostDotdDriverInput, UserUncheckedCreateWithoutMostDotdDriverInput> | UserCreateWithoutMostDotdDriverInput[] | UserUncheckedCreateWithoutMostDotdDriverInput[]
+    connectOrCreate?: UserCreateOrConnectWithoutMostDotdDriverInput | UserCreateOrConnectWithoutMostDotdDriverInput[]
+    createMany?: UserCreateManyMostDotdDriverInputEnvelope
     connect?: UserWhereUniqueInput | UserWhereUniqueInput[]
   }
 
@@ -11668,6 +12144,34 @@ export namespace Prisma {
     deleteMany?: UserScalarWhereInput | UserScalarWhereInput[]
   }
 
+  export type UserUpdateManyWithoutFastestLapDriverNestedInput = {
+    create?: XOR<UserCreateWithoutFastestLapDriverInput, UserUncheckedCreateWithoutFastestLapDriverInput> | UserCreateWithoutFastestLapDriverInput[] | UserUncheckedCreateWithoutFastestLapDriverInput[]
+    connectOrCreate?: UserCreateOrConnectWithoutFastestLapDriverInput | UserCreateOrConnectWithoutFastestLapDriverInput[]
+    upsert?: UserUpsertWithWhereUniqueWithoutFastestLapDriverInput | UserUpsertWithWhereUniqueWithoutFastestLapDriverInput[]
+    createMany?: UserCreateManyFastestLapDriverInputEnvelope
+    set?: UserWhereUniqueInput | UserWhereUniqueInput[]
+    disconnect?: UserWhereUniqueInput | UserWhereUniqueInput[]
+    delete?: UserWhereUniqueInput | UserWhereUniqueInput[]
+    connect?: UserWhereUniqueInput | UserWhereUniqueInput[]
+    update?: UserUpdateWithWhereUniqueWithoutFastestLapDriverInput | UserUpdateWithWhereUniqueWithoutFastestLapDriverInput[]
+    updateMany?: UserUpdateManyWithWhereWithoutFastestLapDriverInput | UserUpdateManyWithWhereWithoutFastestLapDriverInput[]
+    deleteMany?: UserScalarWhereInput | UserScalarWhereInput[]
+  }
+
+  export type UserUpdateManyWithoutMostDotdDriverNestedInput = {
+    create?: XOR<UserCreateWithoutMostDotdDriverInput, UserUncheckedCreateWithoutMostDotdDriverInput> | UserCreateWithoutMostDotdDriverInput[] | UserUncheckedCreateWithoutMostDotdDriverInput[]
+    connectOrCreate?: UserCreateOrConnectWithoutMostDotdDriverInput | UserCreateOrConnectWithoutMostDotdDriverInput[]
+    upsert?: UserUpsertWithWhereUniqueWithoutMostDotdDriverInput | UserUpsertWithWhereUniqueWithoutMostDotdDriverInput[]
+    createMany?: UserCreateManyMostDotdDriverInputEnvelope
+    set?: UserWhereUniqueInput | UserWhereUniqueInput[]
+    disconnect?: UserWhereUniqueInput | UserWhereUniqueInput[]
+    delete?: UserWhereUniqueInput | UserWhereUniqueInput[]
+    connect?: UserWhereUniqueInput | UserWhereUniqueInput[]
+    update?: UserUpdateWithWhereUniqueWithoutMostDotdDriverInput | UserUpdateWithWhereUniqueWithoutMostDotdDriverInput[]
+    updateMany?: UserUpdateManyWithWhereWithoutMostDotdDriverInput | UserUpdateManyWithWhereWithoutMostDotdDriverInput[]
+    deleteMany?: UserScalarWhereInput | UserScalarWhereInput[]
+  }
+
   export type VoteUncheckedUpdateManyWithoutDriverNestedInput = {
     create?: XOR<VoteCreateWithoutDriverInput, VoteUncheckedCreateWithoutDriverInput> | VoteCreateWithoutDriverInput[] | VoteUncheckedCreateWithoutDriverInput[]
     connectOrCreate?: VoteCreateOrConnectWithoutDriverInput | VoteCreateOrConnectWithoutDriverInput[]
@@ -11710,6 +12214,34 @@ export namespace Prisma {
     deleteMany?: UserScalarWhereInput | UserScalarWhereInput[]
   }
 
+  export type UserUncheckedUpdateManyWithoutFastestLapDriverNestedInput = {
+    create?: XOR<UserCreateWithoutFastestLapDriverInput, UserUncheckedCreateWithoutFastestLapDriverInput> | UserCreateWithoutFastestLapDriverInput[] | UserUncheckedCreateWithoutFastestLapDriverInput[]
+    connectOrCreate?: UserCreateOrConnectWithoutFastestLapDriverInput | UserCreateOrConnectWithoutFastestLapDriverInput[]
+    upsert?: UserUpsertWithWhereUniqueWithoutFastestLapDriverInput | UserUpsertWithWhereUniqueWithoutFastestLapDriverInput[]
+    createMany?: UserCreateManyFastestLapDriverInputEnvelope
+    set?: UserWhereUniqueInput | UserWhereUniqueInput[]
+    disconnect?: UserWhereUniqueInput | UserWhereUniqueInput[]
+    delete?: UserWhereUniqueInput | UserWhereUniqueInput[]
+    connect?: UserWhereUniqueInput | UserWhereUniqueInput[]
+    update?: UserUpdateWithWhereUniqueWithoutFastestLapDriverInput | UserUpdateWithWhereUniqueWithoutFastestLapDriverInput[]
+    updateMany?: UserUpdateManyWithWhereWithoutFastestLapDriverInput | UserUpdateManyWithWhereWithoutFastestLapDriverInput[]
+    deleteMany?: UserScalarWhereInput | UserScalarWhereInput[]
+  }
+
+  export type UserUncheckedUpdateManyWithoutMostDotdDriverNestedInput = {
+    create?: XOR<UserCreateWithoutMostDotdDriverInput, UserUncheckedCreateWithoutMostDotdDriverInput> | UserCreateWithoutMostDotdDriverInput[] | UserUncheckedCreateWithoutMostDotdDriverInput[]
+    connectOrCreate?: UserCreateOrConnectWithoutMostDotdDriverInput | UserCreateOrConnectWithoutMostDotdDriverInput[]
+    upsert?: UserUpsertWithWhereUniqueWithoutMostDotdDriverInput | UserUpsertWithWhereUniqueWithoutMostDotdDriverInput[]
+    createMany?: UserCreateManyMostDotdDriverInputEnvelope
+    set?: UserWhereUniqueInput | UserWhereUniqueInput[]
+    disconnect?: UserWhereUniqueInput | UserWhereUniqueInput[]
+    delete?: UserWhereUniqueInput | UserWhereUniqueInput[]
+    connect?: UserWhereUniqueInput | UserWhereUniqueInput[]
+    update?: UserUpdateWithWhereUniqueWithoutMostDotdDriverInput | UserUpdateWithWhereUniqueWithoutMostDotdDriverInput[]
+    updateMany?: UserUpdateManyWithWhereWithoutMostDotdDriverInput | UserUpdateManyWithWhereWithoutMostDotdDriverInput[]
+    deleteMany?: UserScalarWhereInput | UserScalarWhereInput[]
+  }
+
   export type TeamCreateNestedOneWithoutUsersInput = {
     create?: XOR<TeamCreateWithoutUsersInput, TeamUncheckedCreateWithoutUsersInput>
     connectOrCreate?: TeamCreateOrConnectWithoutUsersInput
@@ -11719,6 +12251,24 @@ export namespace Prisma {
   export type DriverCreateNestedOneWithoutFavoritedInput = {
     create?: XOR<DriverCreateWithoutFavoritedInput, DriverUncheckedCreateWithoutFavoritedInput>
     connectOrCreate?: DriverCreateOrConnectWithoutFavoritedInput
+    connect?: DriverWhereUniqueInput
+  }
+
+  export type DriverCreateNestedOneWithoutFastestLapUsersInput = {
+    create?: XOR<DriverCreateWithoutFastestLapUsersInput, DriverUncheckedCreateWithoutFastestLapUsersInput>
+    connectOrCreate?: DriverCreateOrConnectWithoutFastestLapUsersInput
+    connect?: DriverWhereUniqueInput
+  }
+
+  export type TeamCreateNestedOneWithoutFastestPitstopUsersInput = {
+    create?: XOR<TeamCreateWithoutFastestPitstopUsersInput, TeamUncheckedCreateWithoutFastestPitstopUsersInput>
+    connectOrCreate?: TeamCreateOrConnectWithoutFastestPitstopUsersInput
+    connect?: TeamWhereUniqueInput
+  }
+
+  export type DriverCreateNestedOneWithoutMostDotdUsersInput = {
+    create?: XOR<DriverCreateWithoutMostDotdUsersInput, DriverUncheckedCreateWithoutMostDotdUsersInput>
+    connectOrCreate?: DriverCreateOrConnectWithoutMostDotdUsersInput
     connect?: DriverWhereUniqueInput
   }
 
@@ -11764,6 +12314,10 @@ export namespace Prisma {
     connect?: RaceScoreWhereUniqueInput | RaceScoreWhereUniqueInput[]
   }
 
+  export type NullableBoolFieldUpdateOperationsInput = {
+    set?: boolean | null
+  }
+
   export type DateTimeFieldUpdateOperationsInput = {
     set?: Date | string
   }
@@ -11786,6 +12340,36 @@ export namespace Prisma {
     delete?: DriverWhereInput | boolean
     connect?: DriverWhereUniqueInput
     update?: XOR<XOR<DriverUpdateToOneWithWhereWithoutFavoritedInput, DriverUpdateWithoutFavoritedInput>, DriverUncheckedUpdateWithoutFavoritedInput>
+  }
+
+  export type DriverUpdateOneWithoutFastestLapUsersNestedInput = {
+    create?: XOR<DriverCreateWithoutFastestLapUsersInput, DriverUncheckedCreateWithoutFastestLapUsersInput>
+    connectOrCreate?: DriverCreateOrConnectWithoutFastestLapUsersInput
+    upsert?: DriverUpsertWithoutFastestLapUsersInput
+    disconnect?: DriverWhereInput | boolean
+    delete?: DriverWhereInput | boolean
+    connect?: DriverWhereUniqueInput
+    update?: XOR<XOR<DriverUpdateToOneWithWhereWithoutFastestLapUsersInput, DriverUpdateWithoutFastestLapUsersInput>, DriverUncheckedUpdateWithoutFastestLapUsersInput>
+  }
+
+  export type TeamUpdateOneWithoutFastestPitstopUsersNestedInput = {
+    create?: XOR<TeamCreateWithoutFastestPitstopUsersInput, TeamUncheckedCreateWithoutFastestPitstopUsersInput>
+    connectOrCreate?: TeamCreateOrConnectWithoutFastestPitstopUsersInput
+    upsert?: TeamUpsertWithoutFastestPitstopUsersInput
+    disconnect?: TeamWhereInput | boolean
+    delete?: TeamWhereInput | boolean
+    connect?: TeamWhereUniqueInput
+    update?: XOR<XOR<TeamUpdateToOneWithWhereWithoutFastestPitstopUsersInput, TeamUpdateWithoutFastestPitstopUsersInput>, TeamUncheckedUpdateWithoutFastestPitstopUsersInput>
+  }
+
+  export type DriverUpdateOneWithoutMostDotdUsersNestedInput = {
+    create?: XOR<DriverCreateWithoutMostDotdUsersInput, DriverUncheckedCreateWithoutMostDotdUsersInput>
+    connectOrCreate?: DriverCreateOrConnectWithoutMostDotdUsersInput
+    upsert?: DriverUpsertWithoutMostDotdUsersInput
+    disconnect?: DriverWhereInput | boolean
+    delete?: DriverWhereInput | boolean
+    connect?: DriverWhereUniqueInput
+    update?: XOR<XOR<DriverUpdateToOneWithWhereWithoutMostDotdUsersInput, DriverUpdateWithoutMostDotdUsersInput>, DriverUncheckedUpdateWithoutMostDotdUsersInput>
   }
 
   export type VoteUpdateManyWithoutUserNestedInput = {
@@ -12131,6 +12715,11 @@ export namespace Prisma {
     _max?: NestedBoolFilter<$PrismaModel>
   }
 
+  export type NestedBoolNullableFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel> | null
+    not?: NestedBoolNullableFilter<$PrismaModel> | boolean | null
+  }
+
   export type NestedDateTimeFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
@@ -12140,6 +12729,14 @@ export namespace Prisma {
     gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     not?: NestedDateTimeFilter<$PrismaModel> | Date | string
+  }
+
+  export type NestedBoolNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel> | null
+    not?: NestedBoolNullableWithAggregatesFilter<$PrismaModel> | boolean | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedBoolNullableFilter<$PrismaModel>
+    _max?: NestedBoolNullableFilter<$PrismaModel>
   }
 
   export type NestedDateTimeWithAggregatesFilter<$PrismaModel = never> = {
@@ -12185,10 +12782,16 @@ export namespace Prisma {
     password: string
     name?: string | null
     isAdmin?: boolean
+    mostDnfRange?: string | null
+    firstRaceCollision?: boolean | null
+    firstRaceRain?: boolean | null
     avatar?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     favoriteDriver?: DriverCreateNestedOneWithoutFavoritedInput
+    fastestLapDriver?: DriverCreateNestedOneWithoutFastestLapUsersInput
+    fastestPitstopTeam?: TeamCreateNestedOneWithoutFastestPitstopUsersInput
+    mostDotdDriver?: DriverCreateNestedOneWithoutMostDotdUsersInput
     votes?: VoteCreateNestedManyWithoutUserInput
     seasonVotes?: SeasonVoteCreateNestedManyWithoutUserInput
     raceScores?: RaceScoreCreateNestedManyWithoutUserInput
@@ -12201,6 +12804,12 @@ export namespace Prisma {
     name?: string | null
     isAdmin?: boolean
     favoriteDriverId?: string | null
+    fastestLapDriverId?: string | null
+    fastestPitstopTeamId?: string | null
+    mostDotdDriverId?: string | null
+    mostDnfRange?: string | null
+    firstRaceCollision?: boolean | null
+    firstRaceRain?: boolean | null
     avatar?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -12219,6 +12828,58 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type UserCreateWithoutFastestPitstopTeamInput = {
+    id?: string
+    username: string
+    password: string
+    name?: string | null
+    isAdmin?: boolean
+    mostDnfRange?: string | null
+    firstRaceCollision?: boolean | null
+    firstRaceRain?: boolean | null
+    avatar?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    team?: TeamCreateNestedOneWithoutUsersInput
+    favoriteDriver?: DriverCreateNestedOneWithoutFavoritedInput
+    fastestLapDriver?: DriverCreateNestedOneWithoutFastestLapUsersInput
+    mostDotdDriver?: DriverCreateNestedOneWithoutMostDotdUsersInput
+    votes?: VoteCreateNestedManyWithoutUserInput
+    seasonVotes?: SeasonVoteCreateNestedManyWithoutUserInput
+    raceScores?: RaceScoreCreateNestedManyWithoutUserInput
+  }
+
+  export type UserUncheckedCreateWithoutFastestPitstopTeamInput = {
+    id?: string
+    username: string
+    password: string
+    name?: string | null
+    isAdmin?: boolean
+    teamId?: string | null
+    favoriteDriverId?: string | null
+    fastestLapDriverId?: string | null
+    mostDotdDriverId?: string | null
+    mostDnfRange?: string | null
+    firstRaceCollision?: boolean | null
+    firstRaceRain?: boolean | null
+    avatar?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    votes?: VoteUncheckedCreateNestedManyWithoutUserInput
+    seasonVotes?: SeasonVoteUncheckedCreateNestedManyWithoutUserInput
+    raceScores?: RaceScoreUncheckedCreateNestedManyWithoutUserInput
+  }
+
+  export type UserCreateOrConnectWithoutFastestPitstopTeamInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutFastestPitstopTeamInput, UserUncheckedCreateWithoutFastestPitstopTeamInput>
+  }
+
+  export type UserCreateManyFastestPitstopTeamInputEnvelope = {
+    data: UserCreateManyFastestPitstopTeamInput | UserCreateManyFastestPitstopTeamInput[]
+    skipDuplicates?: boolean
+  }
+
   export type DriverCreateWithoutTeamInput = {
     slug: string
     name: string
@@ -12230,6 +12891,8 @@ export namespace Prisma {
     votes?: VoteCreateNestedManyWithoutDriverInput
     seasonVotes?: SeasonVoteCreateNestedManyWithoutDriverInput
     favorited?: UserCreateNestedManyWithoutFavoriteDriverInput
+    fastestLapUsers?: UserCreateNestedManyWithoutFastestLapDriverInput
+    mostDotdUsers?: UserCreateNestedManyWithoutMostDotdDriverInput
   }
 
   export type DriverUncheckedCreateWithoutTeamInput = {
@@ -12243,6 +12906,8 @@ export namespace Prisma {
     votes?: VoteUncheckedCreateNestedManyWithoutDriverInput
     seasonVotes?: SeasonVoteUncheckedCreateNestedManyWithoutDriverInput
     favorited?: UserUncheckedCreateNestedManyWithoutFavoriteDriverInput
+    fastestLapUsers?: UserUncheckedCreateNestedManyWithoutFastestLapDriverInput
+    mostDotdUsers?: UserUncheckedCreateNestedManyWithoutMostDotdDriverInput
   }
 
   export type DriverCreateOrConnectWithoutTeamInput = {
@@ -12282,9 +12947,31 @@ export namespace Prisma {
     isAdmin?: BoolFilter<"User"> | boolean
     teamId?: StringNullableFilter<"User"> | string | null
     favoriteDriverId?: StringNullableFilter<"User"> | string | null
+    fastestLapDriverId?: StringNullableFilter<"User"> | string | null
+    fastestPitstopTeamId?: StringNullableFilter<"User"> | string | null
+    mostDotdDriverId?: StringNullableFilter<"User"> | string | null
+    mostDnfRange?: StringNullableFilter<"User"> | string | null
+    firstRaceCollision?: BoolNullableFilter<"User"> | boolean | null
+    firstRaceRain?: BoolNullableFilter<"User"> | boolean | null
     avatar?: StringNullableFilter<"User"> | string | null
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
+  }
+
+  export type UserUpsertWithWhereUniqueWithoutFastestPitstopTeamInput = {
+    where: UserWhereUniqueInput
+    update: XOR<UserUpdateWithoutFastestPitstopTeamInput, UserUncheckedUpdateWithoutFastestPitstopTeamInput>
+    create: XOR<UserCreateWithoutFastestPitstopTeamInput, UserUncheckedCreateWithoutFastestPitstopTeamInput>
+  }
+
+  export type UserUpdateWithWhereUniqueWithoutFastestPitstopTeamInput = {
+    where: UserWhereUniqueInput
+    data: XOR<UserUpdateWithoutFastestPitstopTeamInput, UserUncheckedUpdateWithoutFastestPitstopTeamInput>
+  }
+
+  export type UserUpdateManyWithWhereWithoutFastestPitstopTeamInput = {
+    where: UserScalarWhereInput
+    data: XOR<UserUpdateManyMutationInput, UserUncheckedUpdateManyWithoutFastestPitstopTeamInput>
   }
 
   export type DriverUpsertWithWhereUniqueWithoutTeamInput = {
@@ -12322,6 +13009,7 @@ export namespace Prisma {
     name: string
     color?: string | null
     users?: UserCreateNestedManyWithoutTeamInput
+    fastestPitstopUsers?: UserCreateNestedManyWithoutFastestPitstopTeamInput
   }
 
   export type TeamUncheckedCreateWithoutDriversInput = {
@@ -12329,6 +13017,7 @@ export namespace Prisma {
     name: string
     color?: string | null
     users?: UserUncheckedCreateNestedManyWithoutTeamInput
+    fastestPitstopUsers?: UserUncheckedCreateNestedManyWithoutFastestPitstopTeamInput
   }
 
   export type TeamCreateOrConnectWithoutDriversInput = {
@@ -12394,10 +13083,16 @@ export namespace Prisma {
     password: string
     name?: string | null
     isAdmin?: boolean
+    mostDnfRange?: string | null
+    firstRaceCollision?: boolean | null
+    firstRaceRain?: boolean | null
     avatar?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     team?: TeamCreateNestedOneWithoutUsersInput
+    fastestLapDriver?: DriverCreateNestedOneWithoutFastestLapUsersInput
+    fastestPitstopTeam?: TeamCreateNestedOneWithoutFastestPitstopUsersInput
+    mostDotdDriver?: DriverCreateNestedOneWithoutMostDotdUsersInput
     votes?: VoteCreateNestedManyWithoutUserInput
     seasonVotes?: SeasonVoteCreateNestedManyWithoutUserInput
     raceScores?: RaceScoreCreateNestedManyWithoutUserInput
@@ -12410,6 +13105,12 @@ export namespace Prisma {
     name?: string | null
     isAdmin?: boolean
     teamId?: string | null
+    fastestLapDriverId?: string | null
+    fastestPitstopTeamId?: string | null
+    mostDotdDriverId?: string | null
+    mostDnfRange?: string | null
+    firstRaceCollision?: boolean | null
+    firstRaceRain?: boolean | null
     avatar?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -12425,6 +13126,110 @@ export namespace Prisma {
 
   export type UserCreateManyFavoriteDriverInputEnvelope = {
     data: UserCreateManyFavoriteDriverInput | UserCreateManyFavoriteDriverInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type UserCreateWithoutFastestLapDriverInput = {
+    id?: string
+    username: string
+    password: string
+    name?: string | null
+    isAdmin?: boolean
+    mostDnfRange?: string | null
+    firstRaceCollision?: boolean | null
+    firstRaceRain?: boolean | null
+    avatar?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    team?: TeamCreateNestedOneWithoutUsersInput
+    favoriteDriver?: DriverCreateNestedOneWithoutFavoritedInput
+    fastestPitstopTeam?: TeamCreateNestedOneWithoutFastestPitstopUsersInput
+    mostDotdDriver?: DriverCreateNestedOneWithoutMostDotdUsersInput
+    votes?: VoteCreateNestedManyWithoutUserInput
+    seasonVotes?: SeasonVoteCreateNestedManyWithoutUserInput
+    raceScores?: RaceScoreCreateNestedManyWithoutUserInput
+  }
+
+  export type UserUncheckedCreateWithoutFastestLapDriverInput = {
+    id?: string
+    username: string
+    password: string
+    name?: string | null
+    isAdmin?: boolean
+    teamId?: string | null
+    favoriteDriverId?: string | null
+    fastestPitstopTeamId?: string | null
+    mostDotdDriverId?: string | null
+    mostDnfRange?: string | null
+    firstRaceCollision?: boolean | null
+    firstRaceRain?: boolean | null
+    avatar?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    votes?: VoteUncheckedCreateNestedManyWithoutUserInput
+    seasonVotes?: SeasonVoteUncheckedCreateNestedManyWithoutUserInput
+    raceScores?: RaceScoreUncheckedCreateNestedManyWithoutUserInput
+  }
+
+  export type UserCreateOrConnectWithoutFastestLapDriverInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutFastestLapDriverInput, UserUncheckedCreateWithoutFastestLapDriverInput>
+  }
+
+  export type UserCreateManyFastestLapDriverInputEnvelope = {
+    data: UserCreateManyFastestLapDriverInput | UserCreateManyFastestLapDriverInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type UserCreateWithoutMostDotdDriverInput = {
+    id?: string
+    username: string
+    password: string
+    name?: string | null
+    isAdmin?: boolean
+    mostDnfRange?: string | null
+    firstRaceCollision?: boolean | null
+    firstRaceRain?: boolean | null
+    avatar?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    team?: TeamCreateNestedOneWithoutUsersInput
+    favoriteDriver?: DriverCreateNestedOneWithoutFavoritedInput
+    fastestLapDriver?: DriverCreateNestedOneWithoutFastestLapUsersInput
+    fastestPitstopTeam?: TeamCreateNestedOneWithoutFastestPitstopUsersInput
+    votes?: VoteCreateNestedManyWithoutUserInput
+    seasonVotes?: SeasonVoteCreateNestedManyWithoutUserInput
+    raceScores?: RaceScoreCreateNestedManyWithoutUserInput
+  }
+
+  export type UserUncheckedCreateWithoutMostDotdDriverInput = {
+    id?: string
+    username: string
+    password: string
+    name?: string | null
+    isAdmin?: boolean
+    teamId?: string | null
+    favoriteDriverId?: string | null
+    fastestLapDriverId?: string | null
+    fastestPitstopTeamId?: string | null
+    mostDnfRange?: string | null
+    firstRaceCollision?: boolean | null
+    firstRaceRain?: boolean | null
+    avatar?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    votes?: VoteUncheckedCreateNestedManyWithoutUserInput
+    seasonVotes?: SeasonVoteUncheckedCreateNestedManyWithoutUserInput
+    raceScores?: RaceScoreUncheckedCreateNestedManyWithoutUserInput
+  }
+
+  export type UserCreateOrConnectWithoutMostDotdDriverInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutMostDotdDriverInput, UserUncheckedCreateWithoutMostDotdDriverInput>
+  }
+
+  export type UserCreateManyMostDotdDriverInputEnvelope = {
+    data: UserCreateManyMostDotdDriverInput | UserCreateManyMostDotdDriverInput[]
     skipDuplicates?: boolean
   }
 
@@ -12444,6 +13249,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     color?: NullableStringFieldUpdateOperationsInput | string | null
     users?: UserUpdateManyWithoutTeamNestedInput
+    fastestPitstopUsers?: UserUpdateManyWithoutFastestPitstopTeamNestedInput
   }
 
   export type TeamUncheckedUpdateWithoutDriversInput = {
@@ -12451,6 +13257,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     color?: NullableStringFieldUpdateOperationsInput | string | null
     users?: UserUncheckedUpdateManyWithoutTeamNestedInput
+    fastestPitstopUsers?: UserUncheckedUpdateManyWithoutFastestPitstopTeamNestedInput
   }
 
   export type VoteUpsertWithWhereUniqueWithoutDriverInput = {
@@ -12525,10 +13332,43 @@ export namespace Prisma {
     data: XOR<UserUpdateManyMutationInput, UserUncheckedUpdateManyWithoutFavoriteDriverInput>
   }
 
+  export type UserUpsertWithWhereUniqueWithoutFastestLapDriverInput = {
+    where: UserWhereUniqueInput
+    update: XOR<UserUpdateWithoutFastestLapDriverInput, UserUncheckedUpdateWithoutFastestLapDriverInput>
+    create: XOR<UserCreateWithoutFastestLapDriverInput, UserUncheckedCreateWithoutFastestLapDriverInput>
+  }
+
+  export type UserUpdateWithWhereUniqueWithoutFastestLapDriverInput = {
+    where: UserWhereUniqueInput
+    data: XOR<UserUpdateWithoutFastestLapDriverInput, UserUncheckedUpdateWithoutFastestLapDriverInput>
+  }
+
+  export type UserUpdateManyWithWhereWithoutFastestLapDriverInput = {
+    where: UserScalarWhereInput
+    data: XOR<UserUpdateManyMutationInput, UserUncheckedUpdateManyWithoutFastestLapDriverInput>
+  }
+
+  export type UserUpsertWithWhereUniqueWithoutMostDotdDriverInput = {
+    where: UserWhereUniqueInput
+    update: XOR<UserUpdateWithoutMostDotdDriverInput, UserUncheckedUpdateWithoutMostDotdDriverInput>
+    create: XOR<UserCreateWithoutMostDotdDriverInput, UserUncheckedCreateWithoutMostDotdDriverInput>
+  }
+
+  export type UserUpdateWithWhereUniqueWithoutMostDotdDriverInput = {
+    where: UserWhereUniqueInput
+    data: XOR<UserUpdateWithoutMostDotdDriverInput, UserUncheckedUpdateWithoutMostDotdDriverInput>
+  }
+
+  export type UserUpdateManyWithWhereWithoutMostDotdDriverInput = {
+    where: UserScalarWhereInput
+    data: XOR<UserUpdateManyMutationInput, UserUncheckedUpdateManyWithoutMostDotdDriverInput>
+  }
+
   export type TeamCreateWithoutUsersInput = {
     id?: string
     name: string
     color?: string | null
+    fastestPitstopUsers?: UserCreateNestedManyWithoutFastestPitstopTeamInput
     drivers?: DriverCreateNestedManyWithoutTeamInput
   }
 
@@ -12536,6 +13376,7 @@ export namespace Prisma {
     id?: string
     name: string
     color?: string | null
+    fastestPitstopUsers?: UserUncheckedCreateNestedManyWithoutFastestPitstopTeamInput
     drivers?: DriverUncheckedCreateNestedManyWithoutTeamInput
   }
 
@@ -12555,6 +13396,8 @@ export namespace Prisma {
     team: TeamCreateNestedOneWithoutDriversInput
     votes?: VoteCreateNestedManyWithoutDriverInput
     seasonVotes?: SeasonVoteCreateNestedManyWithoutDriverInput
+    fastestLapUsers?: UserCreateNestedManyWithoutFastestLapDriverInput
+    mostDotdUsers?: UserCreateNestedManyWithoutMostDotdDriverInput
   }
 
   export type DriverUncheckedCreateWithoutFavoritedInput = {
@@ -12568,11 +13411,104 @@ export namespace Prisma {
     color?: string | null
     votes?: VoteUncheckedCreateNestedManyWithoutDriverInput
     seasonVotes?: SeasonVoteUncheckedCreateNestedManyWithoutDriverInput
+    fastestLapUsers?: UserUncheckedCreateNestedManyWithoutFastestLapDriverInput
+    mostDotdUsers?: UserUncheckedCreateNestedManyWithoutMostDotdDriverInput
   }
 
   export type DriverCreateOrConnectWithoutFavoritedInput = {
     where: DriverWhereUniqueInput
     create: XOR<DriverCreateWithoutFavoritedInput, DriverUncheckedCreateWithoutFavoritedInput>
+  }
+
+  export type DriverCreateWithoutFastestLapUsersInput = {
+    slug: string
+    name: string
+    number: number
+    country?: string | null
+    active?: boolean
+    activeSeason?: boolean
+    color?: string | null
+    team: TeamCreateNestedOneWithoutDriversInput
+    votes?: VoteCreateNestedManyWithoutDriverInput
+    seasonVotes?: SeasonVoteCreateNestedManyWithoutDriverInput
+    favorited?: UserCreateNestedManyWithoutFavoriteDriverInput
+    mostDotdUsers?: UserCreateNestedManyWithoutMostDotdDriverInput
+  }
+
+  export type DriverUncheckedCreateWithoutFastestLapUsersInput = {
+    slug: string
+    name: string
+    number: number
+    country?: string | null
+    active?: boolean
+    activeSeason?: boolean
+    teamId: string
+    color?: string | null
+    votes?: VoteUncheckedCreateNestedManyWithoutDriverInput
+    seasonVotes?: SeasonVoteUncheckedCreateNestedManyWithoutDriverInput
+    favorited?: UserUncheckedCreateNestedManyWithoutFavoriteDriverInput
+    mostDotdUsers?: UserUncheckedCreateNestedManyWithoutMostDotdDriverInput
+  }
+
+  export type DriverCreateOrConnectWithoutFastestLapUsersInput = {
+    where: DriverWhereUniqueInput
+    create: XOR<DriverCreateWithoutFastestLapUsersInput, DriverUncheckedCreateWithoutFastestLapUsersInput>
+  }
+
+  export type TeamCreateWithoutFastestPitstopUsersInput = {
+    id?: string
+    name: string
+    color?: string | null
+    users?: UserCreateNestedManyWithoutTeamInput
+    drivers?: DriverCreateNestedManyWithoutTeamInput
+  }
+
+  export type TeamUncheckedCreateWithoutFastestPitstopUsersInput = {
+    id?: string
+    name: string
+    color?: string | null
+    users?: UserUncheckedCreateNestedManyWithoutTeamInput
+    drivers?: DriverUncheckedCreateNestedManyWithoutTeamInput
+  }
+
+  export type TeamCreateOrConnectWithoutFastestPitstopUsersInput = {
+    where: TeamWhereUniqueInput
+    create: XOR<TeamCreateWithoutFastestPitstopUsersInput, TeamUncheckedCreateWithoutFastestPitstopUsersInput>
+  }
+
+  export type DriverCreateWithoutMostDotdUsersInput = {
+    slug: string
+    name: string
+    number: number
+    country?: string | null
+    active?: boolean
+    activeSeason?: boolean
+    color?: string | null
+    team: TeamCreateNestedOneWithoutDriversInput
+    votes?: VoteCreateNestedManyWithoutDriverInput
+    seasonVotes?: SeasonVoteCreateNestedManyWithoutDriverInput
+    favorited?: UserCreateNestedManyWithoutFavoriteDriverInput
+    fastestLapUsers?: UserCreateNestedManyWithoutFastestLapDriverInput
+  }
+
+  export type DriverUncheckedCreateWithoutMostDotdUsersInput = {
+    slug: string
+    name: string
+    number: number
+    country?: string | null
+    active?: boolean
+    activeSeason?: boolean
+    teamId: string
+    color?: string | null
+    votes?: VoteUncheckedCreateNestedManyWithoutDriverInput
+    seasonVotes?: SeasonVoteUncheckedCreateNestedManyWithoutDriverInput
+    favorited?: UserUncheckedCreateNestedManyWithoutFavoriteDriverInput
+    fastestLapUsers?: UserUncheckedCreateNestedManyWithoutFastestLapDriverInput
+  }
+
+  export type DriverCreateOrConnectWithoutMostDotdUsersInput = {
+    where: DriverWhereUniqueInput
+    create: XOR<DriverCreateWithoutMostDotdUsersInput, DriverUncheckedCreateWithoutMostDotdUsersInput>
   }
 
   export type VoteCreateWithoutUserInput = {
@@ -12670,6 +13606,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     color?: NullableStringFieldUpdateOperationsInput | string | null
+    fastestPitstopUsers?: UserUpdateManyWithoutFastestPitstopTeamNestedInput
     drivers?: DriverUpdateManyWithoutTeamNestedInput
   }
 
@@ -12677,6 +13614,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     color?: NullableStringFieldUpdateOperationsInput | string | null
+    fastestPitstopUsers?: UserUncheckedUpdateManyWithoutFastestPitstopTeamNestedInput
     drivers?: DriverUncheckedUpdateManyWithoutTeamNestedInput
   }
 
@@ -12702,6 +13640,8 @@ export namespace Prisma {
     team?: TeamUpdateOneRequiredWithoutDriversNestedInput
     votes?: VoteUpdateManyWithoutDriverNestedInput
     seasonVotes?: SeasonVoteUpdateManyWithoutDriverNestedInput
+    fastestLapUsers?: UserUpdateManyWithoutFastestLapDriverNestedInput
+    mostDotdUsers?: UserUpdateManyWithoutMostDotdDriverNestedInput
   }
 
   export type DriverUncheckedUpdateWithoutFavoritedInput = {
@@ -12715,6 +13655,117 @@ export namespace Prisma {
     color?: NullableStringFieldUpdateOperationsInput | string | null
     votes?: VoteUncheckedUpdateManyWithoutDriverNestedInput
     seasonVotes?: SeasonVoteUncheckedUpdateManyWithoutDriverNestedInput
+    fastestLapUsers?: UserUncheckedUpdateManyWithoutFastestLapDriverNestedInput
+    mostDotdUsers?: UserUncheckedUpdateManyWithoutMostDotdDriverNestedInput
+  }
+
+  export type DriverUpsertWithoutFastestLapUsersInput = {
+    update: XOR<DriverUpdateWithoutFastestLapUsersInput, DriverUncheckedUpdateWithoutFastestLapUsersInput>
+    create: XOR<DriverCreateWithoutFastestLapUsersInput, DriverUncheckedCreateWithoutFastestLapUsersInput>
+    where?: DriverWhereInput
+  }
+
+  export type DriverUpdateToOneWithWhereWithoutFastestLapUsersInput = {
+    where?: DriverWhereInput
+    data: XOR<DriverUpdateWithoutFastestLapUsersInput, DriverUncheckedUpdateWithoutFastestLapUsersInput>
+  }
+
+  export type DriverUpdateWithoutFastestLapUsersInput = {
+    slug?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    number?: IntFieldUpdateOperationsInput | number
+    country?: NullableStringFieldUpdateOperationsInput | string | null
+    active?: BoolFieldUpdateOperationsInput | boolean
+    activeSeason?: BoolFieldUpdateOperationsInput | boolean
+    color?: NullableStringFieldUpdateOperationsInput | string | null
+    team?: TeamUpdateOneRequiredWithoutDriversNestedInput
+    votes?: VoteUpdateManyWithoutDriverNestedInput
+    seasonVotes?: SeasonVoteUpdateManyWithoutDriverNestedInput
+    favorited?: UserUpdateManyWithoutFavoriteDriverNestedInput
+    mostDotdUsers?: UserUpdateManyWithoutMostDotdDriverNestedInput
+  }
+
+  export type DriverUncheckedUpdateWithoutFastestLapUsersInput = {
+    slug?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    number?: IntFieldUpdateOperationsInput | number
+    country?: NullableStringFieldUpdateOperationsInput | string | null
+    active?: BoolFieldUpdateOperationsInput | boolean
+    activeSeason?: BoolFieldUpdateOperationsInput | boolean
+    teamId?: StringFieldUpdateOperationsInput | string
+    color?: NullableStringFieldUpdateOperationsInput | string | null
+    votes?: VoteUncheckedUpdateManyWithoutDriverNestedInput
+    seasonVotes?: SeasonVoteUncheckedUpdateManyWithoutDriverNestedInput
+    favorited?: UserUncheckedUpdateManyWithoutFavoriteDriverNestedInput
+    mostDotdUsers?: UserUncheckedUpdateManyWithoutMostDotdDriverNestedInput
+  }
+
+  export type TeamUpsertWithoutFastestPitstopUsersInput = {
+    update: XOR<TeamUpdateWithoutFastestPitstopUsersInput, TeamUncheckedUpdateWithoutFastestPitstopUsersInput>
+    create: XOR<TeamCreateWithoutFastestPitstopUsersInput, TeamUncheckedCreateWithoutFastestPitstopUsersInput>
+    where?: TeamWhereInput
+  }
+
+  export type TeamUpdateToOneWithWhereWithoutFastestPitstopUsersInput = {
+    where?: TeamWhereInput
+    data: XOR<TeamUpdateWithoutFastestPitstopUsersInput, TeamUncheckedUpdateWithoutFastestPitstopUsersInput>
+  }
+
+  export type TeamUpdateWithoutFastestPitstopUsersInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    color?: NullableStringFieldUpdateOperationsInput | string | null
+    users?: UserUpdateManyWithoutTeamNestedInput
+    drivers?: DriverUpdateManyWithoutTeamNestedInput
+  }
+
+  export type TeamUncheckedUpdateWithoutFastestPitstopUsersInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    color?: NullableStringFieldUpdateOperationsInput | string | null
+    users?: UserUncheckedUpdateManyWithoutTeamNestedInput
+    drivers?: DriverUncheckedUpdateManyWithoutTeamNestedInput
+  }
+
+  export type DriverUpsertWithoutMostDotdUsersInput = {
+    update: XOR<DriverUpdateWithoutMostDotdUsersInput, DriverUncheckedUpdateWithoutMostDotdUsersInput>
+    create: XOR<DriverCreateWithoutMostDotdUsersInput, DriverUncheckedCreateWithoutMostDotdUsersInput>
+    where?: DriverWhereInput
+  }
+
+  export type DriverUpdateToOneWithWhereWithoutMostDotdUsersInput = {
+    where?: DriverWhereInput
+    data: XOR<DriverUpdateWithoutMostDotdUsersInput, DriverUncheckedUpdateWithoutMostDotdUsersInput>
+  }
+
+  export type DriverUpdateWithoutMostDotdUsersInput = {
+    slug?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    number?: IntFieldUpdateOperationsInput | number
+    country?: NullableStringFieldUpdateOperationsInput | string | null
+    active?: BoolFieldUpdateOperationsInput | boolean
+    activeSeason?: BoolFieldUpdateOperationsInput | boolean
+    color?: NullableStringFieldUpdateOperationsInput | string | null
+    team?: TeamUpdateOneRequiredWithoutDriversNestedInput
+    votes?: VoteUpdateManyWithoutDriverNestedInput
+    seasonVotes?: SeasonVoteUpdateManyWithoutDriverNestedInput
+    favorited?: UserUpdateManyWithoutFavoriteDriverNestedInput
+    fastestLapUsers?: UserUpdateManyWithoutFastestLapDriverNestedInput
+  }
+
+  export type DriverUncheckedUpdateWithoutMostDotdUsersInput = {
+    slug?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    number?: IntFieldUpdateOperationsInput | number
+    country?: NullableStringFieldUpdateOperationsInput | string | null
+    active?: BoolFieldUpdateOperationsInput | boolean
+    activeSeason?: BoolFieldUpdateOperationsInput | boolean
+    teamId?: StringFieldUpdateOperationsInput | string
+    color?: NullableStringFieldUpdateOperationsInput | string | null
+    votes?: VoteUncheckedUpdateManyWithoutDriverNestedInput
+    seasonVotes?: SeasonVoteUncheckedUpdateManyWithoutDriverNestedInput
+    favorited?: UserUncheckedUpdateManyWithoutFavoriteDriverNestedInput
+    fastestLapUsers?: UserUncheckedUpdateManyWithoutFastestLapDriverNestedInput
   }
 
   export type VoteUpsertWithWhereUniqueWithoutUserInput = {
@@ -12784,11 +13835,17 @@ export namespace Prisma {
     password: string
     name?: string | null
     isAdmin?: boolean
+    mostDnfRange?: string | null
+    firstRaceCollision?: boolean | null
+    firstRaceRain?: boolean | null
     avatar?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     team?: TeamCreateNestedOneWithoutUsersInput
     favoriteDriver?: DriverCreateNestedOneWithoutFavoritedInput
+    fastestLapDriver?: DriverCreateNestedOneWithoutFastestLapUsersInput
+    fastestPitstopTeam?: TeamCreateNestedOneWithoutFastestPitstopUsersInput
+    mostDotdDriver?: DriverCreateNestedOneWithoutMostDotdUsersInput
     seasonVotes?: SeasonVoteCreateNestedManyWithoutUserInput
     raceScores?: RaceScoreCreateNestedManyWithoutUserInput
   }
@@ -12801,6 +13858,12 @@ export namespace Prisma {
     isAdmin?: boolean
     teamId?: string | null
     favoriteDriverId?: string | null
+    fastestLapDriverId?: string | null
+    fastestPitstopTeamId?: string | null
+    mostDotdDriverId?: string | null
+    mostDnfRange?: string | null
+    firstRaceCollision?: boolean | null
+    firstRaceRain?: boolean | null
     avatar?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -12824,6 +13887,8 @@ export namespace Prisma {
     team: TeamCreateNestedOneWithoutDriversInput
     seasonVotes?: SeasonVoteCreateNestedManyWithoutDriverInput
     favorited?: UserCreateNestedManyWithoutFavoriteDriverInput
+    fastestLapUsers?: UserCreateNestedManyWithoutFastestLapDriverInput
+    mostDotdUsers?: UserCreateNestedManyWithoutMostDotdDriverInput
   }
 
   export type DriverUncheckedCreateWithoutVotesInput = {
@@ -12837,6 +13902,8 @@ export namespace Prisma {
     color?: string | null
     seasonVotes?: SeasonVoteUncheckedCreateNestedManyWithoutDriverInput
     favorited?: UserUncheckedCreateNestedManyWithoutFavoriteDriverInput
+    fastestLapUsers?: UserUncheckedCreateNestedManyWithoutFastestLapDriverInput
+    mostDotdUsers?: UserUncheckedCreateNestedManyWithoutMostDotdDriverInput
   }
 
   export type DriverCreateOrConnectWithoutVotesInput = {
@@ -12861,11 +13928,17 @@ export namespace Prisma {
     password?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
     isAdmin?: BoolFieldUpdateOperationsInput | boolean
+    mostDnfRange?: NullableStringFieldUpdateOperationsInput | string | null
+    firstRaceCollision?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    firstRaceRain?: NullableBoolFieldUpdateOperationsInput | boolean | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     team?: TeamUpdateOneWithoutUsersNestedInput
     favoriteDriver?: DriverUpdateOneWithoutFavoritedNestedInput
+    fastestLapDriver?: DriverUpdateOneWithoutFastestLapUsersNestedInput
+    fastestPitstopTeam?: TeamUpdateOneWithoutFastestPitstopUsersNestedInput
+    mostDotdDriver?: DriverUpdateOneWithoutMostDotdUsersNestedInput
     seasonVotes?: SeasonVoteUpdateManyWithoutUserNestedInput
     raceScores?: RaceScoreUpdateManyWithoutUserNestedInput
   }
@@ -12878,6 +13951,12 @@ export namespace Prisma {
     isAdmin?: BoolFieldUpdateOperationsInput | boolean
     teamId?: NullableStringFieldUpdateOperationsInput | string | null
     favoriteDriverId?: NullableStringFieldUpdateOperationsInput | string | null
+    fastestLapDriverId?: NullableStringFieldUpdateOperationsInput | string | null
+    fastestPitstopTeamId?: NullableStringFieldUpdateOperationsInput | string | null
+    mostDotdDriverId?: NullableStringFieldUpdateOperationsInput | string | null
+    mostDnfRange?: NullableStringFieldUpdateOperationsInput | string | null
+    firstRaceCollision?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    firstRaceRain?: NullableBoolFieldUpdateOperationsInput | boolean | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -12907,6 +13986,8 @@ export namespace Prisma {
     team?: TeamUpdateOneRequiredWithoutDriversNestedInput
     seasonVotes?: SeasonVoteUpdateManyWithoutDriverNestedInput
     favorited?: UserUpdateManyWithoutFavoriteDriverNestedInput
+    fastestLapUsers?: UserUpdateManyWithoutFastestLapDriverNestedInput
+    mostDotdUsers?: UserUpdateManyWithoutMostDotdDriverNestedInput
   }
 
   export type DriverUncheckedUpdateWithoutVotesInput = {
@@ -12920,6 +14001,8 @@ export namespace Prisma {
     color?: NullableStringFieldUpdateOperationsInput | string | null
     seasonVotes?: SeasonVoteUncheckedUpdateManyWithoutDriverNestedInput
     favorited?: UserUncheckedUpdateManyWithoutFavoriteDriverNestedInput
+    fastestLapUsers?: UserUncheckedUpdateManyWithoutFastestLapDriverNestedInput
+    mostDotdUsers?: UserUncheckedUpdateManyWithoutMostDotdDriverNestedInput
   }
 
   export type UserCreateWithoutSeasonVotesInput = {
@@ -12928,11 +14011,17 @@ export namespace Prisma {
     password: string
     name?: string | null
     isAdmin?: boolean
+    mostDnfRange?: string | null
+    firstRaceCollision?: boolean | null
+    firstRaceRain?: boolean | null
     avatar?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     team?: TeamCreateNestedOneWithoutUsersInput
     favoriteDriver?: DriverCreateNestedOneWithoutFavoritedInput
+    fastestLapDriver?: DriverCreateNestedOneWithoutFastestLapUsersInput
+    fastestPitstopTeam?: TeamCreateNestedOneWithoutFastestPitstopUsersInput
+    mostDotdDriver?: DriverCreateNestedOneWithoutMostDotdUsersInput
     votes?: VoteCreateNestedManyWithoutUserInput
     raceScores?: RaceScoreCreateNestedManyWithoutUserInput
   }
@@ -12945,6 +14034,12 @@ export namespace Prisma {
     isAdmin?: boolean
     teamId?: string | null
     favoriteDriverId?: string | null
+    fastestLapDriverId?: string | null
+    fastestPitstopTeamId?: string | null
+    mostDotdDriverId?: string | null
+    mostDnfRange?: string | null
+    firstRaceCollision?: boolean | null
+    firstRaceRain?: boolean | null
     avatar?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -12968,6 +14063,8 @@ export namespace Prisma {
     team: TeamCreateNestedOneWithoutDriversInput
     votes?: VoteCreateNestedManyWithoutDriverInput
     favorited?: UserCreateNestedManyWithoutFavoriteDriverInput
+    fastestLapUsers?: UserCreateNestedManyWithoutFastestLapDriverInput
+    mostDotdUsers?: UserCreateNestedManyWithoutMostDotdDriverInput
   }
 
   export type DriverUncheckedCreateWithoutSeasonVotesInput = {
@@ -12981,6 +14078,8 @@ export namespace Prisma {
     color?: string | null
     votes?: VoteUncheckedCreateNestedManyWithoutDriverInput
     favorited?: UserUncheckedCreateNestedManyWithoutFavoriteDriverInput
+    fastestLapUsers?: UserUncheckedCreateNestedManyWithoutFastestLapDriverInput
+    mostDotdUsers?: UserUncheckedCreateNestedManyWithoutMostDotdDriverInput
   }
 
   export type DriverCreateOrConnectWithoutSeasonVotesInput = {
@@ -13005,11 +14104,17 @@ export namespace Prisma {
     password?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
     isAdmin?: BoolFieldUpdateOperationsInput | boolean
+    mostDnfRange?: NullableStringFieldUpdateOperationsInput | string | null
+    firstRaceCollision?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    firstRaceRain?: NullableBoolFieldUpdateOperationsInput | boolean | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     team?: TeamUpdateOneWithoutUsersNestedInput
     favoriteDriver?: DriverUpdateOneWithoutFavoritedNestedInput
+    fastestLapDriver?: DriverUpdateOneWithoutFastestLapUsersNestedInput
+    fastestPitstopTeam?: TeamUpdateOneWithoutFastestPitstopUsersNestedInput
+    mostDotdDriver?: DriverUpdateOneWithoutMostDotdUsersNestedInput
     votes?: VoteUpdateManyWithoutUserNestedInput
     raceScores?: RaceScoreUpdateManyWithoutUserNestedInput
   }
@@ -13022,6 +14127,12 @@ export namespace Prisma {
     isAdmin?: BoolFieldUpdateOperationsInput | boolean
     teamId?: NullableStringFieldUpdateOperationsInput | string | null
     favoriteDriverId?: NullableStringFieldUpdateOperationsInput | string | null
+    fastestLapDriverId?: NullableStringFieldUpdateOperationsInput | string | null
+    fastestPitstopTeamId?: NullableStringFieldUpdateOperationsInput | string | null
+    mostDotdDriverId?: NullableStringFieldUpdateOperationsInput | string | null
+    mostDnfRange?: NullableStringFieldUpdateOperationsInput | string | null
+    firstRaceCollision?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    firstRaceRain?: NullableBoolFieldUpdateOperationsInput | boolean | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -13051,6 +14162,8 @@ export namespace Prisma {
     team?: TeamUpdateOneRequiredWithoutDriversNestedInput
     votes?: VoteUpdateManyWithoutDriverNestedInput
     favorited?: UserUpdateManyWithoutFavoriteDriverNestedInput
+    fastestLapUsers?: UserUpdateManyWithoutFastestLapDriverNestedInput
+    mostDotdUsers?: UserUpdateManyWithoutMostDotdDriverNestedInput
   }
 
   export type DriverUncheckedUpdateWithoutSeasonVotesInput = {
@@ -13064,6 +14177,8 @@ export namespace Prisma {
     color?: NullableStringFieldUpdateOperationsInput | string | null
     votes?: VoteUncheckedUpdateManyWithoutDriverNestedInput
     favorited?: UserUncheckedUpdateManyWithoutFavoriteDriverNestedInput
+    fastestLapUsers?: UserUncheckedUpdateManyWithoutFastestLapDriverNestedInput
+    mostDotdUsers?: UserUncheckedUpdateManyWithoutMostDotdDriverNestedInput
   }
 
   export type RaceScoreCreateWithoutRaceInput = {
@@ -13116,11 +14231,17 @@ export namespace Prisma {
     password: string
     name?: string | null
     isAdmin?: boolean
+    mostDnfRange?: string | null
+    firstRaceCollision?: boolean | null
+    firstRaceRain?: boolean | null
     avatar?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     team?: TeamCreateNestedOneWithoutUsersInput
     favoriteDriver?: DriverCreateNestedOneWithoutFavoritedInput
+    fastestLapDriver?: DriverCreateNestedOneWithoutFastestLapUsersInput
+    fastestPitstopTeam?: TeamCreateNestedOneWithoutFastestPitstopUsersInput
+    mostDotdDriver?: DriverCreateNestedOneWithoutMostDotdUsersInput
     votes?: VoteCreateNestedManyWithoutUserInput
     seasonVotes?: SeasonVoteCreateNestedManyWithoutUserInput
   }
@@ -13133,6 +14254,12 @@ export namespace Prisma {
     isAdmin?: boolean
     teamId?: string | null
     favoriteDriverId?: string | null
+    fastestLapDriverId?: string | null
+    fastestPitstopTeamId?: string | null
+    mostDotdDriverId?: string | null
+    mostDnfRange?: string | null
+    firstRaceCollision?: boolean | null
+    firstRaceRain?: boolean | null
     avatar?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -13197,11 +14324,17 @@ export namespace Prisma {
     password?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
     isAdmin?: BoolFieldUpdateOperationsInput | boolean
+    mostDnfRange?: NullableStringFieldUpdateOperationsInput | string | null
+    firstRaceCollision?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    firstRaceRain?: NullableBoolFieldUpdateOperationsInput | boolean | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     team?: TeamUpdateOneWithoutUsersNestedInput
     favoriteDriver?: DriverUpdateOneWithoutFavoritedNestedInput
+    fastestLapDriver?: DriverUpdateOneWithoutFastestLapUsersNestedInput
+    fastestPitstopTeam?: TeamUpdateOneWithoutFastestPitstopUsersNestedInput
+    mostDotdDriver?: DriverUpdateOneWithoutMostDotdUsersNestedInput
     votes?: VoteUpdateManyWithoutUserNestedInput
     seasonVotes?: SeasonVoteUpdateManyWithoutUserNestedInput
   }
@@ -13214,6 +14347,12 @@ export namespace Prisma {
     isAdmin?: BoolFieldUpdateOperationsInput | boolean
     teamId?: NullableStringFieldUpdateOperationsInput | string | null
     favoriteDriverId?: NullableStringFieldUpdateOperationsInput | string | null
+    fastestLapDriverId?: NullableStringFieldUpdateOperationsInput | string | null
+    fastestPitstopTeamId?: NullableStringFieldUpdateOperationsInput | string | null
+    mostDotdDriverId?: NullableStringFieldUpdateOperationsInput | string | null
+    mostDnfRange?: NullableStringFieldUpdateOperationsInput | string | null
+    firstRaceCollision?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    firstRaceRain?: NullableBoolFieldUpdateOperationsInput | boolean | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -13269,6 +14408,30 @@ export namespace Prisma {
     name?: string | null
     isAdmin?: boolean
     favoriteDriverId?: string | null
+    fastestLapDriverId?: string | null
+    fastestPitstopTeamId?: string | null
+    mostDotdDriverId?: string | null
+    mostDnfRange?: string | null
+    firstRaceCollision?: boolean | null
+    firstRaceRain?: boolean | null
+    avatar?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type UserCreateManyFastestPitstopTeamInput = {
+    id?: string
+    username: string
+    password: string
+    name?: string | null
+    isAdmin?: boolean
+    teamId?: string | null
+    favoriteDriverId?: string | null
+    fastestLapDriverId?: string | null
+    mostDotdDriverId?: string | null
+    mostDnfRange?: string | null
+    firstRaceCollision?: boolean | null
+    firstRaceRain?: boolean | null
     avatar?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -13290,10 +14453,16 @@ export namespace Prisma {
     password?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
     isAdmin?: BoolFieldUpdateOperationsInput | boolean
+    mostDnfRange?: NullableStringFieldUpdateOperationsInput | string | null
+    firstRaceCollision?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    firstRaceRain?: NullableBoolFieldUpdateOperationsInput | boolean | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     favoriteDriver?: DriverUpdateOneWithoutFavoritedNestedInput
+    fastestLapDriver?: DriverUpdateOneWithoutFastestLapUsersNestedInput
+    fastestPitstopTeam?: TeamUpdateOneWithoutFastestPitstopUsersNestedInput
+    mostDotdDriver?: DriverUpdateOneWithoutMostDotdUsersNestedInput
     votes?: VoteUpdateManyWithoutUserNestedInput
     seasonVotes?: SeasonVoteUpdateManyWithoutUserNestedInput
     raceScores?: RaceScoreUpdateManyWithoutUserNestedInput
@@ -13306,6 +14475,12 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     isAdmin?: BoolFieldUpdateOperationsInput | boolean
     favoriteDriverId?: NullableStringFieldUpdateOperationsInput | string | null
+    fastestLapDriverId?: NullableStringFieldUpdateOperationsInput | string | null
+    fastestPitstopTeamId?: NullableStringFieldUpdateOperationsInput | string | null
+    mostDotdDriverId?: NullableStringFieldUpdateOperationsInput | string | null
+    mostDnfRange?: NullableStringFieldUpdateOperationsInput | string | null
+    firstRaceCollision?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    firstRaceRain?: NullableBoolFieldUpdateOperationsInput | boolean | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -13321,6 +14496,72 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     isAdmin?: BoolFieldUpdateOperationsInput | boolean
     favoriteDriverId?: NullableStringFieldUpdateOperationsInput | string | null
+    fastestLapDriverId?: NullableStringFieldUpdateOperationsInput | string | null
+    fastestPitstopTeamId?: NullableStringFieldUpdateOperationsInput | string | null
+    mostDotdDriverId?: NullableStringFieldUpdateOperationsInput | string | null
+    mostDnfRange?: NullableStringFieldUpdateOperationsInput | string | null
+    firstRaceCollision?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    firstRaceRain?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    avatar?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type UserUpdateWithoutFastestPitstopTeamInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    username?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    isAdmin?: BoolFieldUpdateOperationsInput | boolean
+    mostDnfRange?: NullableStringFieldUpdateOperationsInput | string | null
+    firstRaceCollision?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    firstRaceRain?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    avatar?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    team?: TeamUpdateOneWithoutUsersNestedInput
+    favoriteDriver?: DriverUpdateOneWithoutFavoritedNestedInput
+    fastestLapDriver?: DriverUpdateOneWithoutFastestLapUsersNestedInput
+    mostDotdDriver?: DriverUpdateOneWithoutMostDotdUsersNestedInput
+    votes?: VoteUpdateManyWithoutUserNestedInput
+    seasonVotes?: SeasonVoteUpdateManyWithoutUserNestedInput
+    raceScores?: RaceScoreUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutFastestPitstopTeamInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    username?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    isAdmin?: BoolFieldUpdateOperationsInput | boolean
+    teamId?: NullableStringFieldUpdateOperationsInput | string | null
+    favoriteDriverId?: NullableStringFieldUpdateOperationsInput | string | null
+    fastestLapDriverId?: NullableStringFieldUpdateOperationsInput | string | null
+    mostDotdDriverId?: NullableStringFieldUpdateOperationsInput | string | null
+    mostDnfRange?: NullableStringFieldUpdateOperationsInput | string | null
+    firstRaceCollision?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    firstRaceRain?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    avatar?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    votes?: VoteUncheckedUpdateManyWithoutUserNestedInput
+    seasonVotes?: SeasonVoteUncheckedUpdateManyWithoutUserNestedInput
+    raceScores?: RaceScoreUncheckedUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserUncheckedUpdateManyWithoutFastestPitstopTeamInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    username?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    isAdmin?: BoolFieldUpdateOperationsInput | boolean
+    teamId?: NullableStringFieldUpdateOperationsInput | string | null
+    favoriteDriverId?: NullableStringFieldUpdateOperationsInput | string | null
+    fastestLapDriverId?: NullableStringFieldUpdateOperationsInput | string | null
+    mostDotdDriverId?: NullableStringFieldUpdateOperationsInput | string | null
+    mostDnfRange?: NullableStringFieldUpdateOperationsInput | string | null
+    firstRaceCollision?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    firstRaceRain?: NullableBoolFieldUpdateOperationsInput | boolean | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -13337,6 +14578,8 @@ export namespace Prisma {
     votes?: VoteUpdateManyWithoutDriverNestedInput
     seasonVotes?: SeasonVoteUpdateManyWithoutDriverNestedInput
     favorited?: UserUpdateManyWithoutFavoriteDriverNestedInput
+    fastestLapUsers?: UserUpdateManyWithoutFastestLapDriverNestedInput
+    mostDotdUsers?: UserUpdateManyWithoutMostDotdDriverNestedInput
   }
 
   export type DriverUncheckedUpdateWithoutTeamInput = {
@@ -13350,6 +14593,8 @@ export namespace Prisma {
     votes?: VoteUncheckedUpdateManyWithoutDriverNestedInput
     seasonVotes?: SeasonVoteUncheckedUpdateManyWithoutDriverNestedInput
     favorited?: UserUncheckedUpdateManyWithoutFavoriteDriverNestedInput
+    fastestLapUsers?: UserUncheckedUpdateManyWithoutFastestLapDriverNestedInput
+    mostDotdUsers?: UserUncheckedUpdateManyWithoutMostDotdDriverNestedInput
   }
 
   export type DriverUncheckedUpdateManyWithoutTeamInput = {
@@ -13385,6 +14630,48 @@ export namespace Prisma {
     name?: string | null
     isAdmin?: boolean
     teamId?: string | null
+    fastestLapDriverId?: string | null
+    fastestPitstopTeamId?: string | null
+    mostDotdDriverId?: string | null
+    mostDnfRange?: string | null
+    firstRaceCollision?: boolean | null
+    firstRaceRain?: boolean | null
+    avatar?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type UserCreateManyFastestLapDriverInput = {
+    id?: string
+    username: string
+    password: string
+    name?: string | null
+    isAdmin?: boolean
+    teamId?: string | null
+    favoriteDriverId?: string | null
+    fastestPitstopTeamId?: string | null
+    mostDotdDriverId?: string | null
+    mostDnfRange?: string | null
+    firstRaceCollision?: boolean | null
+    firstRaceRain?: boolean | null
+    avatar?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type UserCreateManyMostDotdDriverInput = {
+    id?: string
+    username: string
+    password: string
+    name?: string | null
+    isAdmin?: boolean
+    teamId?: string | null
+    favoriteDriverId?: string | null
+    fastestLapDriverId?: string | null
+    fastestPitstopTeamId?: string | null
+    mostDnfRange?: string | null
+    firstRaceCollision?: boolean | null
+    firstRaceRain?: boolean | null
     avatar?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -13444,10 +14731,16 @@ export namespace Prisma {
     password?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
     isAdmin?: BoolFieldUpdateOperationsInput | boolean
+    mostDnfRange?: NullableStringFieldUpdateOperationsInput | string | null
+    firstRaceCollision?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    firstRaceRain?: NullableBoolFieldUpdateOperationsInput | boolean | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     team?: TeamUpdateOneWithoutUsersNestedInput
+    fastestLapDriver?: DriverUpdateOneWithoutFastestLapUsersNestedInput
+    fastestPitstopTeam?: TeamUpdateOneWithoutFastestPitstopUsersNestedInput
+    mostDotdDriver?: DriverUpdateOneWithoutMostDotdUsersNestedInput
     votes?: VoteUpdateManyWithoutUserNestedInput
     seasonVotes?: SeasonVoteUpdateManyWithoutUserNestedInput
     raceScores?: RaceScoreUpdateManyWithoutUserNestedInput
@@ -13460,6 +14753,12 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     isAdmin?: BoolFieldUpdateOperationsInput | boolean
     teamId?: NullableStringFieldUpdateOperationsInput | string | null
+    fastestLapDriverId?: NullableStringFieldUpdateOperationsInput | string | null
+    fastestPitstopTeamId?: NullableStringFieldUpdateOperationsInput | string | null
+    mostDotdDriverId?: NullableStringFieldUpdateOperationsInput | string | null
+    mostDnfRange?: NullableStringFieldUpdateOperationsInput | string | null
+    firstRaceCollision?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    firstRaceRain?: NullableBoolFieldUpdateOperationsInput | boolean | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -13475,6 +14774,132 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     isAdmin?: BoolFieldUpdateOperationsInput | boolean
     teamId?: NullableStringFieldUpdateOperationsInput | string | null
+    fastestLapDriverId?: NullableStringFieldUpdateOperationsInput | string | null
+    fastestPitstopTeamId?: NullableStringFieldUpdateOperationsInput | string | null
+    mostDotdDriverId?: NullableStringFieldUpdateOperationsInput | string | null
+    mostDnfRange?: NullableStringFieldUpdateOperationsInput | string | null
+    firstRaceCollision?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    firstRaceRain?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    avatar?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type UserUpdateWithoutFastestLapDriverInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    username?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    isAdmin?: BoolFieldUpdateOperationsInput | boolean
+    mostDnfRange?: NullableStringFieldUpdateOperationsInput | string | null
+    firstRaceCollision?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    firstRaceRain?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    avatar?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    team?: TeamUpdateOneWithoutUsersNestedInput
+    favoriteDriver?: DriverUpdateOneWithoutFavoritedNestedInput
+    fastestPitstopTeam?: TeamUpdateOneWithoutFastestPitstopUsersNestedInput
+    mostDotdDriver?: DriverUpdateOneWithoutMostDotdUsersNestedInput
+    votes?: VoteUpdateManyWithoutUserNestedInput
+    seasonVotes?: SeasonVoteUpdateManyWithoutUserNestedInput
+    raceScores?: RaceScoreUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutFastestLapDriverInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    username?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    isAdmin?: BoolFieldUpdateOperationsInput | boolean
+    teamId?: NullableStringFieldUpdateOperationsInput | string | null
+    favoriteDriverId?: NullableStringFieldUpdateOperationsInput | string | null
+    fastestPitstopTeamId?: NullableStringFieldUpdateOperationsInput | string | null
+    mostDotdDriverId?: NullableStringFieldUpdateOperationsInput | string | null
+    mostDnfRange?: NullableStringFieldUpdateOperationsInput | string | null
+    firstRaceCollision?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    firstRaceRain?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    avatar?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    votes?: VoteUncheckedUpdateManyWithoutUserNestedInput
+    seasonVotes?: SeasonVoteUncheckedUpdateManyWithoutUserNestedInput
+    raceScores?: RaceScoreUncheckedUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserUncheckedUpdateManyWithoutFastestLapDriverInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    username?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    isAdmin?: BoolFieldUpdateOperationsInput | boolean
+    teamId?: NullableStringFieldUpdateOperationsInput | string | null
+    favoriteDriverId?: NullableStringFieldUpdateOperationsInput | string | null
+    fastestPitstopTeamId?: NullableStringFieldUpdateOperationsInput | string | null
+    mostDotdDriverId?: NullableStringFieldUpdateOperationsInput | string | null
+    mostDnfRange?: NullableStringFieldUpdateOperationsInput | string | null
+    firstRaceCollision?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    firstRaceRain?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    avatar?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type UserUpdateWithoutMostDotdDriverInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    username?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    isAdmin?: BoolFieldUpdateOperationsInput | boolean
+    mostDnfRange?: NullableStringFieldUpdateOperationsInput | string | null
+    firstRaceCollision?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    firstRaceRain?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    avatar?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    team?: TeamUpdateOneWithoutUsersNestedInput
+    favoriteDriver?: DriverUpdateOneWithoutFavoritedNestedInput
+    fastestLapDriver?: DriverUpdateOneWithoutFastestLapUsersNestedInput
+    fastestPitstopTeam?: TeamUpdateOneWithoutFastestPitstopUsersNestedInput
+    votes?: VoteUpdateManyWithoutUserNestedInput
+    seasonVotes?: SeasonVoteUpdateManyWithoutUserNestedInput
+    raceScores?: RaceScoreUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutMostDotdDriverInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    username?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    isAdmin?: BoolFieldUpdateOperationsInput | boolean
+    teamId?: NullableStringFieldUpdateOperationsInput | string | null
+    favoriteDriverId?: NullableStringFieldUpdateOperationsInput | string | null
+    fastestLapDriverId?: NullableStringFieldUpdateOperationsInput | string | null
+    fastestPitstopTeamId?: NullableStringFieldUpdateOperationsInput | string | null
+    mostDnfRange?: NullableStringFieldUpdateOperationsInput | string | null
+    firstRaceCollision?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    firstRaceRain?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    avatar?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    votes?: VoteUncheckedUpdateManyWithoutUserNestedInput
+    seasonVotes?: SeasonVoteUncheckedUpdateManyWithoutUserNestedInput
+    raceScores?: RaceScoreUncheckedUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserUncheckedUpdateManyWithoutMostDotdDriverInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    username?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    isAdmin?: BoolFieldUpdateOperationsInput | boolean
+    teamId?: NullableStringFieldUpdateOperationsInput | string | null
+    favoriteDriverId?: NullableStringFieldUpdateOperationsInput | string | null
+    fastestLapDriverId?: NullableStringFieldUpdateOperationsInput | string | null
+    fastestPitstopTeamId?: NullableStringFieldUpdateOperationsInput | string | null
+    mostDnfRange?: NullableStringFieldUpdateOperationsInput | string | null
+    firstRaceCollision?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    firstRaceRain?: NullableBoolFieldUpdateOperationsInput | boolean | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
