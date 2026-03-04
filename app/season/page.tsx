@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
 import { clsx } from "clsx";
-import { GripVertical, Plus, X, Lock, Trophy, Star, ArrowUpDown, ChevronDown } from "lucide-react";
+import { GripVertical, Plus, X, Lock, Trophy, Star, ArrowUpDown, ChevronDown, Zap, Timer, Wrench, AlertTriangle, Flame, CloudRain, Check } from "lucide-react";
 import ReactCountryFlag from "react-country-flag";
 import {
   DndContext,
@@ -87,25 +87,25 @@ function CustomSelect({
 
   return (
     <div ref={ref} className="flex flex-col gap-1.5 relative">
-      <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{label}</label>
+      {label && <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{label}</label>}
       <button
           type="button"
           disabled={disabled}
           onClick={() => setOpen(!open)}
           className={clsx(
-              "w-full bg-background border border-border p-3 rounded-xl text-sm font-medium text-left flex items-center justify-between transition-colors outline-none",
-              selectedOption ? "text-foreground" : "text-muted-foreground",
-              open && "border-[#E60000]",
+              "w-full bg-white/[0.03] border border-transparent p-3 rounded-xl text-sm font-medium text-left flex items-center justify-between transition-colors outline-none",
+              selectedOption ? "text-white" : "text-gray-500",
+              open && "bg-white/[0.06] ring-1 ring-[#E60000]/30",
               disabled && "opacity-50 cursor-not-allowed",
-              !disabled && "hover:border-white/20"
+              !disabled && "hover:bg-white/[0.06]"
           )}
       >
           <span className="flex-1 truncate">{selectedOption ? selectedOption.label : placeholder}</span>
-          <ChevronDown className={clsx("w-4 h-4 text-muted-foreground transition-transform flex-shrink-0 ml-2", open && "rotate-180")} />
+          <ChevronDown className={clsx("w-4 h-4 transition-transform flex-shrink-0 ml-2", selectedOption ? "text-white/50" : "text-gray-500", open && "rotate-180")} />
       </button>
 
       {open && !disabled && (
-          <div className="absolute z-50 top-full mt-1 left-0 right-0 bg-background border border-border rounded-xl shadow-2xl overflow-y-auto" style={{ maxHeight: "250px" }}>
+          <div className="absolute z-50 top-full mt-1.5 left-0 right-0 bg-[#1C1C1E] border border-white/10 rounded-xl shadow-2xl overflow-y-auto overflow-hidden" style={{ maxHeight: "250px" }}>
               {options.map(o => (
                   <button
                       key={o.value}
@@ -115,8 +115,8 @@ function CustomSelect({
                           setOpen(false);
                       }}
                       className={clsx(
-                          "w-full flex items-center gap-2 px-3 py-2.5 text-left hover:bg-accent hover:text-foreground transition-colors text-sm",
-                          value === o.value ? "text-[#E60000] bg-[#E60000]/5" : "text-foreground/80"
+                          "w-full flex items-center gap-2 px-3 py-3 text-left hover:bg-white/5 hover:text-white transition-colors text-sm",
+                          value === o.value ? "text-[#E60000] bg-[#E60000]/10 font-bold" : "text-gray-300"
                       )}
                   >
                       {o.label}
@@ -158,11 +158,11 @@ function DriverCard({
   return (
     <Card
       className={clsx(
-        "border-border bg-card overflow-hidden transition-all duration-150 select-none",
-        isDragging && "opacity-40 scale-[0.98]",
+        "border-white/[0.06] bg-[#1C1C1E] overflow-hidden transition-all duration-200 select-none",
+        isDragging && "opacity-60 scale-[1.02] shadow-2xl z-50",
         isChampion && "ring-1 ring-yellow-500/20",
         isSelected && "ring-2 ring-[#E60000] scale-[1.01]",
-        isSwapTarget && !locked && "ring-1 ring-white/20"
+        isSwapTarget && !locked && "ring-2 ring-white/20"
       )}
     >
       <CardContent className="flex items-center gap-3 p-3">
@@ -603,106 +603,209 @@ export default function SeasonVotePage() {
         </div>
 
         {/* Extra Predictions */}
-        <div className="mt-4 mb-8 space-y-3">
-           <div className="bg-card border border-border p-4 rounded-3xl flex flex-col gap-2">
-              <span className="text-xs font-black text-muted-foreground uppercase tracking-widest">
-                Dodatkowe Typowanie
-              </span>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 mt-1">
-                <CustomSelect
-                  label="Najszybsze okrążenie (kierowca)"
-                  placeholder="Wybierz kierowcę..."
-                  value={fastestLapDriverId || ""}
-                  options={driverOptions}
-                  disabled={locked || saving}
-                  onChange={async (val) => {
-                     setFastestLapDriverId(val);
-                     setSaving(true);
-                     await setSeasonExtraLap(val);
-                     setSaving(false);
-                     refreshUser();
-                  }}
-                />
-                
-                <CustomSelect
-                  label="Najszybszy pitstop (zespół)"
-                  placeholder="Wybierz zespół..."
-                  value={fastestPitstopTeamId || ""}
-                  options={teamOptions}
-                  disabled={locked || saving}
-                  onChange={async (val) => {
-                     setFastestPitstopTeamId(val);
-                     setSaving(true);
-                     await setSeasonExtraPitstop(val);
-                     setSaving(false);
-                     refreshUser();
-                  }}
-                />
+<div className="mt-8 mb-8">
+  <div>
+    <div className="mb-4 flex flex-wrap items-center justify-between gap-4">
+      <div className="flex items-center gap-3">
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#E60000]/15 ring-1 ring-[#E60000]/20">
+          <Zap className="h-5 w-5 text-[#E60000]" />
+        </div>
+        <div>
+          <h3 className="text-base sm:text-lg font-black text-white uppercase tracking-tight">
+            Dodatkowe Typowanie
+          </h3>
+          <p className="text-[10px] font-bold uppercase tracking-widest text-gray-500">
+            Typuj bonusowe pytania
+          </p>
+        </div>
+      </div>
 
-                <CustomSelect
-                  label="Najwięcej Driver of the day"
-                  placeholder="Wybierz kierowcę..."
-                  value={mostDotdDriverId || ""}
-                  options={driverOptions}
-                  disabled={locked || saving}
-                  onChange={async (val) => {
-                     setMostDotdDriverId(val);
-                     setSaving(true);
-                     await setSeasonExtraMostDotd(val);
-                     setSaving(false);
-                     refreshUser();
-                  }}
-                />
+      {saving && (
+        <div className="flex items-center gap-1.5 rounded-lg bg-white/[0.05] px-2.5 py-1">
+          <div className="h-2 w-2 animate-pulse rounded-full bg-[#E60000]" />
+          <span className="text-[10px] font-bold text-gray-400">
+            Zapisuję…
+          </span>
+        </div>
+      )}
+    </div>
 
-                <CustomSelect
-                  label="Najwięcej DNF w wyścigów"
-                  placeholder="Wybierz przedział..."
-                  value={mostDnfRange || ""}
-                  options={dnfOptions}
-                  disabled={locked || saving}
-                  onChange={async (val) => {
-                     setMostDnfRange(val);
-                     setSaving(true);
-                     await setSeasonExtraMostDnf(val);
-                     setSaving(false);
-                     refreshUser();
-                  }}
-                />
+    {/* Prediction cards grid */}
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+        {[
+          {
+            icon: <Timer className="h-4 w-4 text-purple-400" />,
+            label: "Najszybsze okrążenie",
+            sublabel: "Kierowca",
+            placeholder: "Wybierz kierowcę...",
+            value: fastestLapDriverId || "",
+            options: driverOptions,
+            color: "purple",
+            onChange: async (val: string) => {
+              setFastestLapDriverId(val);
+              setSaving(true);
+              await setSeasonExtraLap(val);
+              setSaving(false);
+              refreshUser();
+            },
+          },
+          {
+            icon: <Wrench className="h-4 w-4 text-orange-400" />,
+            label: "Najszybszy pitstop",
+            sublabel: "Zespół",
+            placeholder: "Wybierz zespół...",
+            value: fastestPitstopTeamId || "",
+            options: teamOptions,
+            color: "orange",
+            onChange: async (val: string) => {
+              setFastestPitstopTeamId(val);
+              setSaving(true);
+              await setSeasonExtraPitstop(val);
+              setSaving(false);
+              refreshUser();
+            },
+          },
+          {
+            icon: <Star className="h-4 w-4 text-yellow-400" />,
+            label: "Najwięcej Driver of the Day",
+            sublabel: "Kierowca",
+            placeholder: "Wybierz kierowcę...",
+            value: mostDotdDriverId || "",
+            options: driverOptions,
+            color: "yellow",
+            onChange: async (val: string) => {
+              setMostDotdDriverId(val);
+              setSaving(true);
+              await setSeasonExtraMostDotd(val);
+              setSaving(false);
+              refreshUser();
+            },
+          },
+          {
+            icon: <AlertTriangle className="h-4 w-4 text-red-400" />,
+            label: "Najwięcej DNF",
+            sublabel: "Przedział wyścigów",
+            placeholder: "Wybierz przedział...",
+            value: mostDnfRange || "",
+            options: dnfOptions,
+            color: "red",
+            onChange: async (val: string) => {
+              setMostDnfRange(val);
+              setSaving(true);
+              await setSeasonExtraMostDnf(val);
+              setSaving(false);
+              refreshUser();
+            },
+          },
+          {
+            icon: <Flame className="h-4 w-4 text-amber-400" />,
+            label: "Kolizja na starcie?",
+            sublabel: "Pierwszy wyścig",
+            placeholder: "Tak / Nie",
+            value:
+              firstRaceCollision === null
+                ? ""
+                : String(firstRaceCollision),
+            options: yesNoOptions,
+            color: "amber",
+            onChange: async (val: string) => {
+              const b = val === "true";
+              setFirstRaceCollision(b);
+              setSaving(true);
+              await setSeasonExtraFirstRaceCollision(b);
+              setSaving(false);
+              refreshUser();
+            },
+          },
+          {
+            icon: <CloudRain className="h-4 w-4 text-blue-400" />,
+            label: "Deszcz na wyścigu?",
+            sublabel: "Pierwszy wyścig",
+            placeholder: "Tak / Nie",
+            value:
+              firstRaceRain === null
+                ? ""
+                : String(firstRaceRain),
+            options: yesNoOptions,
+            color: "blue",
+            onChange: async (val: string) => {
+              const b = val === "true";
+              setFirstRaceRain(b);
+              setSaving(true);
+              await setSeasonExtraFirstRaceRain(b);
+              setSaving(false);
+              refreshUser();
+            },
+          },
+        ].map((item, index) => {
+          const hasValue = item.value !== "";
 
-                <CustomSelect
-                  label="Czy będzie kolizja na starcie?"
-                  placeholder="Tak / Nie"
-                  value={firstRaceCollision === null ? "" : String(firstRaceCollision)}
-                  options={yesNoOptions}
-                  disabled={locked || saving}
-                  onChange={async (val) => {
-                     const b = val === "true";
-                     setFirstRaceCollision(b);
-                     setSaving(true);
-                     await setSeasonExtraFirstRaceCollision(b);
-                     setSaving(false);
-                     refreshUser();
-                  }}
-                />
+          return (
+            <div
+              key={item.label}
+              style={{ zIndex: 100 - index }}
+              className={clsx(
+                "group relative rounded-2xl border transition-all duration-200",
+                hasValue
+                  ? "bg-[#1C1C1E] border-white/[0.04]"
+                  : "bg-white/[0.02] border-transparent"
+              )}
+            >
+              {/* Subtle top accent */}
+              {hasValue && (
+                <div className="absolute left-0 right-0 top-0 h-px rounded-t-2xl bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+              )}
 
+              <div className="p-3.5 sm:p-4">
+                {/* Card header */}
+                <div className="mb-3 flex items-start justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-white/[0.05]">
+                      {item.icon}
+                    </div>
+                    <div>
+                      <div className="text-sm font-black leading-tight text-white">
+                        {item.label}
+                      </div>
+                      <div className="text-[9px] font-bold uppercase tracking-widest text-gray-500">
+                        {item.sublabel}
+                      </div>
+                    </div>
+                  </div>
+                  {hasValue && (
+                    <div className="flex h-5 w-5 items-center justify-center rounded-full bg-green-500/15">
+                      <Check className="h-3 w-3 text-green-400" />
+                    </div>
+                  )}
+                </div>
+
+                {/* Select */}
                 <CustomSelect
-                  label="Czy będzie deszcz na wyścigu?"
-                  placeholder="Tak / Nie"
-                  value={firstRaceRain === null ? "" : String(firstRaceRain)}
-                  options={yesNoOptions}
+                  label=""
+                  placeholder={item.placeholder}
+                  value={item.value}
+                  options={item.options}
                   disabled={locked || saving}
-                  onChange={async (val) => {
-                     const b = val === "true";
-                     setFirstRaceRain(b);
-                     setSaving(true);
-                     await setSeasonExtraFirstRaceRain(b);
-                     setSaving(false);
-                     refreshUser();
-                  }}
+                  onChange={item.onChange}
                 />
               </div>
-           </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Locked banner */}
+      {locked && (
+        <div className="mt-4 flex items-center gap-3 rounded-2xl bg-white/[0.03] px-4 py-3">
+          <Lock className="h-4 w-4 shrink-0 text-gray-500" />
+          <span className="text-xs font-bold text-gray-500">
+            Typowanie zostało zamknięte — nie możesz już zmieniać
+            odpowiedzi.
+          </span>
         </div>
+      )}
+    </div>
+  </div>
 
         {/* Picked driver list */}
         <div className="mt-4">

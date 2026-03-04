@@ -9,7 +9,23 @@ import {
   getRaceWithResults,
   getActiveDriversForResults,
 } from "@/app/actions/raceResults";
-import { Info, ChevronDown, Trophy, Target, Flag, Crown } from "lucide-react";
+import {
+  Info,
+  ChevronDown,
+  Trophy,
+  Target,
+  Flag,
+  Crown,
+  Zap,
+  TrendingUp,
+  Award,
+  CircleDot,
+  Hash,
+  Sparkles,
+  Flame,
+  Bolt,
+  Medal,
+} from "lucide-react";
 
 type PredictionDetail = {
   driverId: string;
@@ -134,268 +150,181 @@ export default function RaceResultsContent({ raceRound }: Props) {
 
   const myScore = raceData.scores.find((s) => s.user.id === user?.id);
   const myDetails = myScore?.details as ScoreDetails | null;
+  const scorePercent = myScore
+    ? Math.round((myScore.totalPoints / 78) * 100)
+    : 0;
 
   const toggleSection = (id: string) =>
     setExpandedSection(expandedSection === id ? null : id);
 
   return (
-    <div className="mx-auto max-w-lg px-4 pb-28 pt-6">
-      {/* ── RACE HEADER ── */}
-      <div className="relative mb-8 overflow-hidden rounded-3xl border border-white/[0.06] bg-gradient-to-b from-[#1C1C1E] to-[#141416] p-6">
-        {/* Decorative glow */}
-        <div className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-[#E60000]/10 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-8 -left-8 h-32 w-32 rounded-full bg-[#E60000]/5 blur-2xl" />
+    <div className="mx-auto max-w-lg px-3 sm:px-4 pb-28 pt-4 sm:pt-6">
+      {/* ── HERO RACE HEADER ── */}
+      <div className="relative mb-8 overflow-hidden rounded-3xl border border-white/[0.08]">
+        {/* Dynamic background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-[#1A1A1D] via-[#131315] to-[#0D0D0D]" />
+        <div className="pointer-events-none absolute -right-20 top-1/2 h-64 w-64 -translate-y-1/2 rounded-full bg-[#E60000]/20 blur-[80px]" />
+        <div className="pointer-events-none absolute -left-16 -bottom-16 h-48 w-48 rounded-full bg-[#E60000]/10 blur-[70px]" />
 
-        <div className="relative text-center">
-          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-[#E60000]/20 bg-[#E60000]/10 px-4 py-1.5">
-            <div className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#E60000]" />
-            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#E60000]">
-              Runda {raceData.round} — Zakończona
+        {/* Top accent bar */}
+        <div className="relative h-1.5 bg-gradient-to-r from-[#E60000] via-[#FF6B6B] to-transparent" />
+
+        <div className="relative z-10 p-6 sm:p-8">
+          {/* Round badge with animation */}
+          <div className="mb-4 inline-flex items-center gap-2.5 rounded-full border border-[#E60000]/30 bg-[#E60000]/5 px-3.5 py-1.5 backdrop-blur-sm">
+            <div className="relative h-2.5 w-2.5">
+              <div className="absolute inset-0 animate-pulse rounded-full bg-[#E60000]" />
+              <div className="absolute inset-1 rounded-full bg-[#E60000] opacity-40" />
+            </div>
+            <span className="text-xs font-black uppercase tracking-[0.25em] text-[#E60000]">
+              Runda {raceData.round}
             </span>
           </div>
-          <h1 className="mb-2 text-3xl font-black uppercase leading-none tracking-tight text-white">
-            {raceData.name}
-          </h1>
-          <p className="text-xs font-semibold uppercase tracking-widest text-gray-500">
-            {raceData.location}
-          </p>
-        </div>
-      </div>
 
-      {/* ── SCORING SYSTEM INFO ── */}
-      <div className="mb-6">
-        <button
-          onClick={() => setShowScoringInfo(!showScoringInfo)}
-          className="group flex w-full items-center justify-between rounded-2xl border border-white/[0.06] bg-[#1C1C1E] p-4 text-left transition-all hover:border-white/10 hover:bg-[#222225]"
-        >
-          <div className="flex items-center gap-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#E60000]/10">
-              <Info className="h-4 w-4 text-[#E60000]" />
-            </div>
-            <span className="text-xs font-bold uppercase tracking-widest text-gray-300">
-              Zasady punktowania
-            </span>
+          {/* Main heading with dynamic layout */}
+          <div className="mb-4">
+            <h1 className="text-4xl sm:text-5xl font-black uppercase leading-[0.95] tracking-tighter text-white">
+              {raceData.name.replace(" Grand Prix", "")}
+              <span className="block bg-gradient-to-r from-[#E60000] to-[#FF6B6B] bg-clip-text text-transparent">
+                Grand Prix
+              </span>
+            </h1>
           </div>
-          <ChevronDown
-            className={clsx(
-              "h-4 w-4 text-gray-500 transition-transform duration-300",
-              showScoringInfo && "rotate-180"
-            )}
-          />
-        </button>
 
-        <div
-          className={clsx(
-            "grid transition-all duration-300 ease-in-out",
-            showScoringInfo
-              ? "grid-rows-[1fr] opacity-100"
-              : "grid-rows-[0fr] opacity-0"
-          )}
-        >
-          <div className="overflow-hidden">
-            <div className="mt-2 space-y-3 rounded-2xl border border-white/[0.06] bg-[#1C1C1E] p-5">
-              {/* Selection */}
-              <div className="rounded-xl bg-[#0D0D0D] p-3">
-                <h3 className="mb-2 text-[10px] font-black uppercase tracking-widest text-gray-400">
-                  Za każdego kierowcę w TOP 10
-                </h3>
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-gray-400">Obecność w TOP 10</span>
-                  <span className="rounded-md bg-green-500/10 px-2 py-0.5 font-black text-green-400">
-                    +1
-                  </span>
-                </div>
-              </div>
-
-              {/* Position bonus */}
-              <div className="rounded-xl bg-[#0D0D0D] p-3">
-                <h3 className="mb-2 text-[10px] font-black uppercase tracking-widest text-gray-400">
-                  🎯 Bonus za zgodność pozycji
-                </h3>
-                <div className="space-y-1.5">
-                  {[
-                    {
-                      label: "Idealnie (±0)",
-                      pts: "+6",
-                      color: "text-[#E60000] bg-[#E60000]/10",
-                    },
-                    {
-                      label: "Różnica ±1",
-                      pts: "+4",
-                      color: "text-orange-400 bg-orange-400/10",
-                    },
-                    {
-                      label: "Różnica ±2",
-                      pts: "+3",
-                      color: "text-yellow-400 bg-yellow-400/10",
-                    },
-                    {
-                      label: "Różnica ±3",
-                      pts: "+2",
-                      color: "text-blue-400 bg-blue-400/10",
-                    },
-                    {
-                      label: "Różnica ±4",
-                      pts: "+1",
-                      color: "text-gray-400 bg-gray-400/10",
-                    },
-                    {
-                      label: "Różnica ≥5",
-                      pts: "+0",
-                      color: "text-gray-600 bg-gray-600/10",
-                    },
-                  ].map((row) => (
-                    <div
-                      key={row.label}
-                      className="flex items-center justify-between text-xs"
-                    >
-                      <span className="text-gray-400">{row.label}</span>
-                      <span
-                        className={clsx(
-                          "rounded-md px-2 py-0.5 font-black",
-                          row.color
-                        )}
-                      >
-                        {row.pts}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-                <div className="mt-2 border-t border-white/5 pt-2 text-[10px] text-gray-500">
-                  Maks za kierowcę:{" "}
-                  <span className="font-bold text-white">7 pkt</span>
-                </div>
-              </div>
-
-              {/* Bonuses */}
-              <div className="rounded-xl bg-[#0D0D0D] p-3">
-                <h3 className="mb-2 text-[10px] font-black uppercase tracking-widest text-gray-400">
-                  ⭐ Bonusy
-                </h3>
-                <div className="space-y-1.5">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-gray-400">Trafione P1</span>
-                    <span className="rounded-md bg-[#E60000]/10 px-2 py-0.5 font-black text-[#E60000]">
-                      +3
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-gray-400">Całe podium</span>
-                    <span className="rounded-md bg-[#E60000]/10 px-2 py-0.5 font-black text-[#E60000]">
-                      +5
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Max total */}
-              <div className="flex items-center justify-between rounded-xl border border-[#E60000]/20 bg-[#E60000]/5 p-3">
-                <span className="text-xs font-black uppercase tracking-widest text-white">
-                  Maks weekend
-                </span>
-                <div className="text-right">
-                  <span className="text-xl font-black text-[#E60000]">78</span>
-                  <span className="ml-1 text-[10px] font-bold text-gray-500">
-                    PKT
-                  </span>
-                </div>
-              </div>
-            </div>
+          {/* Location with icon */}
+          <div className="flex items-center gap-2 text-gray-400">
+            <div className="h-1 w-1 rounded-full bg-[#E60000]" />
+            <span className="text-sm font-bold uppercase tracking-[0.15em]">
+              {raceData.location}
+            </span>
           </div>
         </div>
       </div>
 
-      {/* ── MY SCORE HERO CARD ── */}
+      {/* ── MY SCORE — HERO CARD ── */}
       {myScore && (
-        <div className="relative mb-8 overflow-hidden rounded-3xl border border-[#E60000]/20 bg-gradient-to-br from-[#E60000]/15 via-[#1C1C1E] to-[#141416] p-6">
-          {/* Animated glowing ring */}
-          <div className="pointer-events-none absolute -right-12 -top-12 h-40 w-40 rounded-full border border-[#E60000]/20 opacity-50" />
-          <div className="pointer-events-none absolute -right-8 -top-8 h-28 w-28 rounded-full border border-[#E60000]/10" />
+        <div className="relative mb-8 overflow-hidden rounded-3xl border border-[#E60000]/20">
+          {/* Gradient background */}
+          <div className="absolute inset-0 bg-gradient-to-br from-[#E60000]/10 via-[#151517] to-[#131315]" />
+          <div className="pointer-events-none absolute -right-12 -top-12 h-48 w-48 rounded-full bg-[#E60000]/15 blur-[60px]" />
 
-          <div className="relative">
-            <div className="mb-5 flex items-start justify-between">
+          {/* Top bar */}
+          <div className="relative h-1.5 bg-gradient-to-r from-[#E60000] via-[#FF6B6B]/60 to-transparent" />
+
+          <div className="relative z-10 space-y-6 p-6 sm:p-8">
+            {/* Header with stats */}
+            <div className="flex items-start justify-between gap-4">
               <div>
-                <div className="mb-1 text-[10px] font-black uppercase tracking-[0.2em] text-[#E60000]/60">
-                  Twoje punkty
-                </div>
-                <div className="flex items-baseline gap-1">
-                  <span className="text-5xl font-black tabular-nums leading-none text-white">
-                    {myScore.totalPoints}
-                  </span>
-                  <span className="text-lg font-bold text-[#E60000]/40">
-                    /78
+                <div className="mb-2 flex items-center gap-2">
+                  <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-[#E60000] text-xs font-black text-white">
+                    ★
+                  </div>
+                  <span className="text-xs font-black uppercase tracking-[0.2em] text-[#E60000]">
+                    Twój Wynik
                   </span>
                 </div>
               </div>
-              <div className="flex flex-col items-end gap-2">
-                <div className="flex items-center gap-1.5 rounded-xl border border-green-500/20 bg-green-500/10 px-3 py-1.5">
-                  <Target className="h-3 w-3 text-green-400" />
-                  <span className="text-sm font-black text-green-400">
-                    {myScore.perfectPredictions}
+              {/* {myScore.perfectPredictions > 0 && (
+                <div className="flex items-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 backdrop-blur-sm">
+                  <Sparkles className="h-3.5 w-3.5 text-emerald-400" />
+                  <span className="text-xs font-black text-emerald-400">
+                    {myScore.perfectPredictions} Idealnie
                   </span>
                 </div>
-                <span className="text-[9px] font-bold uppercase tracking-wider text-gray-500">
-                  Trafień
-                </span>
-              </div>
+              )} */}
             </div>
 
-            {/* Score progress bar */}
-            <div className="mb-4 h-2 overflow-hidden rounded-full bg-white/5">
-              <div
-                className="h-full rounded-full bg-gradient-to-r from-[#E60000] to-[#ff4444] transition-all duration-1000 ease-out"
-                style={{
-                  width: `${(myScore.totalPoints / 78) * 100}%`,
-                }}
-              />
+            {/* Score display */}
+            <div className="space-y-3">
+              <div className="flex items-end gap-4">
+                <div>
+                  <div className="text-6xl sm:text-7xl font-black tabular-nums text-white leading-none">
+                    {myScore.totalPoints}
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* Bonus badges */}
-            {myDetails &&
-              (myDetails.bonusP1 > 0 || myDetails.bonusPodium > 0) && (
-                <div className="flex flex-wrap gap-2">
-                  {myDetails.bonusP1 > 0 && (
-                    <div className="flex items-center gap-1.5 rounded-lg border border-[#E60000]/30 bg-[#E60000]/10 px-3 py-1.5">
-                      <Crown className="h-3 w-3 text-[#E60000]" />
-                      <span className="text-[10px] font-black text-[#E60000]">
-                        P1 BONUS +{myDetails.bonusP1}
-                      </span>
+            {myDetails && (
+              <div className="flex flex-wrap gap-2 pt-2">
+                {myScore && myScore.perfectPredictions > 0 && (
+                  <div className="flex items-center gap-3 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 backdrop-blur-sm">
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-emerald-500/20 text-emerald-400">
+                      <Sparkles className="h-4 w-4" />
                     </div>
-                  )}
-                  {myDetails.bonusPodium > 0 && (
-                    <div className="flex items-center gap-1.5 rounded-lg border border-[#E60000]/30 bg-[#E60000]/10 px-3 py-1.5">
-                      <Trophy className="h-3 w-3 text-[#E60000]" />
-                      <span className="text-[10px] font-black text-[#E60000]">
-                        PODIUM +{myDetails.bonusPodium}
-                      </span>
+                    <div>
+                      <div className="text-[9px] font-black uppercase tracking-wider text-emerald-400/80">
+                        Idealnie
+                      </div>
+                      <div className="text-sm font-black text-emerald-400">
+                        {myScore.perfectPredictions}
+                      </div>
                     </div>
-                  )}
-                </div>
-              )}
-
-            {myDetails?.fromSeason && (
-              <div className="mt-3 rounded-xl border border-white/5 bg-[#0D0D0D]/80 px-4 py-2.5 text-[10px] text-gray-400">
-                📋 Typy z{" "}
-                <span className="font-bold text-white">
-                  predykcji sezonowej
-                </span>{" "}
-                — nie oddałeś typów na ten wyścig
+                  </div>
+                )}
+                {myDetails.bonusP1 > 0 && (
+                  <div className="flex items-center gap-3 rounded-xl border border-[#E60000]/30 bg-[#E60000]/10 px-3 py-2 backdrop-blur-sm">
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#E60000]/20 text-[#E60000]">
+                      <Flame className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <div className="text-[9px] font-black uppercase tracking-wider text-[#E60000]/80">
+                        Zwycięzca
+                      </div>
+                      <div className="text-sm font-black text-white">
+                        +{myDetails.bonusP1} <span className="text-[10px] text-gray-500">PKT</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                {myDetails.bonusPodium > 0 && (
+                  <div className="flex items-center gap-3 rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-2 backdrop-blur-sm">
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-amber-500/20 text-amber-400">
+                      <Medal className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <div className="text-[9px] font-black uppercase tracking-wider text-amber-500/80">
+                        Całe Podium
+                      </div>
+                      <div className="text-sm font-black text-white">
+                        +{myDetails.bonusPodium} <span className="text-[10px] text-gray-500">PKT</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                {myDetails.fromSeason && (
+                  <div className="flex items-center gap-3 rounded-xl border border-purple-500/30 bg-purple-500/10 px-3 py-2 backdrop-blur-sm">
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-purple-500/20 text-purple-400">
+                      <Bolt className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <div className="text-[9px] font-black uppercase tracking-wider text-purple-400/80">
+                        Auto uzupełnienie
+                      </div>
+                      <div className="text-sm font-black text-purple-400">
+                        Typy z Sezonu
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
         </div>
       )}
 
-      {/* ── MY DETAILED PREDICTIONS ── */}
+      {/* ── PREDICTIONS GRID ── */}
       {myDetails && myDetails.predictions.length > 0 && (
-        <Section
+        <CollapsibleSection
           id="predictions"
-          icon={<Target className="h-4 w-4 text-[#E60000]" />}
-          title="Twoje TOP 10 Typy"
+          icon={Target}
+          title="Twoje Typy"
+          count={myDetails.predictions.length}
           expanded={expandedSection === "predictions"}
           onToggle={() => toggleSection("predictions")}
         >
-          <div className="space-y-1.5">
+          <div className="space-y-2 sm:space-y-2.5">
             {myDetails.predictions
               .sort((a, b) => a.predictedPos - b.predictedPos)
               .map((pred) => {
@@ -414,201 +343,288 @@ export default function RaceResultsContent({ raceRound }: Props) {
                   <div
                     key={pred.driverId}
                     className={clsx(
-                      "group relative flex items-center gap-3 overflow-hidden rounded-2xl border p-3.5 transition-all",
+                      "group relative overflow-hidden rounded-2xl border p-3.5 sm:p-4 backdrop-blur-sm transition-all duration-300",
                       isPerfect
-                        ? "border-[#E60000]/40 bg-gradient-to-r from-[#E60000]/10 to-transparent"
+                        ? "border-[#E60000]/40 bg-gradient-to-r from-[#E60000]/15 to-transparent shadow-lg shadow-[#E60000]/10"
                         : pred.inTop10
-                          ? "border-green-500/15 bg-[#1A1D1A]"
-                          : "border-white/[0.04] bg-[#161618] opacity-50"
+                          ? "border-emerald-500/20 bg-emerald-500/5"
+                          : "border-white/[0.06] bg-white/[0.02] opacity-60"
                     )}
                   >
-                    {/* Left color accent */}
+                    {/* Left accent */}
                     {isPerfect && (
-                      <div className="absolute bottom-0 left-0 top-0 w-[3px] rounded-full bg-[#E60000]" />
+                      <div className="absolute inset-y-0 left-0 w-1 bg-gradient-to-b from-[#E60000] to-[#FF6B6B]" />
                     )}
 
-                    {/* Position badge */}
-                    <div
-                      className={clsx(
-                        "flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-xs font-black",
-                        pred.predictedPos === 1
-                          ? "bg-[#E60000] text-white shadow-lg shadow-red-900/40"
-                          : pred.predictedPos <= 3
-                            ? "bg-[#E60000]/15 text-[#E60000]"
-                            : "bg-[#2C2C2E] text-gray-500"
-                      )}
-                    >
-                      P{pred.predictedPos}
-                    </div>
-
-                    {/* Driver info */}
-                    <div className="min-w-0 flex-1">
-                      <div className="truncate text-sm font-bold text-white">
-                        {driver.name}
+                    {/* Position badge & Container */}
+                    <div className="flex items-center gap-3 sm:gap-4 w-full">
+                      <div
+                        className={clsx(
+                          "flex h-11 w-11 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-xl font-black text-sm",
+                          pred.predictedPos === 1
+                            ? "bg-[#E60000] text-white shadow-lg shadow-[#E60000]/40"
+                            : pred.predictedPos <= 3
+                              ? "bg-white/10 text-white"
+                              : "bg-white/[0.06] text-gray-400"
+                        )}
+                      >
+                        P{pred.predictedPos}
                       </div>
-                      <div className="mt-0.5 flex items-center gap-1.5">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                          src={getTeamLogo(driver.team)}
-                          alt=""
-                          className="h-3 w-3 object-contain"
-                        />
-                        <span className="text-[9px] font-semibold uppercase tracking-wider text-gray-500">
-                          {driver.team}
-                        </span>
-                      </div>
-                    </div>
 
-                    {/* Result */}
-                    <div className="shrink-0 text-right">
-                      {pred.inTop10 && pred.actualPos ? (
-                        <div className="flex items-center gap-2">
-                          <div className="flex flex-col items-end">
+                      <div className="min-w-0 flex-1 flex items-center justify-between gap-3">
+                        {/* Driver & Team Info */}
+                        <div className="flex flex-col justify-center min-w-0 py-1">
+                          <div className="font-black text-sm sm:text-[15px] text-white truncate leading-none">
+                            {driver.name}
+                          </div>
+                          
+                          <div className="mt-1.5 flex items-center gap-1.5 sm:gap-2">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={getTeamLogo(driver.team)}
+                              alt=""
+                              className="h-3 w-3 sm:h-3.5 sm:w-3.5 object-contain opacity-50 invert brightness-0"
+                            />
+                            <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-gray-500 truncate">
+                              {driver.team}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Result section */}
+                        {pred.inTop10 && pred.actualPos ? (
+                          <div className="flex shrink-0 items-center gap-2 sm:gap-2.5">
+                            <div className="text-right">
+                              <div
+                                className={clsx(
+                                  "rounded-lg px-2 py-0.5 sm:px-2.5 sm:py-1 text-[10px] sm:text-xs font-black inline-block",
+                                  isPerfect
+                                    ? "bg-[#E60000]/20 text-[#E60000]"
+                                    : diff && diff <= 2
+                                      ? "bg-emerald-500/15 text-emerald-400"
+                                      : "bg-white/[0.06] text-gray-400"
+                                )}
+                              >
+                                P{pred.actualPos}
+                              </div>
+                              <div className="mt-1 flex flex-wrap justify-end gap-1 sm:gap-1.5">
+                                {pred.selectionPoints > 0 && (
+                                  <div className="flex items-center gap-1 rounded-md border border-emerald-500/20 bg-emerald-500/10 px-1.5 py-[2px] backdrop-blur-sm">
+                                    <span className="text-[8px] font-bold uppercase text-emerald-500/70 hidden sm:inline-block">Top 10</span>
+                                    <span className="text-[9px] font-black text-emerald-400">+{pred.selectionPoints}</span>
+                                  </div>
+                                )}
+                                {pred.positionPoints > 0 && (
+                                  <div className={clsx(
+                                    "flex items-center gap-1 rounded-md border px-1.5 py-[2px] backdrop-blur-sm",
+                                    diff === 0 ? "border-[#E60000]/20 bg-[#E60000]/10" :
+                                    diff === 1 ? "border-orange-400/20 bg-orange-400/10" :
+                                    diff === 2 ? "border-yellow-400/20 bg-yellow-400/10" :
+                                    diff === 3 ? "border-blue-400/20 bg-blue-400/10" :
+                                    diff === 4 ? "border-gray-400/20 bg-gray-400/10" :
+                                    "border-gray-600/20 bg-gray-600/10"
+                                  )}>
+                                    <span className={clsx(
+                                      "text-[8px] font-bold uppercase hidden sm:inline-block",
+                                      diff === 0 ? "text-[#E60000]/70" :
+                                      diff === 1 ? "text-orange-400/70" :
+                                      diff === 2 ? "text-yellow-400/70" :
+                                      diff === 3 ? "text-blue-400/70" :
+                                      diff === 4 ? "text-gray-400/70" :
+                                      "text-gray-600/70"
+                                    )}>
+                                      {isPerfect ? "Idealnie" : "Pozycja"}
+                                    </span>
+                                    <span className={clsx(
+                                      "text-[9px] font-black",
+                                      diff === 0 ? "text-[#E60000]" :
+                                      diff === 1 ? "text-orange-400" :
+                                      diff === 2 ? "text-yellow-400" :
+                                      diff === 3 ? "text-blue-400" :
+                                      diff === 4 ? "text-gray-400" :
+                                      "text-gray-600"
+                                    )}>+{pred.positionPoints}</span>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+
+                            {/* Points circle */}
                             <div
                               className={clsx(
-                                "text-[10px] font-black",
+                                "flex h-10 w-10 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-xl font-black text-xs sm:text-sm",
                                 isPerfect
-                                  ? "text-[#E60000]"
-                                  : diff && diff <= 2
-                                    ? "text-green-400"
-                                    : "text-gray-400"
+                                  ? "bg-[#E60000] text-white shadow-lg shadow-[#E60000]/40"
+                                  : pred.points >= 4
+                                    ? "bg-emerald-500/15 text-emerald-400 ring-1 ring-emerald-500/30"
+                                    : pred.points > 0
+                                      ? "bg-white/[0.06] text-emerald-400/80"
+                                      : "bg-white/[0.03] text-gray-700"
                               )}
                             >
-                              → P{pred.actualPos}
-                            </div>
-                            <div className="mt-0.5 flex gap-1 text-[8px]">
-                              {pred.selectionPoints > 0 && (
-                                <span className="rounded bg-green-500/10 px-1 py-0.5 font-bold text-green-500">
-                                  +{pred.selectionPoints}
-                                </span>
-                              )}
-                              {pred.positionPoints > 0 && (
-                                <span className="rounded bg-yellow-500/10 px-1 py-0.5 font-bold text-yellow-500">
-                                  +{pred.positionPoints}
-                                  {diff === 0
-                                    ? "✓"
-                                    : ` ±${diff}`}
-                                </span>
-                              )}
+                              +{pred.points}
                             </div>
                           </div>
-                          <div
-                            className={clsx(
-                              "flex h-9 min-w-[40px] items-center justify-center rounded-xl text-sm font-black",
-                              isPerfect
-                                ? "bg-[#E60000] text-white shadow-lg shadow-red-900/30"
-                                : pred.points > 3
-                                  ? "bg-green-500/15 text-green-400"
-                                  : pred.points > 0
-                                    ? "bg-green-500/10 text-green-400/80"
-                                    : "bg-[#2C2C2E] text-gray-600"
-                            )}
-                          >
-                            +{pred.points}
+                        ) : (
+                          <div className="flex shrink-0 items-center gap-2">
+                            <span className="text-[9px] font-bold uppercase text-gray-600 hidden sm:inline-block">
+                              Poza 10
+                            </span>
+                            <div className="flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-xl bg-white/[0.03] font-black text-xs sm:text-sm text-gray-700">
+                              +0
+                            </div>
                           </div>
-                        </div>
-                      ) : (
-                        <div className="flex items-center gap-2">
-                          <span className="text-[10px] font-semibold text-gray-600">
-                            Poza TOP 10
-                          </span>
-                          <div className="flex h-9 min-w-[40px] items-center justify-center rounded-xl bg-[#2C2C2E] text-sm font-black text-gray-600">
-                            +0
-                          </div>
-                        </div>
-                      )}
+                        )}
+                      </div>
                     </div>
                   </div>
                 );
               })}
           </div>
-        </Section>
+        </CollapsibleSection>
       )}
 
-      {/* ── ACTUAL TOP 10 ── */}
-      <Section
+      {/* ── RESULTS — Podium Focus ── */}
+      <CollapsibleSection
         id="classification"
-        icon={<Flag className="h-4 w-4 text-[#E60000]" />}
-        title="Klasyfikacja TOP 10"
+        icon={Flag}
+        title="Wyniki"
+        count={10}
         expanded={expandedSection === "classification"}
         onToggle={() => toggleSection("classification")}
       >
-        <div className="space-y-1.5">
-          {raceData.results.slice(0, 10).map((driverId, position) => {
-            const driver = drivers.find((d) => d.slug === driverId);
-            if (!driver) return null;
+        <div className="space-y-2">
+          {/* Podium (1-3) */}
+          <div className="mb-4 grid grid-cols-3 gap-2 items-end">
+            {raceData.results.slice(0, 3).map((driverId, pos) => {
+              const driver = drivers.find((d) => d.slug === driverId);
+              if (!driver) return null;
 
-            return (
-              <div
-                key={driverId}
-                className={clsx(
-                  "relative flex items-center gap-3 overflow-hidden rounded-2xl border p-3.5 transition-all",
-                  position === 0
-                    ? "border-[#E60000]/30 bg-gradient-to-r from-[#E60000]/10 to-transparent"
-                    : position <= 2
-                      ? "border-white/[0.06] bg-[#1A1A1D]"
-                      : "border-white/[0.04] bg-[#161618]"
-                )}
-              >
-                {position === 0 && (
-                  <div className="absolute bottom-0 left-0 top-0 w-[3px] rounded-full bg-[#E60000]" />
-                )}
+              const podiumClass = [
+                "order-2 z-10",
+                "order-1 opacity-90",
+                "order-3 opacity-90",
+              ];
 
+              return (
                 <div
-                  className={clsx(
-                    "flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-xs font-black",
-                    position === 0
-                      ? "bg-[#E60000] text-white shadow-lg shadow-red-900/40"
-                      : position === 1
-                        ? "bg-gray-500/80 text-white"
-                        : position === 2
-                          ? "bg-orange-700/80 text-white"
-                          : "bg-[#2C2C2E] text-gray-500"
-                  )}
+                  key={driverId}
+                  className={clsx("flex flex-col items-center transition-transform hover:scale-105", podiumClass[pos])}
                 >
-                  {position + 1}
-                </div>
+                  {/* Card */}
+                  <div
+                    className={clsx(
+                      "w-full overflow-hidden rounded-xl border relative bg-[#131315] flex flex-col items-center p-3 text-center",
+                      pos === 0
+                        ? "border-[#E60000]/40 shadow-[0_0_20px_rgba(230,0,0,0.15)] pt-5 pb-4"
+                        : pos === 1
+                          ? "border-gray-400/30 pt-4 pb-3"
+                          : "border-orange-500/30 pt-4 pb-3"
+                    )}
+                  >
+                    {/* Position Highlight */}
+                    <div
+                      className={clsx(
+                        "absolute top-0 inset-x-0 h-1",
+                        pos === 0
+                          ? "bg-gradient-to-r from-[#E60000] to-[#FF6B6B]"
+                          : pos === 1
+                            ? "bg-gradient-to-r from-gray-300 to-gray-500"
+                            : "bg-gradient-to-r from-orange-400 to-orange-600"
+                      )}
+                    />
+                    
+                    {/* Medal */}
+                    <div
+                      className={clsx(
+                        "mb-3 flex items-center justify-center rounded-lg font-black",
+                        pos === 0
+                          ? "h-12 w-12 text-2xl bg-gradient-to-br from-[#E60000] to-[#FF6B6B] shadow-lg shadow-[#E60000]/50 text-white"
+                          : pos === 1
+                            ? "h-10 w-10 text-xl bg-gradient-to-br from-gray-300 to-gray-400 text-gray-900"
+                            : "h-10 w-10 text-xl bg-gradient-to-br from-orange-400 to-orange-600 text-white"
+                      )}
+                    >
+                      {pos + 1}
+                    </div>
 
-                <div className="min-w-0 flex-1">
-                  <div className="truncate text-sm font-bold text-white">
-                    {driver.name}
-                  </div>
-                  <div className="mt-0.5 flex items-center gap-1.5">
+                    {/* Logo instead of placeholder */}
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={getTeamLogo(driver.team)}
                       alt=""
-                      className="h-3 w-3 object-contain"
+                      className="mb-2 h-8 w-8 object-contain opacity-80 invert brightness-0"
                     />
-                    <span className="text-[9px] font-semibold uppercase tracking-wider text-gray-500">
+
+                    {/* Driver Name */}
+                    <div className={clsx(
+                      "font-black tracking-tight",
+                      pos === 0 ? "text-base text-white" : "text-sm text-gray-200"
+                    )}>
+                      {driver.name.split(" ").pop()}
+                    </div>
+                    <div className="mt-0.5 text-[9px] font-bold uppercase tracking-widest text-gray-500">
                       {driver.team}
-                    </span>
+                    </div>
                   </div>
                 </div>
+              );
+            })}
+          </div>
 
+          {/* 4-10 in list */}
+          <div className="overflow-hidden rounded-2xl border border-white/[0.06] bg-[#131315]">
+            {raceData.results.slice(3, 10).map((driverId, pos) => {
+              const driver = drivers.find((d) => d.slug === driverId);
+              if (!driver) return null;
+
+              return (
                 <div
-                  className="h-6 w-1.5 rounded-full opacity-70"
-                  style={{
-                    backgroundColor:
-                      driver.color.split(" ")[0] || "#666",
-                  }}
-                />
-              </div>
-            );
-          })}
-        </div>
-      </Section>
+                  key={driverId}
+                  className={clsx(
+                    "flex items-center gap-3 px-3.5 py-3 sm:px-4 border-b border-white/[0.05] last:border-0"
+                  )}
+                >
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/10 text-xs font-black text-gray-300">
+                    {pos + 4}
+                  </div>
 
-      {/* ── ROUND RANKING ── */}
+                  {/* Color dot */}
+                  <div
+                    className="h-5 w-1 shrink-0 rounded-full"
+                    style={{
+                      backgroundColor:
+                        driver.color.split(" ")[0] || "#666",
+                    }}
+                  />
+
+                  {/* Info */}
+                  <div className="min-w-0 flex-1">
+                    <div className="text-sm font-black text-white truncate">
+                      {driver.name}
+                    </div>
+                    <div className="text-[9px] text-gray-500">
+                      {driver.team} • #{driver.number}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </CollapsibleSection>
+
+      {/* ── LEADERBOARD ── */}
       {raceData.scores.length > 0 && (
-        <Section
+        <CollapsibleSection
           id="ranking"
-          icon={<Trophy className="h-4 w-4 text-[#E60000]" />}
+          icon={Trophy}
           title="Ranking Rundy"
+          count={raceData.scores.length}
           expanded={expandedSection === "ranking"}
           onToggle={() => toggleSection("ranking")}
         >
-          <div className="space-y-1.5">
+          <div className="space-y-2">
             {raceData.scores.map((score, index) => {
               const isMe = score.user.id === user?.id;
               const details = score.details as ScoreDetails | null;
@@ -617,119 +633,194 @@ export default function RaceResultsContent({ raceRound }: Props) {
                 <div
                   key={score.userId}
                   className={clsx(
-                    "relative flex items-center justify-between overflow-hidden rounded-2xl border p-3.5 transition-all",
+                    "group relative flex items-center gap-3 overflow-hidden rounded-2xl border p-3.5 sm:p-4 backdrop-blur-sm transition-all",
                     isMe
-                      ? "border-[#E60000]/30 bg-gradient-to-r from-[#E60000]/10 to-transparent"
-                      : "border-white/[0.04] bg-[#161618]"
+                      ? "border-[#E60000]/30 bg-gradient-to-r from-[#E60000]/15 to-transparent"
+                      : index === 0
+                        ? "border-amber-500/20 bg-amber-500/5"
+                        : "border-white/[0.06] bg-white/[0.02]"
                   )}
                 >
+                  {/* Left bar */}
                   {isMe && (
-                    <div className="absolute bottom-0 left-0 top-0 w-[3px] rounded-full bg-[#E60000]" />
+                    <div className="absolute inset-y-0 left-0 w-1 bg-[#E60000]" />
                   )}
 
-                  <div className="flex items-center gap-3">
-                    {/* Rank */}
-                    <div
-                      className={clsx(
-                        "flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-xs font-black",
-                        index === 0
-                          ? "bg-[#E60000] text-white shadow-lg shadow-red-900/40"
-                          : index === 1
-                            ? "bg-gray-500/80 text-white"
-                            : index === 2
-                              ? "bg-orange-700/80 text-white"
-                              : "bg-[#2C2C2E] text-gray-500"
-                      )}
-                    >
-                      {index + 1}
-                    </div>
+                  {/* Rank badge */}
+                  <div
+                    className={clsx(
+                      "flex h-10 w-10 shrink-0 items-center justify-center rounded-lg font-black text-sm",
+                      index === 0
+                        ? "bg-gradient-to-br from-amber-400 to-amber-600 text-gray-900"
+                        : index === 1
+                          ? "bg-gray-400 text-gray-900"
+                          : index === 2
+                            ? "bg-orange-600 text-white"
+                            : "bg-white/10 text-gray-300"
+                    )}
+                  >
+                    {index + 1}
+                  </div>
 
-                    {/* Avatar */}
-                    <div className="h-9 w-9 shrink-0 overflow-hidden rounded-full border-2 border-white/10 bg-gray-800">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={
-                          score.user.avatar ||
-                          `https://ui-avatars.com/api/?name=${encodeURIComponent(score.user.name || "U")}&background=E60000&color=fff&bold=true`
-                        }
-                        alt={score.user.name || "User"}
-                        className="h-full w-full object-cover"
-                      />
-                    </div>
+                  {/* Avatar */}
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={
+                      score.user.avatar ||
+                      `https://ui-avatars.com/api/?name=${encodeURIComponent(score.user.name || "U")}&background=E60000&color=fff&bold=true`
+                    }
+                    alt={score.user.name || "User"}
+                    className={clsx(
+                      "h-10 w-10 shrink-0 rounded-lg object-cover border-2",
+                      isMe
+                        ? "border-[#E60000]/60"
+                        : index === 0
+                          ? "border-amber-500/60"
+                          : "border-white/[0.1]"
+                    )}
+                  />
 
-                    {/* Name + badges */}
-                    <div>
-                      <div
-                        className={clsx(
-                          "text-sm font-bold",
-                          isMe ? "text-[#E60000]" : "text-white"
-                        )}
-                      >
+                  {/* User info */}
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-black text-white truncate">
                         {score.user.name || "Anonim"}
-                        {isMe && (
-                          <span className="ml-1.5 rounded-md bg-[#E60000]/20 px-1.5 py-0.5 text-[9px] font-black text-[#E60000]">
-                            TY
-                          </span>
-                        )}
-                      </div>
-                      <div className="mt-1 flex gap-1">
-                        {details?.fromSeason && (
-                          <span className="rounded bg-gray-700/50 px-1.5 py-0.5 text-[8px] font-bold text-gray-400">
-                            SEZON
-                          </span>
-                        )}
-                        {details?.bonusP1 ? (
-                          <span className="rounded bg-[#E60000]/15 px-1.5 py-0.5 text-[8px] font-bold text-[#E60000]">
-                            P1
-                          </span>
-                        ) : null}
-                        {details?.bonusPodium ? (
-                          <span className="rounded bg-[#E60000]/15 px-1.5 py-0.5 text-[8px] font-bold text-[#E60000]">
-                            PODIUM
-                          </span>
-                        ) : null}
-                      </div>
+                      </span>
+                      {isMe && (
+                        <span className="shrink-0 rounded bg-[#E60000] px-2 py-0.5 text-[8px] font-black text-white">
+                          TY
+                        </span>
+                      )}
                     </div>
                   </div>
 
                   {/* Points */}
-                  <div className="text-right">
-                    <div className="flex items-baseline justify-end gap-1">
-                      <span className="text-xl font-black tabular-nums text-white">
-                        {score.totalPoints}
-                      </span>
-                      <span className="text-[9px] font-bold text-[#E60000]">
-                        PKT
-                      </span>
-                    </div>
-                    {score.perfectPredictions > 0 && (
-                      <div className="mt-0.5 text-[9px] font-bold text-green-400">
-                        ✨ {score.perfectPredictions} trafień
-                      </div>
-                    )}
+                  <div className="flex shrink-0 flex-col items-end gap-1">
+                    <span className="text-2xl font-black text-white">
+                      {score.totalPoints}
+                    </span>
+                    <span className="text-[8px] font-bold uppercase text-gray-500">
+                      pkt
+                    </span>
                   </div>
                 </div>
               );
             })}
           </div>
-        </Section>
+        </CollapsibleSection>
       )}
+
+      {/* ── SCORING RULES ── */}
+      <div className="mt-8">
+        <button
+          onClick={() => setShowScoringInfo(!showScoringInfo)}
+          className="w-full rounded-2xl border border-white/[0.06] bg-white/[0.02] p-4 text-left transition-all hover:bg-white/[0.04]"
+        >
+          <div className="flex items-center gap-3">
+            <Info className="h-5 w-5 text-gray-500" />
+            <span className="flex-1 text-sm font-black uppercase tracking-wide text-gray-400">
+              Zasady Punktowania
+            </span>
+            <ChevronDown
+              className={clsx(
+                "h-5 w-5 text-gray-500 transition-transform",
+                showScoringInfo && "rotate-180"
+              )}
+            />
+          </div>
+        </button>
+
+        {showScoringInfo && (
+          <div className="mt-3 overflow-hidden rounded-2xl border border-white/[0.06] bg-[#131315]">
+            <div className="divide-y divide-white/[0.04]">
+              <div className="p-4">
+                <div className="mb-3 text-[10px] font-black uppercase tracking-wider text-gray-500">
+                  Za każdego kierowcę w TOP 10
+                </div>
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-gray-400">
+                    Obecność w TOP 10
+                  </span>
+                  <span className="rounded-lg bg-emerald-500/15 px-2.5 py-1 font-black text-emerald-400">
+                    +1
+                  </span>
+                </div>
+              </div>
+
+              <div className="p-4">
+                <div className="mb-3 text-[10px] font-black uppercase tracking-wider text-gray-500">
+                  Bonus za pozycję
+                </div>
+                <div className="space-y-2">
+                  {[
+                    { l: "Idealnie (±0)", p: "+6", c: "text-[#E60000]" },
+                    { l: "Różnica ±1", p: "+4", c: "text-orange-400" },
+                    { l: "Różnica ±2", p: "+3", c: "text-yellow-400" },
+                    { l: "Różnica ±3", p: "+2", c: "text-blue-400" },
+                    { l: "Różnica ±4", p: "+1", c: "text-gray-400" },
+                    { l: "Różnica ≥5", p: "+0", c: "text-gray-600" },
+                  ].map((r) => (
+                    <div
+                      key={r.l}
+                      className="flex items-center justify-between text-xs"
+                    >
+                      <span className="text-gray-400">{r.l}</span>
+                      <span className={clsx("font-black", r.c)}>
+                        {r.p}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="p-4">
+                <div className="mb-3 text-[10px] font-black uppercase tracking-wider text-gray-500">
+                  Bonusy
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-gray-400">Trafione P1</span>
+                    <span className="font-black text-[#E60000]">+3</span>
+                  </div>
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-gray-400">Całe podium</span>
+                    <span className="font-black text-[#E60000]">+5</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between bg-[#E60000]/[0.08] p-4">
+                <span className="text-xs font-black uppercase text-white">
+                  Maksimum
+                </span>
+                <span className="text-2xl font-black text-[#E60000]">
+                  78 pkt
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div className="h-8" />
     </div>
   );
 }
 
-/* ── COLLAPSIBLE SECTION COMPONENT ── */
-function Section({
+/* ── COLLAPSIBLE SECTION ── */
+function CollapsibleSection({
   id,
-  icon,
+  icon: Icon,
   title,
+  count,
   expanded,
   onToggle,
   children,
 }: {
   id: string;
-  icon: React.ReactNode;
+  icon: React.ComponentType<{ className: string }>;
   title: string;
+  count?: number;
   expanded: boolean;
   onToggle: () => void;
   children: React.ReactNode;
@@ -738,34 +829,46 @@ function Section({
     <div className="mb-6">
       <button
         onClick={onToggle}
-        className="group mb-2 flex w-full items-center justify-between rounded-2xl border border-white/[0.06] bg-[#1C1C1E] px-4 py-3 text-left transition-all hover:border-white/10 hover:bg-[#222225]"
-      >
-        <div className="flex items-center gap-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#E60000]/10">
-            {icon}
-          </div>
-          <span className="text-xs font-bold uppercase tracking-widest text-gray-300">
-            {title}
-          </span>
-        </div>
-        <ChevronDown
-          className={clsx(
-            "h-4 w-4 text-gray-500 transition-transform duration-300",
-            expanded && "rotate-180"
-          )}
-        />
-      </button>
-
-      <div
         className={clsx(
-          "grid transition-all duration-300 ease-in-out",
+          "w-full rounded-2xl border p-3.5 sm:p-4 text-left transition-all",
           expanded
-            ? "grid-rows-[1fr] opacity-100"
-            : "grid-rows-[0fr] opacity-0"
+            ? "border-white/[0.1] bg-[#1C1C1F]"
+            : "border-white/[0.04] bg-[#131315] hover:bg-[#1A1A1D]"
         )}
       >
-        <div className="overflow-hidden">{children}</div>
-      </div>
+        <div className="flex items-center gap-3">
+          <div
+            className={clsx(
+              "flex h-9 w-9 items-center justify-center rounded-lg transition-colors",
+              expanded
+                ? "bg-[#E60000] text-white"
+                : "bg-white/[0.08] text-gray-400"
+            )}
+          >
+            <Icon className="h-4 w-4" />
+          </div>
+          <span className="flex-1 text-xs font-black uppercase tracking-wider text-gray-300">
+            {title}
+          </span>
+          {count !== undefined && (
+            <span className="rounded-lg bg-white/[0.08] px-2.5 py-1 text-[10px] font-black text-gray-500">
+              {count}
+            </span>
+          )}
+          <ChevronDown
+            className={clsx(
+              "h-4 w-4 text-gray-500 transition-transform",
+              expanded && "rotate-180"
+            )}
+          />
+        </div>
+      </button>
+
+      {expanded && (
+        <div className="mt-3 animate-in fade-in slide-in-from-top-2 duration-300">
+          {children}
+        </div>
+      )}
     </div>
   );
 }

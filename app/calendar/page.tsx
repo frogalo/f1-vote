@@ -170,14 +170,14 @@ export default function CalendarPage() {
                     <h1 className="text-4xl font-black mb-1 text-white uppercase tracking-tighter">
                         Terminarz F1 <span className="text-[#E60000]">2026</span>
                     </h1>
-                    <p className="text-gray-500 text-xs sm:text-sm font-bold tracking-widest">24 WYŚCIGI • MISTRZOSTWA ŚWIATA</p>
+                    <p className="text-gray-500 text-xs sm:text-sm font-bold tracking-widest">24 WYŚCIGI</p>
                 </div>
-                <button
+                {/* <button
                     onClick={handleGlobalShare}
                     className="w-full sm:w-auto bg-[#E60000]/10 hover:bg-[#E60000]/20 text-[#E60000] border border-[#E60000]/20 px-5 py-3 rounded-2xl font-black uppercase tracking-wider text-xs sm:text-sm active:scale-95 transition-all flex items-center justify-center gap-2"
                 >
                     <Share2 className="w-4 h-4" /> Zaproś do gry
-                </button>
+                </button> */}
             </div>
 
             {/* Calendar Grid */}
@@ -223,13 +223,13 @@ export default function CalendarPage() {
                                 </div>
 
                                 <div className="flex items-center gap-2">
-                                    <button 
+                                    {/* <button 
                                         onClick={(e) => handleShare(e, race.round, race.name)}
                                         className="p-1.5 bg-white/5 hover:bg-white/10 rounded-full text-white/70 hover:text-white transition-colors backdrop-blur-sm z-20"
                                         title="Udostępnij i zaproś znajomych"
                                     >
                                         <Share2 className="w-4 h-4" />
-                                    </button>
+                                    </button> */}
 
                                     {status === "active" && (
                                         <div className="bg-[#E60000] text-white text-[10px] font-black px-2 py-1 rounded-lg animate-pulse">

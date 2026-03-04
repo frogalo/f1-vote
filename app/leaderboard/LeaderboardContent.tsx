@@ -392,262 +392,293 @@ export default function LeaderboardContent() {
 
 
       {/* ── FULL LIST ── */}
-      <div className="space-y-1.5 px-4">
-        {sorted.map((u, index) => {
-          const rank = index + 1;
-          const isMe = u.id === currentUser?.id;
-          const isExpanded = expandedUser === u.id;
-          const scoreValue = hasScores ? u.totalPoints : u.voteCount;
-          const scoreLabel = hasScores ? "PKT" : "TYPÓW";
-          const barWidth =
-            maxPoints > 0 ? (scoreValue / maxPoints) * 100 : 0;
+<div className="space-y-3 px-3 sm:px-4">
+  {sorted.map((u, index) => {
+    const rank = index + 1;
+    const isMe = u.id === currentUser?.id;
+    const isExpanded = expandedUser === u.id;
+    const scoreValue = hasScores ? u.totalPoints : u.voteCount;
+    const scoreLabel = hasScores ? "PKT" : "TYPÓW";
+    const barWidth =
+      maxPoints > 0 ? (scoreValue / maxPoints) * 100 : 0;
 
-          const avgPoints =
-            u.racesScored > 0
-              ? (u.totalPoints / u.racesScored).toFixed(1)
-              : "—";
+    const avgPoints =
+      u.racesScored > 0
+        ? (u.totalPoints / u.racesScored).toFixed(1)
+        : "—";
 
-          return (
-            <div key={u.id}>
-              <button
-                onClick={() =>
-                  setExpandedUser(isExpanded ? null : u.id)
-                }
-                className={clsx(
-                  "group relative flex w-full items-center overflow-hidden rounded-2xl border p-4 sm:p-5 text-left transition-all duration-300 active:scale-[0.98]",
-                  isMe
-                    ? "border-[#E60000]/25 bg-gradient-to-r from-[#E60000]/10 to-[#1A1A1D]"
-                    : rank <= 3
-                      ? "border-white/[0.06] bg-[#1A1A1D] hover:bg-[#222225]"
-                      : "border-white/[0.04] bg-[#161618] hover:bg-[#1E1E21]"
-                )}
-              >
-                {/* Left accent */}
-                {(isMe || rank <= 3) && (
+    const accentColor =
+      rank === 1
+        ? "#E60000"
+        : rank === 2
+          ? "#9CA3AF"
+          : rank === 3
+            ? "#C2410C"
+            : isMe
+              ? "#E60000"
+              : "#3F3F46";
+
+    return (
+      <div key={u.id}>
+        <button
+          onClick={() =>
+            setExpandedUser(isExpanded ? null : u.id)
+          }
+          className={clsx(
+            "relative w-full overflow-hidden rounded-3xl border text-left transition-all duration-300 active:scale-[0.98]",
+            isMe
+              ? "border-[#E60000]/30 bg-[#1A1A1D]"
+              : rank <= 3
+                ? "border-white/[0.08] bg-[#1A1A1D] hover:bg-[#1F1F22]"
+                : "border-white/[0.04] bg-[#161618] hover:bg-[#1C1C1F]"
+          )}
+        >
+          {/* Top colored strip */}
+          <div
+            className="h-1 w-full"
+            style={{
+              background: `linear-gradient(to right, ${accentColor}, transparent)`,
+              opacity: rank <= 3 || isMe ? 1 : 0.3,
+            }}
+          />
+
+          <div className="p-4 sm:p-5">
+            {/* ── ROW 1: Avatar cluster + Score ── */}
+            <div className="flex items-start justify-between gap-4">
+              {/* Left: Avatar with rank badge */}
+              <div className="flex items-center gap-4">
+                <div className="relative shrink-0">
                   <div
                     className={clsx(
-                      "absolute bottom-0 left-0 top-0 w-[3px] rounded-full",
+                      "h-14 w-14 sm:h-16 sm:w-16 overflow-hidden rounded-2xl border-2 bg-gray-800",
                       rank === 1
-                        ? "bg-[#E60000]"
+                        ? "border-[#E60000]"
                         : rank === 2
-                          ? "bg-gray-400"
+                          ? "border-gray-400"
                           : rank === 3
-                            ? "bg-orange-600"
+                            ? "border-orange-600"
                             : isMe
-                              ? "bg-[#E60000]/50"
-                              : ""
-                    )}
-                  />
-                )}
-
-                {/* Progress bar background */}
-                <div
-                  className="pointer-events-none absolute bottom-0 left-0 top-0 transition-all duration-1000 ease-out"
-                  style={{ width: `${barWidth}%` }}
-                >
-                  <div
-                    className={clsx(
-                      "h-full",
-                      rank === 1
-                        ? "bg-[#E60000]/[0.06]"
-                        : "bg-white/[0.02]"
-                    )}
-                  />
-                </div>
-
-                {/* Rank */}
-                <div
-                  className={clsx(
-                    "relative z-10 mr-3 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-xs font-black",
-                    rank === 1
-                      ? "bg-[#E60000] text-white shadow-lg shadow-red-900/30"
-                      : rank === 2
-                        ? "bg-gray-500/80 text-white"
-                        : rank === 3
-                          ? "bg-orange-700/80 text-white"
-                          : "bg-[#2C2C2E] text-gray-500"
-                  )}
-                >
-                  {rank}
-                </div>
-
-                {/* Avatar */}
-                <div
-                  className={clsx(
-                    "relative z-10 mr-4 h-16 w-16 shrink-0 overflow-hidden rounded-full border-[3px] bg-gray-800",
-                    rank === 1
-                      ? "border-[#E60000]"
-                      : rank === 2
-                        ? "border-gray-400"
-                        : rank === 3
-                          ? "border-orange-600"
-                          : isMe
-                            ? "border-[#E60000]/50"
-                            : "border-white/10"
-                  )}
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={u.avatar}
-                    alt={u.name}
-                    className="h-full w-full object-cover"
-                  />
-                </div>
-
-                {/* Info */}
-                <div className="relative z-10 min-w-0 flex-1">
-                  <div
-                    className={clsx(
-                      "truncate text-lg font-black",
-                      isMe ? "text-[#E60000]" : "text-white"
+                              ? "border-[#E60000]/40"
+                              : "border-white/10"
                     )}
                   >
-                    {u.name}
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={u.avatar}
+                      alt={u.name}
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
+                  {/* Rank badge */}
+                  <div
+                    className={clsx(
+                      "absolute -right-2 -top-2 flex h-7 w-7 items-center justify-center rounded-lg text-[11px] font-black shadow-lg",
+                      rank === 1
+                        ? "bg-[#E60000] text-white shadow-red-900/40"
+                        : rank === 2
+                          ? "bg-gray-400 text-gray-900"
+                          : rank === 3
+                            ? "bg-orange-600 text-white"
+                            : "bg-[#2A2A2E] text-gray-400 shadow-none"
+                    )}
+                  >
+                    {rank}
+                  </div>
+                </div>
+
+                {/* Name + tags */}
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span
+                      className={clsx(
+                        "truncate text-lg sm:text-xl font-black leading-tight",
+                        isMe ? "text-[#E60000]" : "text-white"
+                      )}
+                    >
+                      {u.name}
+                    </span>
                     {isMe && (
-                      <span className="ml-2 rounded-md bg-[#E60000]/20 px-2 py-0.5 text-[10px] font-black text-[#E60000]">
+                      <span className="shrink-0 rounded-md bg-[#E60000]/15 px-1.5 py-0.5 text-[9px] font-black text-[#E60000] ring-1 ring-[#E60000]/20">
                         TY
                       </span>
                     )}
                   </div>
-                  <div className="mt-1 flex flex-col gap-1">
-                    <div className="flex items-center gap-2">
+
+                  {/* Chips: team + driver */}
+                  <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                    <div className="flex items-center gap-1.5 rounded-lg bg-white/[0.05] px-2 py-1">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={getTeamLogo(u.team)}
                         alt=""
-                        className="h-4 w-4 object-contain opacity-60 brightness-0 invert"
+                        className="h-3.5 w-3.5 object-contain opacity-70 brightness-0 invert"
                       />
-                      <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">
                         {u.team}
                       </span>
                     </div>
                     {u.favoriteDriver && (
-                      <div className="flex items-center gap-1.5 opacity-80">
-                         <User className="w-3 h-3 text-gray-500" />
-                         <span className="text-[10px] font-bold text-gray-300">
-                            {u.favoriteDriver.name}
-                         </span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Score + chevron */}
-                <div className="relative z-10 flex items-center gap-3">
-                  <div className="text-right">
-                    <div className="flex items-baseline justify-end gap-1.5">
-                      <span className="text-2xl font-black tabular-nums text-white">
-                        {scoreValue}
-                      </span>
-                      <span className="text-[10px] font-bold text-[#E60000]">
-                        {scoreLabel}
-                      </span>
-                    </div>
-                    {hasScores && u.perfectPredictions > 0 && (
-                      <div className="text-[10px] font-bold text-green-400/80">
-                        ✨ {u.perfectPredictions}
-                      </div>
-                    )}
-                  </div>
-                  <ChevronDown
-                    className={clsx(
-                      "h-5 w-5 text-gray-600 transition-transform duration-300",
-                      isExpanded && "rotate-180 text-gray-400"
-                    )}
-                  />
-                </div>
-              </button>
-
-              {/* ── EXPANDED STATS ── */}
-              <div
-                className={clsx(
-                  "grid transition-all duration-300 ease-in-out",
-                  isExpanded
-                    ? "grid-rows-[1fr] opacity-100"
-                    : "grid-rows-[0fr] opacity-0"
-                )}
-              >
-                <div className="overflow-hidden">
-                  <div className="mx-2 mt-1 rounded-2xl border border-white/[0.06] bg-[#141416] p-4">
-                    <div className="grid grid-cols-2 gap-2">
-                      {[
-                        {
-                          label: "Łącznie typów",
-                          value: u.voteCount.toString(),
-                          icon: (
-                            <Zap className="h-3 w-3 text-[#E60000]" />
-                          ),
-                        },
-                        {
-                          label: "Trafienia idealne",
-                          value: u.perfectPredictions.toString(),
-                          icon: (
-                            <Target className="h-3 w-3 text-green-400" />
-                          ),
-                        },
-                        {
-                          label: "Rundy",
-                          value: u.racesScored.toString(),
-                          icon: (
-                            <Medal className="h-3 w-3 text-yellow-400" />
-                          ),
-                        },
-                        {
-                          label: "Średnia / rundę",
-                          value: avgPoints,
-                          icon: (
-                            <TrendingUp className="h-3 w-3 text-blue-400" />
-                          ),
-                        },
-                      ].map((stat) => (
-                        <div
-                          key={stat.label}
-                          className="rounded-xl bg-[#1C1C1E] p-3"
-                        >
-                          <div className="mb-1 flex items-center gap-1.5">
-                            {stat.icon}
-                            <span className="text-[9px] font-bold uppercase tracking-wider text-gray-500">
-                              {stat.label}
-                            </span>
-                          </div>
-                          <div className="text-xl font-black tabular-nums text-white">
-                            {stat.value}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-
-                    {/* Points bar visual */}
-                    {hasScores && (
-                      <div className="mt-3">
-                        <div className="mb-1 flex items-center justify-between text-[9px] font-bold uppercase tracking-wider text-gray-500">
-                          <span>Punkty do lidera</span>
-                          <span className="tabular-nums text-white">
-                            {u.totalPoints} / {maxPoints}
-                          </span>
-                        </div>
-                        <div className="h-2 overflow-hidden rounded-full bg-white/5">
-                          <div
-                            className={clsx(
-                              "h-full rounded-full transition-all duration-700 ease-out",
-                              rank === 1
-                                ? "bg-gradient-to-r from-[#E60000] to-[#ff4444]"
-                                : isMe
-                                  ? "bg-gradient-to-r from-[#E60000]/80 to-[#E60000]/50"
-                                  : "bg-gradient-to-r from-gray-500 to-gray-600"
-                            )}
-                            style={{ width: `${barWidth}%` }}
-                          />
-                        </div>
+                      <div className="flex items-center gap-1 rounded-lg bg-white/[0.05] px-2 py-1">
+                        <User className="h-3 w-3 text-gray-500" />
+                        <span className="text-[10px] font-bold text-gray-400">
+                          {u.favoriteDriver.name}
+                        </span>
                       </div>
                     )}
                   </div>
                 </div>
               </div>
+
+              {/* Right: Score block */}
+              <div className="flex shrink-0 items-start gap-2">
+                <div
+                  className={clsx(
+                    "rounded-2xl px-4 py-2.5 text-center",
+                    rank === 1
+                      ? "bg-[#E60000]/15 ring-1 ring-[#E60000]/20"
+                      : "bg-white/[0.04]"
+                  )}
+                >
+                  <div className="text-2xl sm:text-3xl font-black tabular-nums leading-none text-white">
+                    {scoreValue}
+                  </div>
+                  <div
+                    className={clsx(
+                      "mt-1 text-[9px] font-bold uppercase tracking-widest",
+                      rank === 1 ? "text-[#E60000]" : "text-gray-500"
+                    )}
+                  >
+                    {scoreLabel}
+                  </div>
+                  {hasScores && u.perfectPredictions > 0 && (
+                    <div className="mt-1 text-[10px] font-bold text-green-400/80">
+                      ✨ {u.perfectPredictions}
+                    </div>
+                  )}
+                </div>
+                <ChevronDown
+                  className={clsx(
+                    "mt-3 h-5 w-5 text-gray-600 transition-transform duration-300",
+                    isExpanded && "rotate-180 text-gray-400"
+                  )}
+                />
+              </div>
             </div>
-          );
-        })}
+
+            {/* Progress bar */}
+            {hasScores && (
+              <div className="mt-4">
+                <div className="h-1.5 overflow-hidden rounded-full bg-white/[0.04]">
+                  <div
+                    className="h-full rounded-full transition-all duration-700 ease-out"
+                    style={{
+                      width: `${barWidth}%`,
+                      background: `linear-gradient(to right, ${accentColor}, ${accentColor}88)`,
+                    }}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+        </button>
+
+        {/* ── EXPANDED STATS ── */}
+        <div
+          className={clsx(
+            "grid transition-all duration-300 ease-in-out",
+            isExpanded
+              ? "grid-rows-[1fr] opacity-100"
+              : "grid-rows-[0fr] opacity-0"
+          )}
+        >
+          <div className="overflow-hidden">
+            <div className="mt-1.5 rounded-3xl border border-white/[0.06] bg-[#131315] p-4 sm:p-5">
+              {/* Stats as horizontal scrollable pills on mobile */}
+              <div className="grid grid-cols-4 gap-2">
+                {[
+                  {
+                    label: "Typy",
+                    value: u.voteCount.toString(),
+                    icon: (
+                      <Zap className="h-4 w-4 text-[#E60000]" />
+                    ),
+                    color: "text-[#E60000]",
+                  },
+                  {
+                    label: "Idealne",
+                    value: u.perfectPredictions.toString(),
+                    icon: (
+                      <Target className="h-4 w-4 text-green-400" />
+                    ),
+                    color: "text-green-400",
+                  },
+                  {
+                    label: "Rundy",
+                    value: u.racesScored.toString(),
+                    icon: (
+                      <Medal className="h-4 w-4 text-yellow-400" />
+                    ),
+                    color: "text-yellow-400",
+                  },
+                  {
+                    label: "Średnia",
+                    value: avgPoints,
+                    icon: (
+                      <TrendingUp className="h-4 w-4 text-blue-400" />
+                    ),
+                    color: "text-blue-400",
+                  },
+                ].map((stat) => (
+                  <div
+                    key={stat.label}
+                    className="flex flex-col items-center rounded-2xl bg-white/[0.03] py-3 sm:py-4"
+                  >
+                    <div className="mb-2">{stat.icon}</div>
+                    <div className="text-xl sm:text-2xl font-black tabular-nums text-white">
+                      {stat.value}
+                    </div>
+                    <div className="mt-0.5 text-[8px] sm:text-[10px] font-bold uppercase tracking-wider text-gray-500">
+                      {stat.label}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Points to leader */}
+              {hasScores && (
+                <div className="mt-4 flex items-center gap-3 rounded-2xl bg-white/[0.03] px-4 py-3">
+                  <div className="flex-1">
+                    <div className="mb-1.5 text-[10px] font-bold uppercase tracking-wider text-gray-500">
+                      Punkty do lidera
+                    </div>
+                    <div className="h-2 overflow-hidden rounded-full bg-white/[0.06]">
+                      <div
+                        className="h-full rounded-full transition-all duration-700 ease-out"
+                        style={{
+                          width: `${barWidth}%`,
+                          background: `linear-gradient(to right, ${accentColor}, ${accentColor}88)`,
+                        }}
+                      />
+                    </div>
+                  </div>
+                  <div className="shrink-0 text-right">
+                    <span className="text-lg font-black tabular-nums text-white">
+                      {u.totalPoints}
+                    </span>
+                    <span className="text-xs text-gray-500">
+                      {" "}
+                      / {maxPoints}
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
+    );
+  })}
+</div>
     </div>
   );
 }
