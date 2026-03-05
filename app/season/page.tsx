@@ -684,8 +684,8 @@ export default function SeasonVotePage() {
           {
             icon: <AlertTriangle className="h-4 w-4 text-red-400" />,
             label: "Najwięcej DNF",
-            sublabel: "Przedział wyścigów",
-            placeholder: "Wybierz przedział...",
+            sublabel: "W wyscigu",
+            placeholder: "Przedział wyścigów",
             value: mostDnfRange || "",
             options: dnfOptions,
             color: "red",
@@ -700,7 +700,7 @@ export default function SeasonVotePage() {
           {
             icon: <Flame className="h-4 w-4 text-amber-400" />,
             label: "Kolizja na starcie?",
-            sublabel: "Pierwszy wyścig",
+            sublabel: "W wyścigu",
             placeholder: "Tak / Nie",
             value:
               firstRaceCollision === null
@@ -720,7 +720,7 @@ export default function SeasonVotePage() {
           {
             icon: <CloudRain className="h-4 w-4 text-blue-400" />,
             label: "Deszcz na wyścigu?",
-            sublabel: "Pierwszy wyścig",
+            sublabel: "W wyścigu",
             placeholder: "Tak / Nie",
             value:
               firstRaceRain === null
