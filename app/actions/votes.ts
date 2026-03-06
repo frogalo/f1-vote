@@ -43,6 +43,38 @@ export async function saveRaceVotes(
 }
 
 /**
+ * Get the current user's saved race votes for a specific round from the DB.
+ * Returns driver slugs in position order, or empty array if none exist.
+ */
+export async function getMyRaceVotes(round: number) {
+    const cookieStore = await cookies();
+    const userId = cookieStore.get("userId")?.value;
+    if (!userId) return [];
+
+    try {
+        const votes = await prisma.vote.findMany({
+            where: {
+                userId,
+                raceRound: { startsWith: `race-${round}-position-` },
+            },
+            orderBy: { raceRound: "asc" },
+        });
+
+        // Sort by position number extracted from raceRound string
+        const sorted = votes.sort((a, b) => {
+            const posA = parseInt(a.raceRound.split("-").pop() || "0");
+            const posB = parseInt(b.raceRound.split("-").pop() || "0");
+            return posA - posB;
+        });
+
+        return sorted.map(v => v.driverId);
+    } catch (e) {
+        console.error("Error fetching user race votes:", e);
+        return [];
+    }
+}
+
+/**
  * Get the voting status (has voted / has not voted) for all active users for a given race round.
  * Excludes admin/test accounts.
  */

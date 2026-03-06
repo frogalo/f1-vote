@@ -104,6 +104,7 @@ model Race {
   trackImage String?
   isTesting Boolean  @default(false)
   completed Boolean  @default(false)
+  canceled  Boolean  @default(false)
   results   String[] // Array of driver slugs in finish order
   scores    RaceScore[]
 }

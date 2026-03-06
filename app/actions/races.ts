@@ -175,3 +175,18 @@ export async function getLiveRaceVotes(round: number) {
         }))
     };
 }
+
+export async function toggleRaceCanceled(id: string, canceled: boolean) {
+    await requireAdmin();
+    try {
+        await prisma.race.update({
+            where: { id },
+            data: { canceled }
+        });
+        revalidatePath("/admin");
+        revalidatePath("/calendar");
+        return { success: true };
+    } catch (e: any) {
+        return { error: e.message || "Błąd zmiany statusu wyścigu" };
+    }
+}

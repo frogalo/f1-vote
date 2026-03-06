@@ -43,6 +43,7 @@ type Race = {
     date: Date;
     trackImage: string | null;
     completed: boolean;
+    canceled: boolean;
 };
 
 type UserScore = {
@@ -71,7 +72,7 @@ export default function CalendarPage() {
         
         const load = async () => {
             const fetchedRaces = await getRaces();
-            setRaces(fetchedRaces as Race[]);
+            setRaces(fetchedRaces as unknown as Race[]);
 
             // Load user scores if logged in
             if (user?.id) {
@@ -91,11 +92,12 @@ export default function CalendarPage() {
     }, [user, authLoading, router]);
 
     const getRaceStatus = (race: Race) => {
+        if (race.canceled) return "canceled";
         if (race.completed) return "completed";
         // If date has passed but not completed, this race is live
         if (new Date(race.date) < now && !race.completed) return "active";
-        // Find the first un-completed race whose date is still in the future (next up)
-        const nextRace = races.find(r => !r.completed && new Date(r.date) > now);
+        // Find the first un-completed and un-canceled race whose date is still in the future (next up)
+        const nextRace = races.find(r => !r.completed && !r.canceled && new Date(r.date) > now);
         if (nextRace && race.round === nextRace.round) return "upcoming";
         return "future";
     };
@@ -184,7 +186,7 @@ export default function CalendarPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 px-4">
                 {races.map((race) => {
                     const status = getRaceStatus(race);
-                    const countdownInfo = status !== "completed" ? getCountdownInfo(race.date) : null;
+                    const countdownInfo = (status !== "completed" && status !== "canceled") ? getCountdownInfo(race.date) : null;
                     const slug = trackSlugs[race.round] || "melbourne";
 
                     // Get user's score for this race from the database
@@ -201,6 +203,7 @@ export default function CalendarPage() {
                         "block p-6 rounded-[2rem] transition-all relative overflow-hidden group",
                         "bg-[#1C1C1E] border border-white/5",
                         status === "completed" && "opacity-80 hover:opacity-100",
+                        status === "canceled" && "opacity-50 grayscale hover:grayscale-0",
                         status === "active" && "bg-gradient-to-br from-[#1C1C1E] to-[#2C2C2E] border-[#E60000]/30 shadow-2xl shadow-red-900/10 scale-[1.02] z-10",
                         status === "upcoming" && "bg-gradient-to-br from-[#1C1C1E] to-[#2C2C2E] border-white/20 shadow-lg scale-[1.01]",
                         status === "future" && "opacity-40"
@@ -234,6 +237,11 @@ export default function CalendarPage() {
                                     {status === "active" && (
                                         <div className="bg-[#E60000] text-white text-[10px] font-black px-2 py-1 rounded-lg animate-pulse">
                                             NA ŻYWO
+                                        </div>
+                                    )}
+                                    {status === "canceled" && (
+                                        <div className="bg-red-900/30 text-red-500 border border-red-500/20 text-[10px] font-black px-2 py-1 rounded-lg">
+                                            ODWOŁANY
                                         </div>
                                     )}
                                     {status === "upcoming" && (
@@ -275,6 +283,10 @@ export default function CalendarPage() {
                                 {status === "completed" ? (
                                     <div className="text-xs font-black text-gray-500 uppercase flex items-center gap-1 group-hover:text-white transition-colors">
                                         WYNIKI <span>→</span>
+                                    </div>
+                                ) : status === "canceled" ? (
+                                    <div className="text-[10px] font-black text-red-500/50 uppercase">
+                                        BRAK WYNIKÓW
                                     </div>
                                 ) : countdownInfo ? (
                                     <div className={clsx(

@@ -186,6 +186,7 @@ exports.Prisma.RaceScalarFieldEnum = {
   trackImage: 'trackImage',
   isTesting: 'isTesting',
   completed: 'completed',
+  canceled: 'canceled',
   results: 'results'
 };
 

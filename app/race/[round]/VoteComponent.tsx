@@ -1,6 +1,5 @@
 "use client";
 
-import { useStore } from "@/lib/store";
 import { Driver, getTeamLogo, normalizeCountryCode } from "@/lib/data";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
@@ -33,7 +32,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { toast } from "sonner";
 import { getSeasonVotes } from "@/app/actions/seasonVote";
 import { getLiveRaceVotes } from "@/app/actions/races";
-import { saveRaceVotes, getRaceVoterStatus } from "@/app/actions/votes";
+import { saveRaceVotes, getRaceVoterStatus, getMyRaceVotes } from "@/app/actions/votes";
 
 type Props = {
   race: { round: number; name: string; date: string };
@@ -57,7 +56,6 @@ type VoterStatus = {
 };
 
 export function VoteComponent({ race, drivers }: Props) {
-  const { votes, userId, setSessionVotes, loadFromIndexedDB } = useStore();
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
   const [timeLeft, setTimeLeft] = useState("");
@@ -93,47 +91,46 @@ export function VoteComponent({ race, drivers }: Props) {
     }
 
     async function init() {
-      await loadFromIndexedDB();
-
       setIsLocked(Date.now() > new Date(race.date).getTime());
 
-      // Read the just-loaded store state via zustand's getState
-      const { votes: storedVotes, userId: storedUserId } = useStore.getState();
-      const prefix = `race-${race.round}-position-`;
-      const raceVotes = storedVotes.filter(
-        (v) => v.userId === storedUserId && String(v.raceRound).startsWith(prefix)
-      );
-
-      if (raceVotes.length > 0) {
-        // ── Restore previously saved race order ──
-        const restored = [...drivers].sort((a, b) => {
-          const vA = raceVotes.find((v) => v.driverId === a.id);
-          const vB = raceVotes.find((v) => v.driverId === b.id);
-          const pA = vA ? parseInt(String(vA.raceRound).split("-")[3]) : 999;
-          const pB = vB ? parseInt(String(vB.raceRound).split("-")[3]) : 999;
-          return pA - pB;
-        });
-        setOrderedDrivers(restored);
-        // Sync to server DB in background (in case only stored in IndexedDB)
-        saveRaceVotes(race.round, restored.map((d) => d.id)).catch(() => {});
-      } else {
-        // ── No race votes yet — pre-populate from season picks ──
-        try {
-          const seasonVotes = await getSeasonVotes();
-          if (seasonVotes.length > 0) {
-            const seasonSlugs = seasonVotes.map((sv) => sv.driverSlug);
-            const bySeasonOrder = [
-              ...seasonSlugs
-                .map((slug) => drivers.find((d) => d.id === slug))
-                .filter((d): d is Driver => Boolean(d)),
-              ...drivers.filter((d) => !seasonSlugs.includes(d.id)),
-            ];
-            setOrderedDrivers(bySeasonOrder);
+      // ── 1. Check server DB for existing race-specific votes ──
+      try {
+        const serverRaceVotes = await getMyRaceVotes(race.round);
+        
+        if (serverRaceVotes.length > 0) {
+          // ── Server has race votes → use them (source of truth) ──
+          const restored = [
+            ...serverRaceVotes
+              .map((slug) => drivers.find((d) => d.id === slug))
+              .filter((d): d is Driver => Boolean(d)),
+            // Any drivers not in the vote list (e.g. newly added) go at the end
+            ...drivers.filter((d) => !serverRaceVotes.includes(d.id)),
+          ];
+          setOrderedDrivers(restored);
+        } else {
+          // ── 2. No race votes on server — pull season votes as initial defaults ──
+          try {
+            const seasonVotes = await getSeasonVotes();
+            if (seasonVotes.length > 0) {
+              const seasonSlugs = seasonVotes.map((sv) => sv.driverSlug);
+              const bySeasonOrder = [
+                ...seasonSlugs
+                  .map((slug) => drivers.find((d) => d.id === slug))
+                  .filter((d): d is Driver => Boolean(d)),
+                ...drivers.filter((d) => !seasonSlugs.includes(d.id)),
+              ];
+              setOrderedDrivers(bySeasonOrder);
+              // ── Save season order as the initial race-specific votes ──
+              // This decouples them — from now on, race votes are independent
+              await saveRaceVotes(race.round, bySeasonOrder.map((d) => d.id));
+            }
+            // else keep default prop order
+          } catch {
+            // Fall back silently to default driver order
           }
-          // else keep default prop order
-        } catch {
-          // Fall back silently to default driver order
         }
+      } catch {
+        // Network error — fall back to default order
       }
 
       const raceDate = new Date(race.date);
@@ -203,8 +200,7 @@ export function VoteComponent({ race, drivers }: Props) {
       const newIdx = orderedDrivers.findIndex((d) => d.id === over.id);
       const next = arrayMove(orderedDrivers, oldIdx, newIdx);
       setOrderedDrivers(next);
-      await setSessionVotes(`race-${race.round}-position-`, userId || "", next.map((d) => d.id));
-      // Also persist to server DB for scoring
+      // Persist to server DB (source of truth)
       saveRaceVotes(race.round, next.map((d) => d.id)).catch(() => {});
       toast.success("Typy zapisano!");
     }
@@ -224,8 +220,7 @@ export function VoteComponent({ race, drivers }: Props) {
     [next[idxA], next[idxB]] = [next[idxB], next[idxA]];
     setOrderedDrivers(next);
     setSelectedId(null);
-    await setSessionVotes(`race-${race.round}-position-`, userId || "", next.map((d) => d.id));
-    // Also persist to server DB for scoring
+    // Persist to server DB (source of truth)
     saveRaceVotes(race.round, next.map((d) => d.id)).catch(() => {});
     toast.success("Pozycje zamienione!");
   };

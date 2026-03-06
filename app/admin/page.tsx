@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { getTeamLogo, normalizeCountryCode } from "@/lib/data";
 import { getTeams, getDrivers, addDriver, updateDriver, deleteDriver, getAllUsersWithVotes, deleteUser, getUserDetails, toggleDriverStatus } from "@/app/actions/admin";
-import { getRaces, addRace, updateRace, deleteRace, seedRaces } from "@/app/actions/races";
+import { getRaces, addRace, updateRace, deleteRace, seedRaces, toggleRaceCanceled } from "@/app/actions/races";
 import { toast } from "sonner";
 import { Plus, Trash2, Edit3, X, Shield, ChevronDown, Trophy, Flag, LogOut, CheckCircle2 } from "lucide-react";
 import { logoutUser } from "@/app/actions/auth";
@@ -62,6 +62,7 @@ type Race = {
     country: string | null;
     circuitId: string | null;
     completed?: boolean;
+    canceled?: boolean;
     results?: string[];
 };
 
@@ -248,6 +249,21 @@ export default function AdminPage() {
             }
         } catch {
             toast.error("Błąd usuwania");
+        }
+    }
+
+    async function handleToggleCanceled(id: string, name: string, isCanceled: boolean) {
+        if (!confirm(`${isCanceled ? "Przywrócić" : "Zmienić status na anulowany dla"} wyścigu ${name}?`)) return;
+        try {
+            const result = await toggleRaceCanceled(id, !isCanceled);
+            if (result.success) {
+                toast.success(!isCanceled ? "Wyścig anulowany" : "Wyścig przywrócony");
+                await loadData();
+            } else {
+                toast.error(result.error);
+            }
+        } catch {
+            toast.error("Błąd zmiany statusu");
         }
     }
 
@@ -847,13 +863,13 @@ export default function AdminPage() {
                         {races.map(race => (
                              <div key={race.id} className={clsx(
                                 "bg-[#1C1C1E] border rounded-2xl p-5 hover:bg-[#252528] transition-all group",
-                                race.completed ? "border-green-500/20" : "border-white/5"
+                                race.completed ? "border-green-500/20" : race.canceled ? "border-red-500/20 opacity-70 hover:opacity-100" : "border-white/5"
                              )}>
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-4">
                                          <div className={clsx(
                                             "w-12 h-12 rounded-xl flex flex-col items-center justify-center border",
-                                            race.completed ? "bg-green-900/20 border-green-500/20" : "bg-[#2C2C2E] border-white/5"
+                                            race.completed ? "bg-green-900/20 border-green-500/20" : race.canceled ? "bg-red-900/20 border-red-500/20" : "bg-[#2C2C2E] border-white/5"
                                          )}>
                                             <span className="text-[8px] uppercase text-gray-500 font-bold">Runda</span>
                                             <span className="text-xl font-black text-white">{race.round}</span>
@@ -865,6 +881,12 @@ export default function AdminPage() {
                                                     <span className="text-[10px] bg-green-900/30 text-green-400 px-2 py-0.5 rounded-full border border-green-500/20 font-bold uppercase tracking-wider flex items-center gap-1">
                                                         <CheckCircle2 className="w-3 h-3" />
                                                         Zakończony
+                                                    </span>
+                                                )}
+                                                {race.canceled && (
+                                                    <span className="text-[10px] bg-red-900/30 text-red-500 px-2 py-0.5 rounded-full border border-red-500/20 font-bold uppercase tracking-wider flex items-center gap-1">
+                                                        <X className="w-3 h-3" />
+                                                        Odwołany
                                                     </span>
                                                 )}
                                             </h3>
@@ -879,6 +901,17 @@ export default function AdminPage() {
                                     </div>
                                     
                                     <div className="flex items-center gap-3">
+                                        <button
+                                            onClick={() => handleToggleCanceled(race.id, race.name, race.canceled || false)}
+                                            className={clsx(
+                                                "text-[10px] px-3 py-1.5 rounded-lg font-bold uppercase tracking-wider border transition-all",
+                                                race.canceled 
+                                                    ? "bg-white/10 text-white border-white/20 hover:bg-white/20" 
+                                                    : "bg-[#2C2C2E] text-gray-400 border-white/10 hover:bg-white/10"
+                                            )}
+                                        >
+                                            {race.canceled ? "Przywróć" : "Odwołaj"}
+                                        </button>
                                         {/* Finish/Results button */}
                                         <button
                                             onClick={() => setFinishingRace(race)}

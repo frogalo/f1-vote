@@ -7618,6 +7618,7 @@ export namespace Prisma {
     trackImage: string | null
     isTesting: boolean | null
     completed: boolean | null
+    canceled: boolean | null
   }
 
   export type RaceMaxAggregateOutputType = {
@@ -7632,6 +7633,7 @@ export namespace Prisma {
     trackImage: string | null
     isTesting: boolean | null
     completed: boolean | null
+    canceled: boolean | null
   }
 
   export type RaceCountAggregateOutputType = {
@@ -7646,6 +7648,7 @@ export namespace Prisma {
     trackImage: number
     isTesting: number
     completed: number
+    canceled: number
     results: number
     _all: number
   }
@@ -7671,6 +7674,7 @@ export namespace Prisma {
     trackImage?: true
     isTesting?: true
     completed?: true
+    canceled?: true
   }
 
   export type RaceMaxAggregateInputType = {
@@ -7685,6 +7689,7 @@ export namespace Prisma {
     trackImage?: true
     isTesting?: true
     completed?: true
+    canceled?: true
   }
 
   export type RaceCountAggregateInputType = {
@@ -7699,6 +7704,7 @@ export namespace Prisma {
     trackImage?: true
     isTesting?: true
     completed?: true
+    canceled?: true
     results?: true
     _all?: true
   }
@@ -7801,6 +7807,7 @@ export namespace Prisma {
     trackImage: string | null
     isTesting: boolean
     completed: boolean
+    canceled: boolean
     results: string[]
     _count: RaceCountAggregateOutputType | null
     _avg: RaceAvgAggregateOutputType | null
@@ -7835,6 +7842,7 @@ export namespace Prisma {
     trackImage?: boolean
     isTesting?: boolean
     completed?: boolean
+    canceled?: boolean
     results?: boolean
     scores?: boolean | Race$scoresArgs<ExtArgs>
     _count?: boolean | RaceCountOutputTypeDefaultArgs<ExtArgs>
@@ -7852,6 +7860,7 @@ export namespace Prisma {
     trackImage?: boolean
     isTesting?: boolean
     completed?: boolean
+    canceled?: boolean
     results?: boolean
   }, ExtArgs["result"]["race"]>
 
@@ -7867,6 +7876,7 @@ export namespace Prisma {
     trackImage?: boolean
     isTesting?: boolean
     completed?: boolean
+    canceled?: boolean
     results?: boolean
   }, ExtArgs["result"]["race"]>
 
@@ -7882,10 +7892,11 @@ export namespace Prisma {
     trackImage?: boolean
     isTesting?: boolean
     completed?: boolean
+    canceled?: boolean
     results?: boolean
   }
 
-  export type RaceOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "round" | "name" | "location" | "date" | "circuitId" | "url" | "country" | "trackImage" | "isTesting" | "completed" | "results", ExtArgs["result"]["race"]>
+  export type RaceOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "round" | "name" | "location" | "date" | "circuitId" | "url" | "country" | "trackImage" | "isTesting" | "completed" | "canceled" | "results", ExtArgs["result"]["race"]>
   export type RaceInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     scores?: boolean | Race$scoresArgs<ExtArgs>
     _count?: boolean | RaceCountOutputTypeDefaultArgs<ExtArgs>
@@ -7910,6 +7921,7 @@ export namespace Prisma {
       trackImage: string | null
       isTesting: boolean
       completed: boolean
+      canceled: boolean
       results: string[]
     }, ExtArgs["result"]["race"]>
     composites: {}
@@ -8346,6 +8358,7 @@ export namespace Prisma {
     readonly trackImage: FieldRef<"Race", 'String'>
     readonly isTesting: FieldRef<"Race", 'Boolean'>
     readonly completed: FieldRef<"Race", 'Boolean'>
+    readonly canceled: FieldRef<"Race", 'Boolean'>
     readonly results: FieldRef<"Race", 'String[]'>
   }
     
@@ -10002,6 +10015,7 @@ export namespace Prisma {
     trackImage: 'trackImage',
     isTesting: 'isTesting',
     completed: 'completed',
+    canceled: 'canceled',
     results: 'results'
   };
 
@@ -10561,6 +10575,7 @@ export namespace Prisma {
     trackImage?: StringNullableFilter<"Race"> | string | null
     isTesting?: BoolFilter<"Race"> | boolean
     completed?: BoolFilter<"Race"> | boolean
+    canceled?: BoolFilter<"Race"> | boolean
     results?: StringNullableListFilter<"Race">
     scores?: RaceScoreListRelationFilter
   }
@@ -10577,6 +10592,7 @@ export namespace Prisma {
     trackImage?: SortOrderInput | SortOrder
     isTesting?: SortOrder
     completed?: SortOrder
+    canceled?: SortOrder
     results?: SortOrder
     scores?: RaceScoreOrderByRelationAggregateInput
   }
@@ -10596,6 +10612,7 @@ export namespace Prisma {
     trackImage?: StringNullableFilter<"Race"> | string | null
     isTesting?: BoolFilter<"Race"> | boolean
     completed?: BoolFilter<"Race"> | boolean
+    canceled?: BoolFilter<"Race"> | boolean
     results?: StringNullableListFilter<"Race">
     scores?: RaceScoreListRelationFilter
   }, "id" | "round">
@@ -10612,6 +10629,7 @@ export namespace Prisma {
     trackImage?: SortOrderInput | SortOrder
     isTesting?: SortOrder
     completed?: SortOrder
+    canceled?: SortOrder
     results?: SortOrder
     _count?: RaceCountOrderByAggregateInput
     _avg?: RaceAvgOrderByAggregateInput
@@ -10635,6 +10653,7 @@ export namespace Prisma {
     trackImage?: StringNullableWithAggregatesFilter<"Race"> | string | null
     isTesting?: BoolWithAggregatesFilter<"Race"> | boolean
     completed?: BoolWithAggregatesFilter<"Race"> | boolean
+    canceled?: BoolWithAggregatesFilter<"Race"> | boolean
     results?: StringNullableListFilter<"Race">
   }
 
@@ -11133,6 +11152,7 @@ export namespace Prisma {
     trackImage?: string | null
     isTesting?: boolean
     completed?: boolean
+    canceled?: boolean
     results?: RaceCreateresultsInput | string[]
     scores?: RaceScoreCreateNestedManyWithoutRaceInput
   }
@@ -11149,6 +11169,7 @@ export namespace Prisma {
     trackImage?: string | null
     isTesting?: boolean
     completed?: boolean
+    canceled?: boolean
     results?: RaceCreateresultsInput | string[]
     scores?: RaceScoreUncheckedCreateNestedManyWithoutRaceInput
   }
@@ -11165,6 +11186,7 @@ export namespace Prisma {
     trackImage?: NullableStringFieldUpdateOperationsInput | string | null
     isTesting?: BoolFieldUpdateOperationsInput | boolean
     completed?: BoolFieldUpdateOperationsInput | boolean
+    canceled?: BoolFieldUpdateOperationsInput | boolean
     results?: RaceUpdateresultsInput | string[]
     scores?: RaceScoreUpdateManyWithoutRaceNestedInput
   }
@@ -11181,6 +11203,7 @@ export namespace Prisma {
     trackImage?: NullableStringFieldUpdateOperationsInput | string | null
     isTesting?: BoolFieldUpdateOperationsInput | boolean
     completed?: BoolFieldUpdateOperationsInput | boolean
+    canceled?: BoolFieldUpdateOperationsInput | boolean
     results?: RaceUpdateresultsInput | string[]
     scores?: RaceScoreUncheckedUpdateManyWithoutRaceNestedInput
   }
@@ -11197,6 +11220,7 @@ export namespace Prisma {
     trackImage?: string | null
     isTesting?: boolean
     completed?: boolean
+    canceled?: boolean
     results?: RaceCreateresultsInput | string[]
   }
 
@@ -11212,6 +11236,7 @@ export namespace Prisma {
     trackImage?: NullableStringFieldUpdateOperationsInput | string | null
     isTesting?: BoolFieldUpdateOperationsInput | boolean
     completed?: BoolFieldUpdateOperationsInput | boolean
+    canceled?: BoolFieldUpdateOperationsInput | boolean
     results?: RaceUpdateresultsInput | string[]
   }
 
@@ -11227,6 +11252,7 @@ export namespace Prisma {
     trackImage?: NullableStringFieldUpdateOperationsInput | string | null
     isTesting?: BoolFieldUpdateOperationsInput | boolean
     completed?: BoolFieldUpdateOperationsInput | boolean
+    canceled?: BoolFieldUpdateOperationsInput | boolean
     results?: RaceUpdateresultsInput | string[]
   }
 
@@ -11734,6 +11760,7 @@ export namespace Prisma {
     trackImage?: SortOrder
     isTesting?: SortOrder
     completed?: SortOrder
+    canceled?: SortOrder
     results?: SortOrder
   }
 
@@ -11753,6 +11780,7 @@ export namespace Prisma {
     trackImage?: SortOrder
     isTesting?: SortOrder
     completed?: SortOrder
+    canceled?: SortOrder
   }
 
   export type RaceMinOrderByAggregateInput = {
@@ -11767,6 +11795,7 @@ export namespace Prisma {
     trackImage?: SortOrder
     isTesting?: SortOrder
     completed?: SortOrder
+    canceled?: SortOrder
   }
 
   export type RaceSumOrderByAggregateInput = {
@@ -14284,6 +14313,7 @@ export namespace Prisma {
     trackImage?: string | null
     isTesting?: boolean
     completed?: boolean
+    canceled?: boolean
     results?: RaceCreateresultsInput | string[]
   }
 
@@ -14299,6 +14329,7 @@ export namespace Prisma {
     trackImage?: string | null
     isTesting?: boolean
     completed?: boolean
+    canceled?: boolean
     results?: RaceCreateresultsInput | string[]
   }
 
@@ -14383,6 +14414,7 @@ export namespace Prisma {
     trackImage?: NullableStringFieldUpdateOperationsInput | string | null
     isTesting?: BoolFieldUpdateOperationsInput | boolean
     completed?: BoolFieldUpdateOperationsInput | boolean
+    canceled?: BoolFieldUpdateOperationsInput | boolean
     results?: RaceUpdateresultsInput | string[]
   }
 
@@ -14398,6 +14430,7 @@ export namespace Prisma {
     trackImage?: NullableStringFieldUpdateOperationsInput | string | null
     isTesting?: BoolFieldUpdateOperationsInput | boolean
     completed?: BoolFieldUpdateOperationsInput | boolean
+    canceled?: BoolFieldUpdateOperationsInput | boolean
     results?: RaceUpdateresultsInput | string[]
   }
 
