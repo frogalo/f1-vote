@@ -4,7 +4,7 @@ import { Driver, getTeamLogo, normalizeCountryCode } from "@/lib/data";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { clsx } from "clsx";
-import { GripVertical, ArrowUpDown, CheckCircle2, CircleDashed } from "lucide-react";
+import { GripVertical, ArrowUpDown, CheckCircle2, CircleDashed, ArrowDownToLine } from "lucide-react";
 import { useAuth } from "@/app/providers/AuthProvider";
 import ReactCountryFlag from "react-country-flag";
 import { Card, CardContent } from "@/components/ui/card";
@@ -225,7 +225,37 @@ export function VoteComponent({ race, drivers }: Props) {
     toast.success("Pozycje zamienione!");
   };
 
+  // ── Mobile insert-between ────────────────────────────────────────────────
+  const handleInsertAt = async (insertIndex: number) => {
+    if (isLocked || !user || !selectedId) return;
+
+    const fromIdx = orderedDrivers.findIndex((d) => d.id === selectedId);
+    if (fromIdx === -1) { setSelectedId(null); return; }
+
+    // Remove the driver from its current position
+    const next = [...orderedDrivers];
+    const [moved] = next.splice(fromIdx, 1);
+
+    // Adjust the target index after removal
+    const adjustedIdx = insertIndex > fromIdx ? insertIndex - 1 : insertIndex;
+
+    // Insert at the target position
+    next.splice(adjustedIdx, 0, moved);
+
+    setOrderedDrivers(next);
+    setSelectedId(null);
+    saveRaceVotes(race.round, next.map((d) => d.id)).catch(() => {});
+    toast.success("Kierowca przeniesiony!");
+  };
+
   const activeDriver = activeId ? orderedDrivers.find((d) => d.id === activeId) : null;
+
+  // Helper for mobile insert-between: skip slots that would be no-ops
+  const selectedIdx = selectedId
+    ? orderedDrivers.findIndex((d) => d.id === selectedId)
+    : -1;
+  const isInsertNoOp = (pos: number) =>
+    selectedIdx !== -1 && (pos === selectedIdx || pos === selectedIdx + 1);
 
   if (loading) {
     return (
@@ -263,7 +293,7 @@ export function VoteComponent({ race, drivers }: Props) {
           <p className="text-muted-foreground text-xs uppercase tracking-widest font-bold">
             {isMobile
               ? selectedId
-                ? "👆 Dotknij numer pozycji, aby zamienić miejsca"
+                ? "👆 Dotknij ⬇ aby wstawić, lub numer aby zamienić"
                 : "👆 Dotknij numer pozycji, aby wybrać kierowcę"
               : "Przeciągnij ⠿, aby zmienić kolejność"}
           </p>
@@ -321,20 +351,41 @@ export function VoteComponent({ race, drivers }: Props) {
 
       {/* ── Mobile ── */}
       {isMobile ? (
-        <div className="grid grid-cols-1 gap-2 mb-6">
-          {orderedDrivers.map((driver, index) => (
-            <DriverCard
-              key={driver.id}
-              driver={driver}
-              index={index}
-              disabled={isLocked || !user}
-              isSelected={selectedId === driver.id}
-              isSwapTarget={selectedId !== null && selectedId !== driver.id}
-              onTapBadge={() => handleTapBadge(driver.id)}
-              mobile
-              otherVotes={liveVotes.filter(v => v.driverId === driver.id && v.userId !== user?.id)}
-            />
-          ))}
+        <div className="grid grid-cols-1 gap-0 mb-6">
+          {orderedDrivers.map((driver, index) => {
+            const isDriverSelected = selectedId === driver.id;
+            const showInsertSlots = selectedId !== null && !isDriverSelected;
+            return (
+              <div key={driver.id}>
+                {/* Insert slot BEFORE this driver (only for the first driver) */}
+                {index === 0 && showInsertSlots && !isInsertNoOp(0) && (
+                  <InsertSlot
+                    position={0}
+                    onClick={() => handleInsertAt(0)}
+                  />
+                )}
+                <div className="py-1">
+                  <DriverCard
+                    driver={driver}
+                    index={index}
+                    disabled={isLocked || !user}
+                    isSelected={isDriverSelected}
+                    isSwapTarget={selectedId !== null && selectedId !== driver.id}
+                    onTapBadge={() => handleTapBadge(driver.id)}
+                    mobile
+                    otherVotes={liveVotes.filter(v => v.driverId === driver.id && v.userId !== user?.id)}
+                  />
+                </div>
+                {/* Insert slot AFTER this driver */}
+                {showInsertSlots && !isInsertNoOp(index + 1) && (
+                  <InsertSlot
+                    position={index + 1}
+                    onClick={() => handleInsertAt(index + 1)}
+                  />
+                )}
+              </div>
+            );
+          })}
         </div>
       ) : (
         /* ── Desktop ── */
@@ -568,5 +619,36 @@ function DriverCard({
         )}
       </CardContent>
     </Card>
+  );
+}
+
+// ─── Mobile insert slot ───────────────────────────────────────────────────
+function InsertSlot({
+  position,
+  onClick,
+}: {
+  position: number;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className="w-full group flex items-center gap-2 py-1.5 px-3 my-0.5 rounded-xl
+        border-2 border-dashed border-[#E60000]/30 bg-[#E60000]/5
+        hover:border-[#E60000]/60 hover:bg-[#E60000]/10
+        active:scale-[0.98] active:bg-[#E60000]/20
+        transition-all duration-200 focus:outline-none"
+      aria-label={`Wstaw na pozycję ${position + 1}`}
+    >
+      <div className="w-8 h-8 rounded-lg bg-[#E60000]/20 flex items-center justify-center flex-shrink-0">
+        <ArrowDownToLine className="w-4 h-4 text-[#E60000] group-hover:scale-110 transition-transform" />
+      </div>
+      <span className="text-[11px] font-bold text-[#E60000]/70 uppercase tracking-wider group-hover:text-[#E60000]">
+        Wstaw tutaj
+      </span>
+      <span className="ml-auto text-[10px] font-medium text-[#E60000]/40">
+        → P{position + 1}
+      </span>
+    </button>
   );
 }
