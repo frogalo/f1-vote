@@ -201,6 +201,29 @@ export default function RaceResultsContent({ raceRound }: Props) {
         </div>
       </div>
 
+      {/* ── WRAPPED BUTTON ── */}
+      {myScore && (
+        <button
+          onClick={() => router.push(`/race/${raceRound}/results/wrapped`)}
+          className="group relative mb-8 w-full overflow-hidden rounded-3xl border border-[#E60000]/30 p-[1px] transition-all active:scale-[0.98]"
+        >
+          <div className="absolute inset-0 bg-gradient-to-r from-[#E60000] via-[#FF6B6B] to-[#E60000] opacity-30 transition-opacity group-hover:opacity-50" />
+          <div className="relative flex items-center gap-4 rounded-3xl bg-gradient-to-r from-[#1a0000] via-[#151517] to-[#1a0000] px-5 py-4 sm:px-6">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#E60000]/20 backdrop-blur-md">
+              <Sparkles className="h-6 w-6 text-[#E60000]" />
+            </div>
+            <div className="flex-1 text-left">
+              <div className="text-xs font-black uppercase tracking-[0.2em] text-[#E60000]">
+                Podsumowanie Rundy
+              </div>
+            </div>
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#E60000]/20 group-hover:bg-[#E60000]/40 transition-colors">
+              <span className="text-[#E60000] text-lg">→</span>
+            </div>
+          </div>
+        </button>
+      )}
+
       {/* ── MY SCORE — HERO CARD ── */}
       {myScore && (
         <div className="relative mb-8 overflow-hidden rounded-3xl border border-[#E60000]/20">
