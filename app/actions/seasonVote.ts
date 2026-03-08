@@ -32,6 +32,9 @@ export async function hasSeasonVotes(): Promise<boolean> {
 }
 
 export async function hasCompletedSeasonPicks(): Promise<boolean> {
+    // If the season is already locked, don't force completion — users can't edit anyway
+    if (await isSeasonLocked()) return true;
+
     const userId = await getAuthUserId();
     if (!userId || !prisma.seasonVote || !prisma.driver) return true; // fail open for unauth
 

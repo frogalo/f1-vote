@@ -31,8 +31,8 @@ type PredictionDetail = {
   driverId: string;
   predictedPos: number;
   actualPos: number | null;
-  inTop10: boolean;
-  selectionPoints: number;
+  inTop10?: boolean; // legacy, may still appear in old data
+  selectionPoints?: number; // legacy
   positionPoints: number;
   points: number;
 };
@@ -151,7 +151,7 @@ export default function RaceResultsContent({ raceRound }: Props) {
   const myScore = raceData.scores.find((s) => s.user.id === user?.id);
   const myDetails = myScore?.details as ScoreDetails | null;
   const scorePercent = myScore
-    ? Math.round((myScore.totalPoints / 78) * 100)
+    ? Math.round((myScore.totalPoints / 70) * 100)
     : 0;
 
   const toggleSection = (id: string) =>
@@ -369,7 +369,7 @@ export default function RaceResultsContent({ raceRound }: Props) {
                       "group relative overflow-hidden rounded-2xl border p-3.5 sm:p-4 backdrop-blur-sm transition-all duration-300",
                       isPerfect
                         ? "border-[#E60000]/40 bg-gradient-to-r from-[#E60000]/15 to-transparent shadow-lg shadow-[#E60000]/10"
-                        : pred.inTop10
+                        : pred.points > 0
                           ? "border-emerald-500/20 bg-emerald-500/5"
                           : "border-white/[0.06] bg-white/[0.02] opacity-60"
                     )}
@@ -415,7 +415,7 @@ export default function RaceResultsContent({ raceRound }: Props) {
                         </div>
 
                         {/* Result section */}
-                        {pred.inTop10 && pred.actualPos ? (
+                        {pred.actualPos ? (
                           <div className="flex shrink-0 items-center gap-2 sm:gap-2.5">
                             <div className="text-right">
                               <div
@@ -423,7 +423,7 @@ export default function RaceResultsContent({ raceRound }: Props) {
                                   "rounded-lg px-2 py-0.5 sm:px-2.5 sm:py-1 text-[10px] sm:text-xs font-black inline-block",
                                   isPerfect
                                     ? "bg-[#E60000]/20 text-[#E60000]"
-                                    : diff && diff <= 2
+                                    : diff !== null && diff <= 2
                                       ? "bg-emerald-500/15 text-emerald-400"
                                       : "bg-white/[0.06] text-gray-400"
                                 )}
@@ -431,20 +431,12 @@ export default function RaceResultsContent({ raceRound }: Props) {
                                 P{pred.actualPos}
                               </div>
                               <div className="mt-1 flex flex-wrap justify-end gap-1 sm:gap-1.5">
-                                {pred.selectionPoints > 0 && (
-                                  <div className="flex items-center gap-1 rounded-md border border-emerald-500/20 bg-emerald-500/10 px-1.5 py-[2px] backdrop-blur-sm">
-                                    <span className="text-[8px] font-bold uppercase text-emerald-500/70 hidden sm:inline-block">Top 10</span>
-                                    <span className="text-[9px] font-black text-emerald-400">+{pred.selectionPoints}</span>
-                                  </div>
-                                )}
                                 {pred.positionPoints > 0 && (
                                   <div className={clsx(
                                     "flex items-center gap-1 rounded-md border px-1.5 py-[2px] backdrop-blur-sm",
                                     diff === 0 ? "border-[#E60000]/20 bg-[#E60000]/10" :
                                     diff === 1 ? "border-orange-400/20 bg-orange-400/10" :
                                     diff === 2 ? "border-yellow-400/20 bg-yellow-400/10" :
-                                    diff === 3 ? "border-blue-400/20 bg-blue-400/10" :
-                                    diff === 4 ? "border-gray-400/20 bg-gray-400/10" :
                                     "border-gray-600/20 bg-gray-600/10"
                                   )}>
                                     <span className={clsx(
@@ -452,19 +444,15 @@ export default function RaceResultsContent({ raceRound }: Props) {
                                       diff === 0 ? "text-[#E60000]/70" :
                                       diff === 1 ? "text-orange-400/70" :
                                       diff === 2 ? "text-yellow-400/70" :
-                                      diff === 3 ? "text-blue-400/70" :
-                                      diff === 4 ? "text-gray-400/70" :
                                       "text-gray-600/70"
                                     )}>
-                                      {isPerfect ? "Idealnie" : "Pozycja"}
+                                      {isPerfect ? "Idealnie" : `±${diff}`}
                                     </span>
                                     <span className={clsx(
                                       "text-[9px] font-black",
                                       diff === 0 ? "text-[#E60000]" :
                                       diff === 1 ? "text-orange-400" :
                                       diff === 2 ? "text-yellow-400" :
-                                      diff === 3 ? "text-blue-400" :
-                                      diff === 4 ? "text-gray-400" :
                                       "text-gray-600"
                                     )}>+{pred.positionPoints}</span>
                                   </div>
@@ -478,7 +466,7 @@ export default function RaceResultsContent({ raceRound }: Props) {
                                 "flex h-10 w-10 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-xl font-black text-xs sm:text-sm",
                                 isPerfect
                                   ? "bg-[#E60000] text-white shadow-lg shadow-[#E60000]/40"
-                                  : pred.points >= 4
+                                  : pred.points >= 2
                                     ? "bg-emerald-500/15 text-emerald-400 ring-1 ring-emerald-500/30"
                                     : pred.points > 0
                                       ? "bg-white/[0.06] text-emerald-400/80"
@@ -491,7 +479,7 @@ export default function RaceResultsContent({ raceRound }: Props) {
                         ) : (
                           <div className="flex shrink-0 items-center gap-2">
                             <span className="text-[9px] font-bold uppercase text-gray-600 hidden sm:inline-block">
-                              Poza 10
+                              DNF
                             </span>
                             <div className="flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-xl bg-white/[0.03] font-black text-xs sm:text-sm text-gray-700">
                               +0
@@ -758,30 +746,14 @@ export default function RaceResultsContent({ raceRound }: Props) {
             <div className="divide-y divide-white/[0.04]">
               <div className="p-4">
                 <div className="mb-3 text-[10px] font-black uppercase tracking-wider text-gray-500">
-                  Za każdego kierowcę w TOP 10
-                </div>
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-gray-400">
-                    Obecność w TOP 10
-                  </span>
-                  <span className="rounded-lg bg-emerald-500/15 px-2.5 py-1 font-black text-emerald-400">
-                    +1
-                  </span>
-                </div>
-              </div>
-
-              <div className="p-4">
-                <div className="mb-3 text-[10px] font-black uppercase tracking-wider text-gray-500">
-                  Bonus za pozycję
+                  Za każdego kierowcę (22 kierowców)
                 </div>
                 <div className="space-y-2">
                   {[
-                    { l: "Idealnie (±0)", p: "+6", c: "text-[#E60000]" },
-                    { l: "Różnica ±1", p: "+4", c: "text-orange-400" },
-                    { l: "Różnica ±2", p: "+3", c: "text-yellow-400" },
-                    { l: "Różnica ±3", p: "+2", c: "text-blue-400" },
-                    { l: "Różnica ±4", p: "+1", c: "text-gray-400" },
-                    { l: "Różnica ≥5", p: "+0", c: "text-gray-600" },
+                    { l: "Idealnie (±0)", p: "+3", c: "text-[#E60000]" },
+                    { l: "Różnica ±1", p: "+2", c: "text-orange-400" },
+                    { l: "Różnica ±2", p: "+1", c: "text-yellow-400" },
+                    { l: "Różnica ±3 i więcej", p: "+0", c: "text-gray-600" },
                   ].map((r) => (
                     <div
                       key={r.l}
@@ -803,11 +775,11 @@ export default function RaceResultsContent({ raceRound }: Props) {
                 <div className="space-y-2">
                   <div className="flex items-center justify-between text-xs">
                     <span className="text-gray-400">Trafione P1</span>
-                    <span className="font-black text-[#E60000]">+3</span>
+                    <span className="font-black text-[#E60000]">+1</span>
                   </div>
                   <div className="flex items-center justify-between text-xs">
                     <span className="text-gray-400">Całe podium</span>
-                    <span className="font-black text-[#E60000]">+5</span>
+                    <span className="font-black text-[#E60000]">+3</span>
                   </div>
                 </div>
               </div>
@@ -817,7 +789,7 @@ export default function RaceResultsContent({ raceRound }: Props) {
                   Maksimum
                 </span>
                 <span className="text-2xl font-black text-[#E60000]">
-                  78 pkt
+                  70 pkt
                 </span>
               </div>
             </div>

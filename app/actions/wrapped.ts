@@ -18,7 +18,7 @@ export type WrappedData = {
 
   // User score
   userPoints: number;
-  maxPoints: number; // 78
+  maxPoints: number; // 70
   perfectPredictions: number;
   bonusP1: number;
   bonusPodium: number;
@@ -199,16 +199,17 @@ export async function getWrappedData(round: number): Promise<WrappedData | null>
   // Build all possible stats
   const allRandomStats: WrappedData["randomStats"] = [];
 
-  // 1. How many drivers user predicted correctly in top 10
-  const correctInTop10 = details?.predictions?.filter(
-    (p: any) => p.inTop10
+  // 1. How many drivers user scored points for
+  const driversWithPoints = details?.predictions?.filter(
+    (p: any) => p.points > 0
   ).length ?? 0;
+  const totalPredictions = details?.predictions?.length ?? 22;
   allRandomStats.push({
-    id: "correct_top10",
+    id: "scored_drivers",
     emoji: "🎯",
-    title: "Trafienia w TOP 10",
-    value: `${correctInTop10}/10`,
-    description: `Trafiłeś ${correctInTop10} kierowców, którzy ukończyli w TOP 10`,
+    title: "Kierowcy z punktami",
+    value: `${driversWithPoints}/${totalPredictions}`,
+    description: `Zdobyłeś punkty za ${driversWithPoints} z ${totalPredictions} kierowców`,
   });
 
   // 2. Total position diff (accuracy measure)
@@ -225,7 +226,7 @@ export async function getWrappedData(round: number): Promise<WrappedData | null>
 
   // 3. Best single prediction
   const bestPred = details?.predictions
-    ?.filter((p: any) => p.inTop10 && p.actualPos)
+    ?.filter((p: any) => p.actualPos !== null)
     .sort((a: any, b: any) => Math.abs(a.predictedPos - a.actualPos!) - Math.abs(b.predictedPos - b.actualPos!))[0];
   if (bestPred) {
     const bestDriver = driverMap.get(bestPred.driverId);
@@ -242,7 +243,7 @@ export async function getWrappedData(round: number): Promise<WrappedData | null>
 
   // 4. Worst prediction
   const worstPred = details?.predictions
-    ?.filter((p: any) => p.inTop10 && p.actualPos)
+    ?.filter((p: any) => p.actualPos !== null)
     .sort((a: any, b: any) => Math.abs(b.predictedPos - b.actualPos!) - Math.abs(a.predictedPos - a.actualPos!))[0];
   if (worstPred && worstPred !== bestPred) {
     const worstDriver = driverMap.get(worstPred.driverId);
@@ -323,7 +324,7 @@ export async function getWrappedData(round: number): Promise<WrappedData | null>
     raceLocation: race.location,
     raceRound: race.round,
     userPoints,
-    maxPoints: 78,
+    maxPoints: 70,
     perfectPredictions,
     bonusP1,
     bonusPodium,

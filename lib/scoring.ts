@@ -3,11 +3,11 @@ import { raceResults, actualSeasonStandings } from "./data";
 
 /**
  * Calculate points for a single prediction based on distance
- * +5 for 0 diff, +4 for 1, +3 for 2, +2 for 3, +1 for 4, 0 for 5+
+ * +3 for 0 diff, +2 for 1, +1 for 2, 0 for 3+
  */
 export function calculatePointValue(predictedPosition: number, actualPosition: number): number {
     const distance = Math.abs(actualPosition - predictedPosition);
-    return Math.max(0, 5 - distance);
+    return Math.max(0, 3 - distance);
 }
 
 /**

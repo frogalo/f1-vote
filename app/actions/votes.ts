@@ -24,7 +24,7 @@ export async function saveRaceVotes(
             },
         });
 
-        // Create new votes (only top 10 positions needed for scoring, but save all for display)
+        // Create new votes (all 22 positions are scored)
         const votesToCreate = driverIds.map((driverId, index) => ({
             userId,
             driverId,
