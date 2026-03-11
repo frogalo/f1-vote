@@ -1,6 +1,4 @@
-import { Suspense } from "react";
-import RaceResultsContent from "./RaceResultsContent";
-import { prisma } from "@/lib/prisma";
+import { redirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 
@@ -8,9 +6,5 @@ export default async function RaceResultsPage({ params }: { params: Promise<{ ro
     const { round: roundStr } = await params;
     const raceRound = Number(roundStr);
 
-    return (
-        <Suspense fallback={<div className="text-center p-8 text-slate-500 animate-pulse">Ładowanie wyników...</div>}>
-            <RaceResultsContent raceRound={raceRound} />
-        </Suspense>
-    );
+    redirect(`/race/${raceRound}?tab=race`);
 }

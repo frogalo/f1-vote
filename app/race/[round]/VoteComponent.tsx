@@ -1,7 +1,7 @@
 "use client";
 
 import { Driver, getTeamLogo, normalizeCountryCode } from "@/lib/data";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import { clsx } from "clsx";
 import { GripVertical, ArrowUpDown, CheckCircle2, CircleDashed, ArrowDownToLine } from "lucide-react";
@@ -9,6 +9,7 @@ import { useAuth } from "@/app/providers/AuthProvider";
 import ReactCountryFlag from "react-country-flag";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   DndContext,
   closestCenter,
@@ -31,11 +32,12 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import { toast } from "sonner";
 import { getSeasonVotes } from "@/app/actions/seasonVote";
-import { getLiveRaceVotes } from "@/app/actions/races";
-import { saveRaceVotes, getRaceVoterStatus, getMyRaceVotes } from "@/app/actions/votes";
+import { getLiveRaceVotes, getLiveSprintVotes } from "@/app/actions/races";
+import { saveRaceVotes, getRaceVoterStatus, getMyRaceVotes, saveSprintVotes, getMySprintVotes, getSprintVoterStatus } from "@/app/actions/votes";
+import RaceResultsContent from "./results/RaceResultsContent";
 
 type Props = {
-  race: { round: number; name: string; date: string };
+  race: { round: number; name: string; date: string; hasSprint?: boolean; sprintDate?: string; sprintCompleted?: boolean; completed?: boolean };
   drivers: Driver[];
 };
 
@@ -58,15 +60,40 @@ type VoterStatus = {
 export function VoteComponent({ race, drivers }: Props) {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
-  const [timeLeft, setTimeLeft] = useState("");
-  const [orderedDrivers, setOrderedDrivers] = useState<Driver[]>(drivers);
+  
+  // ── Sprint/Race tab ──
+  const hasSprint = race.hasSprint && race.sprintDate;
+  const searchParams = useSearchParams();
+  const initTab = searchParams.get("tab") as "sprint" | "race" | null;
+  const [activeTab, setActiveTab] = useState<"sprint" | "race">(initTab && hasSprint ? initTab : (hasSprint ? "sprint" : "race"));
+  const isSprint = activeTab === "sprint";
+  
+  // ── Race state ──
+  const [raceTimeLeft, setRaceTimeLeft] = useState("");
+  const [raceOrderedDrivers, setRaceOrderedDrivers] = useState<Driver[]>(drivers);
+  const [raceIsLocked, setRaceIsLocked] = useState(false);
+  const [raceLiveVotes, setRaceLiveVotes] = useState<LiveVote[]>([]);
+  const [raceVoterStatus, setRaceVoterStatus] = useState<VoterStatus[]>([]);
+  
+  // ── Sprint state ──
+  const [sprintTimeLeft, setSprintTimeLeft] = useState("");
+  const [sprintOrderedDrivers, setSprintOrderedDrivers] = useState<Driver[]>(drivers);
+  const [sprintIsLocked, setSprintIsLocked] = useState(false);
+  const [sprintLiveVotes, setSprintLiveVotes] = useState<LiveVote[]>([]);
+  const [sprintVoterStatus, setSprintVoterStatus] = useState<VoterStatus[]>([]);
+  
+  // ── Active state (derived from tab) ──
+  const timeLeft = isSprint ? sprintTimeLeft : raceTimeLeft;
+  const orderedDrivers = isSprint ? sprintOrderedDrivers : raceOrderedDrivers;
+  const setOrderedDrivers = isSprint ? setSprintOrderedDrivers : setRaceOrderedDrivers;
+  const isLocked = isSprint ? sprintIsLocked : raceIsLocked;
+  const liveVotes = isSprint ? sprintLiveVotes : raceLiveVotes;
+  const voterStatus = isSprint ? sprintVoterStatus : raceVoterStatus;
+  
   const [loading, setLoading] = useState(true);
-  const [isLocked, setIsLocked] = useState(false);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [liveVotes, setLiveVotes] = useState<LiveVote[]>([]);
-  const [voterStatus, setVoterStatus] = useState<VoterStatus[]>([]);
 
   // Screen-width based mobile detection (< 768px)
   useEffect(() => {
@@ -75,6 +102,25 @@ export function VoteComponent({ race, drivers }: Props) {
     window.addEventListener("resize", check);
     return () => window.removeEventListener("resize", check);
   }, []);
+
+  // Update tab state & URL
+  const handleTabChange = (tab: "sprint" | "race") => {
+    if (activeTab === tab) return;
+    setActiveTab(tab);
+    setSelectedId(null);
+    const url = new URL(window.location.href);
+    url.searchParams.set("tab", tab);
+    window.history.replaceState(null, '', url.toString());
+  };
+
+  // Sync tab with URL if it changes externally
+  useEffect(() => {
+    const tabUrl = searchParams.get("tab");
+    if ((tabUrl === "sprint" || tabUrl === "race") && activeTab !== tabUrl) {
+      setActiveTab(tabUrl);
+      setSelectedId(null);
+    }
+  }, [searchParams, activeTab]);
 
   // Desktop sensors
   const sensors = useSensors(
@@ -91,24 +137,22 @@ export function VoteComponent({ race, drivers }: Props) {
     }
 
     async function init() {
-      setIsLocked(Date.now() > new Date(race.date).getTime());
+      // ── Race init ──
+      const raceDate = new Date(race.date);
+      const raceCurrentlyLocked = raceDate.getTime() - Date.now() <= 0;
+      setRaceIsLocked(raceCurrentlyLocked);
 
-      // ── 1. Check server DB for existing race-specific votes ──
       try {
         const serverRaceVotes = await getMyRaceVotes(race.round);
-        
         if (serverRaceVotes.length > 0) {
-          // ── Server has race votes → use them (source of truth) ──
           const restored = [
             ...serverRaceVotes
               .map((slug) => drivers.find((d) => d.id === slug))
               .filter((d): d is Driver => Boolean(d)),
-            // Any drivers not in the vote list (e.g. newly added) go at the end
             ...drivers.filter((d) => !serverRaceVotes.includes(d.id)),
           ];
-          setOrderedDrivers(restored);
+          setRaceOrderedDrivers(restored);
         } else {
-          // ── 2. No race votes on server — pull season votes as initial defaults ──
           try {
             const seasonVotes = await getSeasonVotes();
             if (seasonVotes.length > 0) {
@@ -119,39 +163,90 @@ export function VoteComponent({ race, drivers }: Props) {
                   .filter((d): d is Driver => Boolean(d)),
                 ...drivers.filter((d) => !seasonSlugs.includes(d.id)),
               ];
-              setOrderedDrivers(bySeasonOrder);
-              // ── Save season order as the initial race-specific votes ──
-              // This decouples them — from now on, race votes are independent
+              setRaceOrderedDrivers(bySeasonOrder);
               await saveRaceVotes(race.round, bySeasonOrder.map((d) => d.id));
             }
-            // else keep default prop order
           } catch {
-            // Fall back silently to default driver order
+            // Fall back silently
           }
         }
       } catch {
-        // Network error — fall back to default order
+        // Network error
       }
-
-      const raceDate = new Date(race.date);
-      const isCurrentlyLocked = raceDate.getTime() - Date.now() <= 0;
-      setIsLocked(isCurrentlyLocked);
 
       try {
         const statuses = await getRaceVoterStatus(race.round);
-        setVoterStatus(statuses);
-      } catch {
-        // Ignore
-      }
+        setRaceVoterStatus(statuses);
+      } catch { /* ignore */ }
 
-      if (isCurrentlyLocked) {
+      if (raceCurrentlyLocked) {
         try {
           const res = await getLiveRaceVotes(race.round);
-          if (res.votes) {
-            setLiveVotes(res.votes);
+          if (res.votes) setRaceLiveVotes(res.votes);
+        } catch { /* ignore */ }
+      }
+
+      // ── Sprint init (if applicable) ──
+      if (hasSprint && race.sprintDate) {
+        const sprintDate = new Date(race.sprintDate);
+        const sprintCurrentlyLocked = sprintDate.getTime() - Date.now() <= 0;
+        setSprintIsLocked(sprintCurrentlyLocked);
+
+        try {
+          const serverSprintVotes = await getMySprintVotes(race.round);
+          if (serverSprintVotes.length > 0) {
+            const restored = [
+              ...serverSprintVotes
+                .map((slug) => drivers.find((d) => d.id === slug))
+                .filter((d): d is Driver => Boolean(d)),
+              ...drivers.filter((d) => !serverSprintVotes.includes(d.id)),
+            ];
+            setSprintOrderedDrivers(restored);
+          } else {
+            // Use race votes or season votes as sprint defaults
+            try {
+              const raceVotes = await getMyRaceVotes(race.round);
+              if (raceVotes.length > 0) {
+                const restored = [
+                  ...raceVotes
+                    .map((slug) => drivers.find((d) => d.id === slug))
+                    .filter((d): d is Driver => Boolean(d)),
+                  ...drivers.filter((d) => !raceVotes.includes(d.id)),
+                ];
+                setSprintOrderedDrivers(restored);
+                await saveSprintVotes(race.round, restored.map((d) => d.id));
+              } else {
+                const seasonVotes = await getSeasonVotes();
+                if (seasonVotes.length > 0) {
+                  const seasonSlugs = seasonVotes.map((sv) => sv.driverSlug);
+                  const bySeasonOrder = [
+                    ...seasonSlugs
+                      .map((slug) => drivers.find((d) => d.id === slug))
+                      .filter((d): d is Driver => Boolean(d)),
+                    ...drivers.filter((d) => !seasonSlugs.includes(d.id)),
+                  ];
+                  setSprintOrderedDrivers(bySeasonOrder);
+                  await saveSprintVotes(race.round, bySeasonOrder.map((d) => d.id));
+                }
+              }
+            } catch {
+              // Fall back silently
+            }
           }
         } catch {
-          // Ignore
+          // Network error
+        }
+
+        try {
+          const statuses = await getSprintVoterStatus(race.round);
+          setSprintVoterStatus(statuses);
+        } catch { /* ignore */ }
+
+        if (sprintCurrentlyLocked) {
+          try {
+            const res = await getLiveSprintVotes(race.round);
+            if (res.votes) setSprintLiveVotes(res.votes);
+          } catch { /* ignore */ }
         }
       }
 
@@ -162,18 +257,17 @@ export function VoteComponent({ race, drivers }: Props) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authLoading, user]);
 
-  // Countdown timer
+  // Countdown timer for RACE
   useEffect(() => {
     const raceDate = new Date(race.date);
     const update = () => {
       const diff = raceDate.getTime() - Date.now();
       if (diff <= 0) {
-          setTimeLeft("WYŚCIG ROZPOCZĘTY");
-          if (!isLocked) {
-             setIsLocked(true);
-             // Fetch live votes the moment it locks, if we are currently looking at the page
-             getLiveRaceVotes(race.round).then(res => {
-                 if (res.votes) setLiveVotes(res.votes);
+          setRaceTimeLeft("WYŚCIG ROZPOCZĘTY");
+          if (!raceIsLocked) {
+             setRaceIsLocked(true);
+             getLiveRaceVotes(race.round).then((res: any) => {
+                 if (res.votes) setRaceLiveVotes(res.votes);
              }).catch(() => {});
           }
           return;
@@ -181,15 +275,43 @@ export function VoteComponent({ race, drivers }: Props) {
       const d = Math.floor(diff / 86400000);
       const h = Math.floor((diff % 86400000) / 3600000);
       const m = Math.floor((diff % 3600000) / 60000);
-      setTimeLeft(`${d}d ${h}h ${m}m`);
+      setRaceTimeLeft(`${d}d ${h}h ${m}m`);
     };
     update();
     const id = setInterval(update, 60000);
     return () => clearInterval(id);
-  }, [race.date, race.round, isLocked]);
+  }, [race.date, race.round, raceIsLocked]);
+
+  // Countdown timer for SPRINT
+  useEffect(() => {
+    if (!hasSprint || !race.sprintDate) return;
+    const sprintDate = new Date(race.sprintDate);
+    const update = () => {
+      const diff = sprintDate.getTime() - Date.now();
+      if (diff <= 0) {
+          setSprintTimeLeft("SPRINT ROZPOCZĘTY");
+          if (!sprintIsLocked) {
+             setSprintIsLocked(true);
+             getLiveSprintVotes(race.round).then((res: any) => {
+                 if (res.votes) setSprintLiveVotes(res.votes);
+             }).catch(() => {});
+          }
+          return;
+      }
+      const d = Math.floor(diff / 86400000);
+      const h = Math.floor((diff % 86400000) / 3600000);
+      const m = Math.floor((diff % 3600000) / 60000);
+      setSprintTimeLeft(`${d}d ${h}h ${m}m`);
+    };
+    update();
+    const id = setInterval(update, 60000);
+    return () => clearInterval(id);
+  }, [race.sprintDate, race.round, sprintIsLocked, hasSprint]);
 
   // ── Desktop drag handlers ──────────────────────────────────────────────────
   const handleDragStart = (event: DragStartEvent) => setActiveId(event.active.id as string);
+
+  const saveFn = isSprint ? saveSprintVotes : saveRaceVotes;
 
   const handleDragEnd = async (event: DragEndEvent) => {
     setActiveId(null);
@@ -201,7 +323,7 @@ export function VoteComponent({ race, drivers }: Props) {
       const next = arrayMove(orderedDrivers, oldIdx, newIdx);
       setOrderedDrivers(next);
       // Persist to server DB (source of truth)
-      saveRaceVotes(race.round, next.map((d) => d.id)).catch(() => {});
+      saveFn(race.round, next.map((d) => d.id)).catch(() => {});
       toast.success("Typy zapisano!");
     }
   };
@@ -221,7 +343,7 @@ export function VoteComponent({ race, drivers }: Props) {
     setOrderedDrivers(next);
     setSelectedId(null);
     // Persist to server DB (source of truth)
-    saveRaceVotes(race.round, next.map((d) => d.id)).catch(() => {});
+    saveFn(race.round, next.map((d) => d.id)).catch(() => {});
     toast.success("Pozycje zamienione!");
   };
 
@@ -267,6 +389,14 @@ export function VoteComponent({ race, drivers }: Props) {
 
   return (
     <div className="pb-32 pt-6 px-4">
+      {/* Dynamic Sprint Background Glow */}
+      <div 
+        className={clsx(
+          "fixed inset-0 z-[-1] pointer-events-none transition-opacity duration-1000 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-orange-600/15 via-[#0D0D0D]/0 to-transparent",
+          isSprint ? "opacity-100" : "opacity-0"
+        )}
+      />
+
       {/* Header */}
       <div className="text-center mb-6">
         <h2 className="text-2xl md:text-3xl font-black text-white uppercase leading-tight mb-2">
@@ -276,6 +406,11 @@ export function VoteComponent({ race, drivers }: Props) {
           <Badge variant="secondary" className="text-xs font-bold">
             Runda {race.round}
           </Badge>
+          {isSprint && (
+            <Badge className="text-xs font-bold bg-amber-500/20 text-amber-400 border-amber-500/30" variant="outline">
+              ⚡ SPRINT
+            </Badge>
+          )}
           <Badge
             className={clsx(
               "text-xs font-bold",
@@ -288,6 +423,36 @@ export function VoteComponent({ race, drivers }: Props) {
             ⏱ {timeLeft || "..."}
           </Badge>
         </div>
+
+        {/* Sprint / Race Tabs - Fixed above global nav on mobile, static center on desktop */}
+        {hasSprint && (
+          <div className="fixed bottom-32 left-4 right-4 z-50 md:static md:bottom-auto md:left-auto md:right-auto md:mb-6 pointer-events-none flex justify-center">
+            <div className="w-full max-w-sm p-1.5 bg-[#1C1C1E]/80 backdrop-blur-2xl rounded-2xl flex relative shadow-[0_20px_40px_rgba(0,0,0,0.9)] border border-white/10 pointer-events-auto">
+              <button
+                onClick={() => handleTabChange("sprint")}
+                className={clsx(
+                  "flex-1 py-3.5 rounded-xl text-[11px] sm:text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2",
+                  activeTab === "sprint"
+                    ? "bg-[#2C2C2E] text-amber-500 shadow-md border border-white/10 scale-[1.02]"
+                    : "text-gray-500 hover:text-gray-300 active:scale-95"
+                )}
+              >
+                ⚡ Sprint
+              </button>
+              <button
+                onClick={() => handleTabChange("race")}
+                className={clsx(
+                  "flex-1 py-3.5 rounded-xl text-[11px] sm:text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2",
+                  activeTab === "race"
+                    ? "bg-[#2C2C2E] text-[#E60000] shadow-md border border-white/10 scale-[1.02]"
+                    : "text-gray-500 hover:text-gray-300 active:scale-95"
+                )}
+              >
+                🏁 Wyścig
+              </button>
+            </div>
+          </div>
+        )}
 
         {!isLocked && user && (
           <p className="text-muted-foreground text-xs uppercase tracking-widest font-bold">
@@ -305,7 +470,7 @@ export function VoteComponent({ race, drivers }: Props) {
         )}
         {isLocked && (
           <p className="text-muted-foreground text-xs uppercase tracking-widest font-bold">
-            Stawka zablokowana — wyścig się rozpoczął
+            {isSprint ? "Stawka zablokowana — sprint się rozpoczął" : "Stawka zablokowana — wyścig się rozpoczął"}
           </p>
         )}
       </div>
@@ -351,75 +516,106 @@ export function VoteComponent({ race, drivers }: Props) {
 
       {/* ── Mobile ── */}
       {isMobile ? (
-        <div className="grid grid-cols-1 gap-0 mb-6">
-          {orderedDrivers.map((driver, index) => {
-            const isDriverSelected = selectedId === driver.id;
-            const showInsertSlots = selectedId !== null && !isDriverSelected;
-            return (
-              <div key={driver.id}>
-                {/* Insert slot BEFORE this driver (only for the first driver) */}
-                {index === 0 && showInsertSlots && !isInsertNoOp(0) && (
-                  <InsertSlot
-                    position={0}
-                    onClick={() => handleInsertAt(0)}
-                  />
-                )}
-                <div className="py-1">
-                  <DriverCard
-                    driver={driver}
-                    index={index}
-                    disabled={isLocked || !user}
-                    isSelected={isDriverSelected}
-                    isSwapTarget={selectedId !== null && selectedId !== driver.id}
-                    onTapBadge={() => handleTapBadge(driver.id)}
-                    mobile
-                    otherVotes={liveVotes.filter(v => v.driverId === driver.id && v.userId !== user?.id)}
-                  />
-                </div>
-                {/* Insert slot AFTER this driver */}
-                {showInsertSlots && !isInsertNoOp(index + 1) && (
-                  <InsertSlot
-                    position={index + 1}
-                    onClick={() => handleInsertAt(index + 1)}
-                  />
-                )}
-              </div>
-            );
-          })}
-        </div>
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={`container-${activeTab}`} // Forces re-mount and animation when tab changes
+            initial={{ opacity: 0, x: isSprint ? 20 : -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: isSprint ? -10 : 10 }}
+            transition={{ type: "spring", stiffness: 350, damping: 30 }}
+            className="grid grid-cols-1 gap-0 mb-6"
+          >
+            {(isSprint && race.sprintCompleted) || (!isSprint && race.completed) ? (
+              <RaceResultsContent raceRound={race.round} isSprint={isSprint} hideHeader={true} />
+            ) : (
+              orderedDrivers.map((driver, index) => {
+                const isDriverSelected = selectedId === driver.id;
+                const showInsertSlots = selectedId !== null && !isDriverSelected;
+                return (
+                  <motion.div 
+                    key={`${activeTab}-${driver.id}`} 
+                    layout="position"
+                    transition={{ type: "spring", stiffness: 350, damping: 25 }}
+                  >
+                    {/* Insert slot BEFORE this driver (only for the first driver) */}
+                    {index === 0 && showInsertSlots && !isInsertNoOp(0) && (
+                      <InsertSlot
+                        position={0}
+                        onClick={() => handleInsertAt(0)}
+                      />
+                    )}
+                    <div className="py-1">
+                      <DriverCard
+                        driver={driver}
+                        index={index}
+                        disabled={isLocked || !user}
+                        isSelected={isDriverSelected}
+                        isSwapTarget={selectedId !== null && selectedId !== driver.id}
+                        onTapBadge={() => handleTapBadge(driver.id)}
+                        mobile
+                        otherVotes={liveVotes.filter(v => v.driverId === driver.id && v.userId !== user?.id)}
+                      />
+                    </div>
+                    {/* Insert slot AFTER this driver */}
+                    {showInsertSlots && !isInsertNoOp(index + 1) && (
+                      <InsertSlot
+                        position={index + 1}
+                        onClick={() => handleInsertAt(index + 1)}
+                      />
+                    )}
+                  </motion.div>
+                );
+              })
+            )}
+          </motion.div>
+        </AnimatePresence>
       ) : (
         /* ── Desktop ── */
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          onDragStart={handleDragStart}
-          onDragEnd={handleDragEnd}
-        >
-          <SortableContext items={orderedDrivers.map((d) => d.id)} strategy={verticalListSortingStrategy}>
-            <div className="grid grid-cols-1 gap-2 mb-6">
-              {orderedDrivers.map((driver, index) => (
-                <SortableDriverCard
-                  key={driver.id}
-                  driver={driver}
-                  index={index}
-                  disabled={isLocked || !user}
-                  isBeingDragged={driver.id === activeId}
-                  otherVotes={liveVotes.filter(v => v.driverId === driver.id && v.userId !== user?.id)}
-                />
-              ))}
-            </div>
-          </SortableContext>
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={`container-${activeTab}`} // Forces re-mount and animation when tab changes
+            initial={{ opacity: 0, scale: 0.98 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 1.02 }}
+            transition={{ duration: 0.15 }}
+          >
+            {(isSprint && race.sprintCompleted) || (!isSprint && race.completed) ? (
+              <RaceResultsContent raceRound={race.round} isSprint={isSprint} hideHeader={true} />
+            ) : (
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragStart={handleDragStart}
+                onDragEnd={handleDragEnd}
+              >
+                <SortableContext items={orderedDrivers.map((d) => d.id)} strategy={verticalListSortingStrategy}>
+                  <div className="grid grid-cols-1 gap-2 mb-6">
+                    {orderedDrivers.map((driver, index) => (
+                      <SortableDriverCard
+                        key={driver.id}
+                        driver={driver}
+                        index={index}
+                        disabled={isLocked || !user}
+                        isBeingDragged={driver.id === activeId}
+                        otherVotes={liveVotes.filter(v => v.driverId === driver.id && v.userId !== user?.id)}
+                      />
+                    ))}
+                  </div>
+                </SortableContext>
 
-          <DragOverlay adjustScale={false}>
-            {activeDriver ? (
-              <DriverCard
-                driver={activeDriver}
-                index={orderedDrivers.findIndex((d) => d.id === activeId)}
-                overlay
-              />
-            ) : null}
-          </DragOverlay>
-        </DndContext>
+                <DragOverlay adjustScale={false}>
+                  {activeDriver ? (
+                    <DriverCard
+                      driver={activeDriver}
+                      index={orderedDrivers.findIndex((d) => d.id === activeId)}
+                      overlay
+                    />
+                  ) : null}
+                </DragOverlay>
+              </DndContext>
+            )}
+          </motion.div>
+        </AnimatePresence>
       )}
     </div>
   );

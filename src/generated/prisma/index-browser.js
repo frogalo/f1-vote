@@ -187,13 +187,18 @@ exports.Prisma.RaceScalarFieldEnum = {
   isTesting: 'isTesting',
   completed: 'completed',
   canceled: 'canceled',
-  results: 'results'
+  results: 'results',
+  hasSprint: 'hasSprint',
+  sprintDate: 'sprintDate',
+  sprintCompleted: 'sprintCompleted',
+  sprintResults: 'sprintResults'
 };
 
 exports.Prisma.RaceScoreScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
   raceRound: 'raceRound',
+  isSprint: 'isSprint',
   totalPoints: 'totalPoints',
   perfectPredictions: 'perfectPredictions',
   details: 'details',

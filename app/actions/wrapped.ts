@@ -77,7 +77,7 @@ export type WrappedData = {
   userName: string | null;
 };
 
-export async function getWrappedData(round: number): Promise<WrappedData | null> {
+export async function getWrappedData(round: number, isSprint: boolean = false): Promise<WrappedData | null> {
   const cookieStore = await cookies();
   const userId = cookieStore.get("userId")?.value;
   if (!userId) return null;
@@ -102,6 +102,7 @@ export async function getWrappedData(round: number): Promise<WrappedData | null>
     include: {
       scores: {
         where: {
+          isSprint,
           user: {
             NOT: [
               { username: "testadmin" },
@@ -117,9 +118,11 @@ export async function getWrappedData(round: number): Promise<WrappedData | null>
     },
   });
 
-  if (!race || !race.completed) return null;
+  if (!race) return null;
+  if (isSprint && !race.sprintCompleted) return null;
+  if (!isSprint && !race.completed) return null;
 
-  const results = race.results; // driver slugs in finish order
+  const results = isSprint ? race.sprintResults : race.results; // driver slugs in finish order
   const top10 = results.slice(0, 10);
 
   // Get all drivers

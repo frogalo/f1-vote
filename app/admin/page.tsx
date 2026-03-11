@@ -64,6 +64,10 @@ type Race = {
     completed?: boolean;
     canceled?: boolean;
     results?: string[];
+    hasSprint?: boolean;
+    sprintDate?: string | Date;
+    sprintCompleted?: boolean;
+    sprintResults?: string[];
 };
 
 export default function AdminPage() {
@@ -101,6 +105,8 @@ export default function AdminPage() {
     const [formRaceDate, setFormRaceDate] = useState("");
     const [formRaceTrackImage, setFormRaceTrackImage] = useState("");
     const [formRaceCountry, setFormRaceCountry] = useState("");
+    const [formRaceHasSprint, setFormRaceHasSprint] = useState(false);
+    const [formRaceSprintDate, setFormRaceSprintDate] = useState("");
 
     // User details state
     const [selectedUser, setSelectedUser] = useState<UserDetails | null>(null);
@@ -158,6 +164,8 @@ export default function AdminPage() {
         setFormRaceDate("");
         setFormRaceTrackImage("");
         setFormRaceCountry("");
+        setFormRaceHasSprint(false);
+        setFormRaceSprintDate("");
 
         setShowForm(false);
     }
@@ -197,6 +205,8 @@ export default function AdminPage() {
             setFormRaceDate(new Date(race.date).toISOString().slice(0, 16)); // for datetime-local
             setFormRaceTrackImage(race.trackImage || "");
             setFormRaceCountry(race.country || "");
+            setFormRaceHasSprint(race.hasSprint || false);
+            setFormRaceSprintDate(race.sprintDate ? new Date(race.sprintDate).toISOString().slice(0, 16) : "");
         }
         setShowForm(true);
     }
@@ -213,6 +223,10 @@ export default function AdminPage() {
             formData.append("date", formRaceDate);
             formData.append("trackImage", formRaceTrackImage);
             formData.append("country", formRaceCountry);
+            formData.append("hasSprint", String(formRaceHasSprint));
+            if (formRaceHasSprint && formRaceSprintDate) {
+                formData.append("sprintDate", formRaceSprintDate);
+            }
 
             let result;
             if (formRaceId) {
@@ -651,7 +665,7 @@ export default function AdminPage() {
                                             {teamDrivers.map(driver => (
                                                 <div
                                                     key={driver.slug}
-                                                    className="flex items-center justify-between px-5 py-4 hover:bg-white/[0.02] transition-colors"
+                                                    className="flex flex-col sm:flex-row sm:items-center justify-between px-5 py-4 hover:bg-white/[0.02] transition-colors gap-4"
                                                 >
                                                     <div className="flex items-center gap-4">
                                                         <div className="w-10 h-10 rounded-xl bg-[#2C2C2E] flex items-center justify-center font-black text-sm text-white">
@@ -698,7 +712,7 @@ export default function AdminPage() {
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    <div className="flex items-center gap-2">
+                                                    <div className="flex items-center gap-2 self-end sm:self-auto mt-2 sm:mt-0">
                                                         <button
                                                             onClick={() => openEditForm(driver)}
                                                             className="p-2.5 hover:bg-white/10 rounded-xl transition-colors"
@@ -839,6 +853,36 @@ export default function AdminPage() {
                                         />
                                     </div>
 
+                                    <div className="flex items-center gap-3 bg-[#2C2C2E] border border-white/10 p-3 rounded-xl mt-4">
+                                        <input
+                                            type="checkbox"
+                                            id="hasSprintCheck"
+                                            checked={formRaceHasSprint}
+                                            onChange={(e) => setFormRaceHasSprint(e.target.checked)}
+                                            className="w-5 h-5 accent-[#E60000] rounded focus:ring-0 cursor-pointer"
+                                        />
+                                        <div className="flex-1">
+                                            <label htmlFor="hasSprintCheck" className="text-white font-bold text-sm cursor-pointer select-none block">
+                                                ⚡ Runda ze sprintem
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    {formRaceHasSprint && (
+                                        <div>
+                                            <label className="text-[10px] uppercase font-bold text-gray-500 tracking-widest mb-1 block">
+                                                Data i Czas Sprintu (UTC/Lokalny) *
+                                            </label>
+                                            <input
+                                                type="datetime-local"
+                                                value={formRaceSprintDate}
+                                                onChange={(e) => setFormRaceSprintDate(e.target.value)}
+                                                className="w-full bg-[#2C2C2E] border border-white/10 p-3 rounded-xl text-white placeholder-gray-600 font-medium focus:border-[#E60000] outline-none transition-colors [color-scheme:dark]"
+                                                required={formRaceHasSprint}
+                                            />
+                                        </div>
+                                    )}
+
 
                                     <button
                                         type="submit"
@@ -862,11 +906,11 @@ export default function AdminPage() {
                     <div className="space-y-4">
                         {races.map(race => (
                              <div key={race.id} className={clsx(
-                                "bg-[#1C1C1E] border rounded-2xl p-5 hover:bg-[#252528] transition-all group",
+                                "bg-[#1C1C1E] border rounded-2xl p-5 hover:bg-[#252528] transition-all group flex flex-col gap-4",
                                 race.completed ? "border-green-500/20" : race.canceled ? "border-red-500/20 opacity-70 hover:opacity-100" : "border-white/5"
                              )}>
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-4">
+                                <div className="flex flex-col md:flex-row lg:items-center justify-between gap-4">
+                                    <div className="flex items-start md:items-center gap-4">
                                          <div className={clsx(
                                             "w-12 h-12 rounded-xl flex flex-col items-center justify-center border",
                                             race.completed ? "bg-green-900/20 border-green-500/20" : race.canceled ? "bg-red-900/20 border-red-500/20" : "bg-[#2C2C2E] border-white/5"
@@ -880,7 +924,13 @@ export default function AdminPage() {
                                                 {race.completed && (
                                                     <span className="text-[10px] bg-green-900/30 text-green-400 px-2 py-0.5 rounded-full border border-green-500/20 font-bold uppercase tracking-wider flex items-center gap-1">
                                                         <CheckCircle2 className="w-3 h-3" />
-                                                        Zakończony
+                                                        W Zakończony
+                                                    </span>
+                                                )}
+                                                {race.hasSprint && race.sprintCompleted && (
+                                                    <span className="text-[10px] bg-orange-900/30 text-orange-400 px-2 py-0.5 rounded-full border border-orange-500/20 font-bold uppercase tracking-wider flex items-center gap-1">
+                                                        <CheckCircle2 className="w-3 h-3" />
+                                                        S Zakończony
                                                     </span>
                                                 )}
                                                 {race.canceled && (
@@ -900,7 +950,7 @@ export default function AdminPage() {
                                         </div>
                                     </div>
                                     
-                                    <div className="flex items-center gap-3">
+                                    <div className="flex flex-wrap items-center gap-2 md:gap-3 w-full md:w-auto mt-2 md:mt-0">
                                         <button
                                             onClick={() => handleToggleCanceled(race.id, race.name, race.canceled || false)}
                                             className={clsx(
@@ -912,9 +962,29 @@ export default function AdminPage() {
                                         >
                                             {race.canceled ? "Przywróć" : "Odwołaj"}
                                         </button>
-                                        {/* Finish/Results button */}
+                                        {/* Finish/Results button for Sprint */}
+                                        {race.hasSprint && (
+                                            <button
+                                                onClick={() => setFinishingRace({...race, finishTarget: 'sprint'} as any)}
+                                                className={clsx(
+                                                    "text-[10px] px-3 py-1.5 rounded-lg font-bold uppercase tracking-wider border transition-all flex items-center gap-1.5",
+                                                    race.sprintCompleted
+                                                        ? "bg-green-900/30 text-green-400 border-green-500/20 hover:bg-green-900/50"
+                                                        : (race.sprintDate && new Date(race.sprintDate) < new Date())
+                                                            ? "bg-[#E60000] text-white border-[#E60000] hover:bg-red-700 shadow-lg shadow-red-900/20"
+                                                            : "bg-[#2C2C2E] text-gray-400 border-white/10 hover:bg-white/10"
+                                                )}
+                                            >
+                                                {race.sprintCompleted ? (
+                                                    <><CheckCircle2 className="w-3 h-3" /> Wyniki Sprintu</>
+                                                ) : (
+                                                    <><Trophy className="w-3 h-3" /> Zakończ Sprint</>
+                                                )}
+                                            </button>
+                                        )}
+                                        {/* Finish/Results button for Main Race */}
                                         <button
-                                            onClick={() => setFinishingRace(race)}
+                                            onClick={() => setFinishingRace({...race, finishTarget: 'race'} as any)}
                                             className={clsx(
                                                 "text-[10px] px-3 py-1.5 rounded-lg font-bold uppercase tracking-wider border transition-all flex items-center gap-1.5",
                                                 race.completed
@@ -925,9 +995,9 @@ export default function AdminPage() {
                                             )}
                                         >
                                             {race.completed ? (
-                                                <><CheckCircle2 className="w-3 h-3" /> Wyniki</>
+                                                <><CheckCircle2 className="w-3 h-3" /> Wyniki Wyścigu</>
                                             ) : (
-                                                <><Trophy className="w-3 h-3" /> Zakończ</>
+                                                <><Trophy className="w-3 h-3" /> Zakończ Wyścig</>
                                             )}
                                         </button>
                                         {race.trackImage ? (
@@ -1065,9 +1135,9 @@ export default function AdminPage() {
                         <div 
                             key={userRow.id} 
                             onClick={() => handleUserClick(userRow.id)}
-                            className="bg-[#1C1C1E] border border-white/5 rounded-2xl p-5 hover:bg-[#252528] transition-colors cursor-pointer group"
+                            className="bg-[#1C1C1E] border border-white/5 rounded-2xl p-5 hover:bg-[#252528] transition-colors cursor-pointer group flex flex-col sm:flex-row sm:items-start justify-between gap-4"
                         >
-                            <div className="flex items-start justify-between">
+                            <div className="flex flex-col sm:flex-row justify-between w-full h-full">
                                 <div className="flex items-center gap-4">
                                     <div className={clsx(
                                         "w-12 h-12 rounded-full flex items-center justify-center font-black text-lg border-2",
@@ -1085,7 +1155,7 @@ export default function AdminPage() {
                                         <div className="text-gray-500 text-xs font-medium">@{userRow.username} · {userRow.team}</div>
                                     </div>
                                 </div>
-                                <div className="text-right flex items-start gap-4">
+                                <div className="text-right flex items-start gap-4 self-end sm:self-auto mt-4 sm:mt-0">
                                     <div className="flex flex-col gap-1 items-end">
                                         <div className="flex items-center gap-1.5 text-xs text-gray-400 font-bold uppercase tracking-wider">
                                             <Trophy className="w-3 h-3 text-[#E60000]" />

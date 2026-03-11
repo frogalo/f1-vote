@@ -76,9 +76,11 @@ type DriverInfo = {
 
 type Props = {
   raceRound: number;
+  isSprint?: boolean;
+  hideHeader?: boolean;
 };
 
-export default function RaceResultsContent({ raceRound }: Props) {
+export default function RaceResultsContent({ raceRound, isSprint = false, hideHeader = false }: Props) {
   const { user, loading: authLoading } = useAuth();
   const [loading, setLoading] = useState(true);
   const [raceData, setRaceData] = useState<RaceResult | null>(null);
@@ -97,8 +99,8 @@ export default function RaceResultsContent({ raceRound }: Props) {
 
     async function loadData() {
       try {
-        const race = await getRaceWithResults(raceRound);
-        if (race && race.completed) {
+        const race = await getRaceWithResults(raceRound, isSprint);
+        if (race && (isSprint ? race.sprintCompleted : race.completed)) {
           setRaceData(race as unknown as RaceResult);
         }
         const driversData = await getActiveDriversForResults();
@@ -111,7 +113,7 @@ export default function RaceResultsContent({ raceRound }: Props) {
     }
 
     loadData();
-  }, [raceRound, user, authLoading, router]);
+  }, [raceRound, user, authLoading, router, isSprint]);
 
   if (loading) {
     return (
@@ -127,7 +129,9 @@ export default function RaceResultsContent({ raceRound }: Props) {
     );
   }
 
-  if (!raceData || !raceData.completed) {
+  const isDataCompleted = raceData ? (isSprint ? (raceData as any).sprintCompleted : raceData.completed) : false;
+
+  if (!raceData || !isDataCompleted) {
     return (
       <div className="flex h-[60vh] flex-col items-center justify-center p-8 text-center">
         <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-2xl border border-white/5 bg-[#1C1C1E]">
@@ -160,51 +164,53 @@ export default function RaceResultsContent({ raceRound }: Props) {
   return (
     <div className="mx-auto max-w-lg px-3 sm:px-4 pb-28 pt-4 sm:pt-6">
       {/* ── HERO RACE HEADER ── */}
-      <div className="relative mb-8 overflow-hidden rounded-3xl border border-white/[0.08]">
-        {/* Dynamic background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-[#1A1A1D] via-[#131315] to-[#0D0D0D]" />
-        <div className="pointer-events-none absolute -right-20 top-1/2 h-64 w-64 -translate-y-1/2 rounded-full bg-[#E60000]/20 blur-[80px]" />
-        <div className="pointer-events-none absolute -left-16 -bottom-16 h-48 w-48 rounded-full bg-[#E60000]/10 blur-[70px]" />
+      {!hideHeader && (
+        <div className="relative mb-8 overflow-hidden rounded-3xl border border-white/[0.08]">
+          {/* Dynamic background */}
+          <div className="absolute inset-0 bg-gradient-to-br from-[#1A1A1D] via-[#131315] to-[#0D0D0D]" />
+          <div className="pointer-events-none absolute -right-20 top-1/2 h-64 w-64 -translate-y-1/2 rounded-full bg-[#E60000]/20 blur-[80px]" />
+          <div className="pointer-events-none absolute -left-16 -bottom-16 h-48 w-48 rounded-full bg-[#E60000]/10 blur-[70px]" />
 
-        {/* Top accent bar */}
-        <div className="relative h-1.5 bg-gradient-to-r from-[#E60000] via-[#FF6B6B] to-transparent" />
+          {/* Top accent bar */}
+          <div className="relative h-1.5 bg-gradient-to-r from-[#E60000] via-[#FF6B6B] to-transparent" />
 
-        <div className="relative z-10 p-6 sm:p-8">
-          {/* Round badge with animation */}
-          <div className="mb-4 inline-flex items-center gap-2.5 rounded-full border border-[#E60000]/30 bg-[#E60000]/5 px-3.5 py-1.5 backdrop-blur-sm">
-            <div className="relative h-2.5 w-2.5">
-              <div className="absolute inset-0 animate-pulse rounded-full bg-[#E60000]" />
-              <div className="absolute inset-1 rounded-full bg-[#E60000] opacity-40" />
-            </div>
-            <span className="text-xs font-black uppercase tracking-[0.25em] text-[#E60000]">
-              Runda {raceData.round}
-            </span>
-          </div>
-
-          {/* Main heading with dynamic layout */}
-          <div className="mb-4">
-            <h1 className="text-4xl sm:text-5xl font-black uppercase leading-[0.95] tracking-tighter text-white">
-              {raceData.name.replace(" Grand Prix", "")}
-              <span className="block bg-gradient-to-r from-[#E60000] to-[#FF6B6B] bg-clip-text text-transparent">
-                Grand Prix
+          <div className="relative z-10 p-6 sm:p-8">
+            {/* Round badge with animation */}
+            <div className="mb-4 inline-flex items-center gap-2.5 rounded-full border border-[#E60000]/30 bg-[#E60000]/5 px-3.5 py-1.5 backdrop-blur-sm">
+              <div className="relative h-2.5 w-2.5">
+                <div className="absolute inset-0 animate-pulse rounded-full bg-[#E60000]" />
+                <div className="absolute inset-1 rounded-full bg-[#E60000] opacity-40" />
+              </div>
+              <span className="text-xs font-black uppercase tracking-[0.25em] text-[#E60000]">
+                Runda {raceData.round}
               </span>
-            </h1>
-          </div>
+            </div>
 
-          {/* Location with icon */}
-          <div className="flex items-center gap-2 text-gray-400">
-            <div className="h-1 w-1 rounded-full bg-[#E60000]" />
-            <span className="text-sm font-bold uppercase tracking-[0.15em]">
-              {raceData.location}
-            </span>
+            {/* Main heading with dynamic layout */}
+            <div className="mb-4">
+              <h1 className="text-4xl sm:text-5xl font-black uppercase leading-[0.95] tracking-tighter text-white">
+                {raceData.name.replace(" Grand Prix", "")}
+                <span className="block bg-gradient-to-r from-[#E60000] to-[#FF6B6B] bg-clip-text text-transparent">
+                  Grand Prix
+                </span>
+              </h1>
+            </div>
+
+            {/* Location with icon */}
+            <div className="flex items-center gap-2 text-gray-400">
+              <div className="h-1 w-1 rounded-full bg-[#E60000]" />
+              <span className="text-sm font-bold uppercase tracking-[0.15em]">
+                {raceData.location}
+              </span>
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* ── WRAPPED BUTTON ── */}
       {myScore && (
         <button
-          onClick={() => router.push(`/race/${raceRound}/results/wrapped`)}
+          onClick={() => router.push(`/race/${raceRound}/results/wrapped${isSprint ? "?isSprint=true" : ""}`)}
           className="group relative mb-8 w-full overflow-hidden rounded-3xl border border-[#E60000]/30 p-[1px] transition-all active:scale-[0.98]"
         >
           <div className="absolute inset-0 bg-gradient-to-r from-[#E60000] via-[#FF6B6B] to-[#E60000] opacity-30 transition-opacity group-hover:opacity-50" />
@@ -428,7 +434,7 @@ export default function RaceResultsContent({ raceRound }: Props) {
                                       : "bg-white/[0.06] text-gray-400"
                                 )}
                               >
-                                P{pred.actualPos}
+                                {isSprint ? (pred.actualPos > 8 ? `P${pred.actualPos}` : `P${pred.actualPos}`) : `P${pred.actualPos}`}
                               </div>
                               <div className="mt-1 flex flex-wrap justify-end gap-1 sm:gap-1.5">
                                 {pred.positionPoints > 0 && (
@@ -507,7 +513,7 @@ export default function RaceResultsContent({ raceRound }: Props) {
         <div className="space-y-2">
           {/* Podium (1-3) */}
           <div className="mb-4 grid grid-cols-3 gap-2 items-end">
-            {raceData.results.slice(0, 3).map((driverId, pos) => {
+            {(isSprint ? (raceData as any).sprintResults : raceData.results).slice(0, 3).map((driverId: string, pos: number) => {
               const driver = drivers.find((d) => d.slug === driverId);
               if (!driver) return null;
 
@@ -583,9 +589,8 @@ export default function RaceResultsContent({ raceRound }: Props) {
             })}
           </div>
 
-          {/* 4-10 in list */}
           <div className="overflow-hidden rounded-2xl border border-white/[0.06] bg-[#131315]">
-            {raceData.results.slice(3, 10).map((driverId, pos) => {
+            {(isSprint ? (raceData as any).sprintResults : raceData.results).slice(3, isSprint ? 20 : 10).map((driverId: string, pos: number) => {
               const driver = drivers.find((d) => d.slug === driverId);
               if (!driver) return null;
 

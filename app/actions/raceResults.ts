@@ -207,7 +207,7 @@ export async function finishRace(round: number, results: string[]) {
             scoreOps.push(
                 prisma.raceScore.upsert({
                     where: {
-                        userId_raceRound: { userId, raceRound: round },
+                        userId_raceRound_isSprint: { userId, raceRound: round, isSprint: false },
                     },
                     update: {
                         totalPoints,
@@ -217,6 +217,7 @@ export async function finishRace(round: number, results: string[]) {
                     create: {
                         userId,
                         raceRound: round,
+                        isSprint: false,
                         totalPoints,
                         perfectPredictions,
                         details: JSON.parse(JSON.stringify(detailsWithBonuses)),
@@ -239,15 +240,199 @@ export async function finishRace(round: number, results: string[]) {
 }
 
 /**
+ * Finish a sprint: set sprint results and calculate sprint points
+ */
+export async function finishSprint(round: number, results: string[]) {
+    await requireAdmin();
+
+    if (!results || results.length === 0) {
+        return { error: "Musisz podać kolejność kierowców" };
+    }
+
+    const fullResults = results;
+
+    try {
+        // 1. Update race sprint as completed
+        await prisma.race.update({
+            where: { round },
+            data: {
+                sprintCompleted: true,
+                sprintResults: results,
+            },
+        });
+
+        // 2. Get all sprint votes
+        const votes = await prisma.vote.findMany({
+            where: {
+                raceRound: { startsWith: `sprint-${round}-position-` },
+            },
+            include: {
+                user: { select: { id: true } },
+            },
+        });
+
+        // 3. Group votes by user
+        const votesByUser = new Map<string, typeof votes>();
+        for (const vote of votes) {
+            const userId = vote.userId;
+            if (!votesByUser.has(userId)) {
+                votesByUser.set(userId, []);
+            }
+            votesByUser.get(userId)!.push(vote);
+        }
+
+        // 3b. Fallback: use season votes for users without sprint votes
+        const usersWhoVoted = new Set(votesByUser.keys());
+        const seasonVotes = await prisma.seasonVote.findMany({
+            where: {
+                season: 2026,
+                userId: { notIn: Array.from(usersWhoVoted) },
+                user: {
+                    isAdmin: false,
+                    NOT: [
+                        { username: "testadmin" },
+                        { name: "testadmin" },
+                    ],
+                },
+            },
+            include: {
+                driver: { select: { slug: true, activeSeason: true } },
+            },
+        });
+
+        const seasonByUser = new Map<string, typeof seasonVotes>();
+        for (const sv of seasonVotes) {
+            if (!sv.driver.activeSeason) continue;
+            if (!seasonByUser.has(sv.userId)) {
+                seasonByUser.set(sv.userId, []);
+            }
+            seasonByUser.get(sv.userId)!.push(sv);
+        }
+
+        for (const [userId, userSeasonVotes] of seasonByUser.entries()) {
+            const syntheticVotes = userSeasonVotes.map((sv, i) => ({
+                id: `season-fallback-${sv.id}`,
+                userId,
+                driverId: sv.driver.slug,
+                raceRound: `sprint-${round}-position-${i + 1}`,
+                createdAt: sv.createdAt,
+                user: { id: userId },
+            }));
+            votesByUser.set(userId, syntheticVotes as typeof votes);
+        }
+
+        // 4. Calculate scores
+        const scoreOps = [];
+        for (const [userId, userVotes] of votesByUser.entries()) {
+            let totalPoints = 0;
+            let perfectPredictions = 0;
+            const isFromSeason = userVotes.length > 0 && userVotes[0].id.startsWith("season-fallback-");
+            const details: Array<{
+                driverId: string;
+                predictedPos: number;
+                actualPos: number | null;
+                positionPoints: number;
+                points: number;
+            }> = [];
+
+            for (const vote of userVotes) {
+                const parts = vote.raceRound.split("-");
+                const predictedPos = parseInt(parts[3]);
+                const actualIndex = fullResults.indexOf(vote.driverId);
+                const actualPos = actualIndex !== -1 ? actualIndex + 1 : null;
+
+                let positionPoints = 0;
+
+                if (actualPos !== null) {
+                    const diff = Math.abs(predictedPos - actualPos);
+                    positionPoints = calculatePositionPoints(diff);
+
+                    if (diff === 0) {
+                        perfectPredictions++;
+                    }
+                }
+
+                totalPoints += positionPoints;
+
+                details.push({
+                    driverId: vote.driverId,
+                    predictedPos,
+                    actualPos,
+                    positionPoints,
+                    points: positionPoints,
+                });
+            }
+
+            // Sprint bonuses (same as race)
+            let bonusP1 = 0;
+            let bonusPodium = 0;
+
+            const p1Vote = details.find(d => d.predictedPos === 1);
+            if (p1Vote && p1Vote.actualPos === 1) {
+                bonusP1 = 1;
+                totalPoints += bonusP1;
+            }
+
+            const p1 = details.find(d => d.predictedPos === 1 && d.actualPos === 1);
+            const p2 = details.find(d => d.predictedPos === 2 && d.actualPos === 2);
+            const p3 = details.find(d => d.predictedPos === 3 && d.actualPos === 3);
+            if (p1 && p2 && p3) {
+                bonusPodium = 3;
+                totalPoints += bonusPodium;
+            }
+
+            const detailsWithBonuses = {
+                predictions: details,
+                bonusP1,
+                bonusPodium,
+                fromSeason: isFromSeason,
+            };
+
+            scoreOps.push(
+                prisma.raceScore.upsert({
+                    where: {
+                        userId_raceRound_isSprint: { userId, raceRound: round, isSprint: true },
+                    },
+                    update: {
+                        totalPoints,
+                        perfectPredictions,
+                        details: JSON.parse(JSON.stringify(detailsWithBonuses)),
+                    },
+                    create: {
+                        userId,
+                        raceRound: round,
+                        isSprint: true,
+                        totalPoints,
+                        perfectPredictions,
+                        details: JSON.parse(JSON.stringify(detailsWithBonuses)),
+                    },
+                })
+            );
+        }
+
+        await Promise.all(scoreOps);
+
+        revalidatePath("/admin");
+        revalidatePath("/leaderboard");
+        revalidatePath(`/race/${round}/results`);
+        revalidatePath("/calendar");
+
+        return { success: true, usersScored: votesByUser.size };
+    } catch (e: unknown) {
+        return { error: (e instanceof Error ? e.message : String(e)) || "Błąd zakończenia sprintu" };
+    }
+}
+
+/**
  * Reopen a race (undo finish)
  */
 export async function reopenRace(round: number) {
     await requireAdmin();
 
     try {
-        // Delete all computed scores for this race
+        // Delete race scores (not sprint)
         await prisma.raceScore.deleteMany({
-            where: { raceRound: round },
+            where: { raceRound: round, isSprint: false },
         });
 
         // Reset race completion
@@ -262,6 +447,7 @@ export async function reopenRace(round: number) {
         revalidatePath("/admin");
         revalidatePath("/leaderboard");
         revalidatePath(`/race/${round}/results`);
+        revalidatePath(`/race/${round}`);
         revalidatePath("/calendar");
 
         return { success: true };
@@ -271,14 +457,46 @@ export async function reopenRace(round: number) {
 }
 
 /**
+ * Reopen a sprint (undo sprint finish)
+ */
+export async function reopenSprint(round: number) {
+    await requireAdmin();
+
+    try {
+        await prisma.raceScore.deleteMany({
+            where: { raceRound: round, isSprint: true },
+        });
+
+        await prisma.race.update({
+            where: { round },
+            data: {
+                sprintCompleted: false,
+                sprintResults: [],
+            },
+        });
+
+        revalidatePath("/admin");
+        revalidatePath("/leaderboard");
+        revalidatePath(`/race/${round}/results`);
+        revalidatePath(`/race/${round}`);
+        revalidatePath("/calendar");
+
+        return { success: true };
+    } catch (e: unknown) {
+        return { error: (e instanceof Error ? e.message : String(e)) || "Błąd cofania zakończenia sprintu" };
+    }
+}
+
+/**
  * Get race data with results and scores
  */
-export async function getRaceWithResults(round: number) {
+export async function getRaceWithResults(round: number, isSprint: boolean = false) {
     const race = await prisma.race.findUnique({
         where: { round },
         include: {
             scores: {
                 where: {
+                    isSprint,
                     user: {
                         NOT: [
                             { username: "testadmin" },
@@ -371,10 +589,29 @@ export async function getLeaderboardScoresForUser(userId: string) {
         where: { userId },
         select: {
             raceRound: true,
+            isSprint: true,
             totalPoints: true,
         },
     });
 
-    return scores;
+    const grouped = scores.reduce((acc, score) => {
+        if (!acc[score.raceRound]) {
+            acc[score.raceRound] = { 
+                raceRound: score.raceRound, 
+                totalPoints: 0, 
+                racePoints: 0, 
+                sprintPoints: 0 
+            };
+        }
+        acc[score.raceRound].totalPoints += score.totalPoints;
+        if (score.isSprint) {
+            acc[score.raceRound].sprintPoints += score.totalPoints;
+        } else {
+            acc[score.raceRound].racePoints += score.totalPoints;
+        }
+        return acc;
+    }, {} as Record<number, { raceRound: number, totalPoints: number, racePoints: number, sprintPoints: number }>);
+
+    return Object.values(grouped);
 }
 

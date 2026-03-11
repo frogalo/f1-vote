@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { X, CheckCircle2, RotateCcw, Trophy, ArrowRightLeft, Undo2 } from "lucide-react";
 import { clsx } from "clsx";
-import { getActiveDriversForResults, finishRace, reopenRace } from "@/app/actions/raceResults";
+import { getActiveDriversForResults, finishRace, reopenRace, finishSprint, reopenSprint } from "@/app/actions/raceResults";
 import { toast } from "sonner";
 import { getTeamLogo, normalizeCountryCode } from "@/lib/data";
 import ReactCountryFlag from "react-country-flag";
@@ -25,6 +25,10 @@ type Race = {
     date: string | Date;
     completed?: boolean;
     results?: string[];
+    hasSprint?: boolean;
+    sprintCompleted?: boolean;
+    sprintResults?: string[];
+    finishTarget?: 'race' | 'sprint';
 };
 
 type Props = {
@@ -49,9 +53,11 @@ export default function FinishRaceModal({ race, onClose, onFinished }: Props) {
                 setAllDrivers(data);
 
                 // If race already has results, pre-fill the picked order
-                if (race.results && race.results.length > 0) {
+                const isSprint = race.finishTarget === 'sprint';
+                const currentResults = isSprint ? race.sprintResults : race.results;
+                if (currentResults && currentResults.length > 0) {
                     const ordered: DriverOption[] = [];
-                    for (const slug of race.results) {
+                    for (const slug of currentResults) {
                         const d = data.find(dr => dr.slug === slug);
                         if (d) ordered.push(d);
                     }
@@ -73,15 +79,18 @@ export default function FinishRaceModal({ race, onClose, onFinished }: Props) {
 
     const allPicked = remainingDrivers.length === 0 && pickedOrder.length > 0;
 
+    const isSprint = race.finishTarget === 'sprint';
+    const isCompleted = isSprint ? race.sprintCompleted : race.completed;
+
     // Pick a driver — adds them to the next position
     function pickDriver(driver: DriverOption) {
-        if (race.completed) return;
+        if (isCompleted) return;
         setPickedOrder(prev => [...prev, driver]);
     }
 
     // Click on a picked driver — either start swap or complete swap
     function handlePickedClick(index: number) {
-        if (race.completed) return;
+        if (isCompleted) return;
 
         if (swapFirst === null) {
             // Start swap — select first driver
@@ -118,17 +127,21 @@ export default function FinishRaceModal({ race, onClose, onFinished }: Props) {
             return;
         }
 
-        if (!confirm(`Zakończyć wyścig "${race.name}"? Zostaną obliczone punkty dla wszystkich użytkowników.`)) return;
+        const typeName = isSprint ? "sprint" : "wyścig";
+
+        if (!confirm(`Zakończyć ${typeName} "${race.name}"? Zostaną obliczone punkty dla wszystkich użytkowników.`)) return;
 
         setSubmitting(true);
         try {
             const results = pickedOrder.map(d => d.slug);
-            const result = await finishRace(race.round, results);
+            const result = isSprint 
+                ? await finishSprint(race.round, results)
+                : await finishRace(race.round, results);
 
             if (result.error) {
                 toast.error(result.error);
             } else {
-                toast.success(`🏁 Wyścig zakończony! Obliczono punkty dla ${result.usersScored} użytkowników.`);
+                toast.success(`🏁 ${isSprint ? 'Sprint' : 'Wyścig'} zakończony! Obliczono punkty dla ${result.usersScored} użytkowników.`);
                 onFinished();
             }
         } catch {
@@ -139,15 +152,18 @@ export default function FinishRaceModal({ race, onClose, onFinished }: Props) {
     }
 
     async function handleReopen() {
-        if (!confirm(`Cofnąć zakończenie wyścigu "${race.name}"? Punkty zostaną usunięte.`)) return;
+        const typeName = isSprint ? "sprintu" : "wyścigu";
+        if (!confirm(`Cofnąć zakończenie ${typeName} "${race.name}"? Punkty zostaną usunięte.`)) return;
 
         setSubmitting(true);
         try {
-            const result = await reopenRace(race.round);
+            const result = isSprint 
+                ? await reopenSprint(race.round)
+                : await reopenRace(race.round);
             if (result.error) {
                 toast.error(result.error);
             } else {
-                toast.success("Wyścig ponownie otwarty");
+                toast.success(`${isSprint ? 'Sprint' : 'Wyścig'} ponownie otwarty`);
                 onFinished();
             }
         } catch {
@@ -164,7 +180,7 @@ export default function FinishRaceModal({ race, onClose, onFinished }: Props) {
                 <div className="flex items-center justify-between p-5 border-b border-white/5 shrink-0">
                     <div>
                         <h2 className="text-xl font-black text-white uppercase tracking-tight">
-                            {race.completed ? "Wyniki" : "Zakończ"} <span className="text-[#E60000]">Wyścig</span>
+                            {isCompleted ? "Wyniki" : "Zakończ"} <span className="text-[#E60000]">{isSprint ? "Sprint" : "Wyścig"}</span>
                         </h2>
                         <p className="text-gray-500 text-xs mt-0.5">
                             Runda {race.round} · {race.name}
@@ -190,7 +206,7 @@ export default function FinishRaceModal({ race, onClose, onFinished }: Props) {
                                             <Trophy className="w-3 h-3 text-[#E60000]" />
                                             Kolejność ({pickedOrder.length}/{allDrivers.length})
                                         </h3>
-                                        {!race.completed && (
+                                        {!isCompleted && (
                                             <div className="flex items-center gap-1">
                                                 <button
                                                     onClick={undoLast}
@@ -220,7 +236,7 @@ export default function FinishRaceModal({ race, onClose, onFinished }: Props) {
                                             <button
                                                 key={driver.slug}
                                                 onClick={() => handlePickedClick(index)}
-                                                disabled={race.completed}
+                                                disabled={isCompleted}
                                                 className={clsx(
                                                     "w-full flex items-center gap-3 p-2.5 rounded-xl border transition-all text-left",
                                                     swapFirst === index
@@ -228,7 +244,7 @@ export default function FinishRaceModal({ race, onClose, onFinished }: Props) {
                                                         : swapFirst !== null
                                                             ? "border-white/10 bg-[#2C2C2E]/70 hover:border-[#E60000]/50 hover:bg-[#E60000]/5 cursor-pointer"
                                                             : "border-white/5 bg-[#2C2C2E]/50 hover:bg-[#2C2C2E] cursor-pointer",
-                                                    race.completed && "cursor-default",
+                                                    isCompleted && "cursor-default",
                                                     index === 0 && "border-[#E60000]/30 bg-gradient-to-r from-[#E60000]/10 to-transparent",
                                                     index === 0 && swapFirst === index && "border-[#E60000] bg-[#E60000]/20"
                                                 )}
@@ -265,7 +281,7 @@ export default function FinishRaceModal({ race, onClose, onFinished }: Props) {
                                                 </div>
 
                                                 {/* Swap indicator */}
-                                                {!race.completed && swapFirst !== null && swapFirst !== index && (
+                                                {!isCompleted && swapFirst !== null && swapFirst !== index && (
                                                     <ArrowRightLeft className="w-3.5 h-3.5 text-[#E60000] shrink-0" />
                                                 )}
                                             </button>
@@ -275,7 +291,7 @@ export default function FinishRaceModal({ race, onClose, onFinished }: Props) {
                             )}
 
                             {/* ── REMAINING DRIVERS TO PICK ── */}
-                            {!race.completed && remainingDrivers.length > 0 && (
+                            {!isCompleted && remainingDrivers.length > 0 && (
                                 <div>
                                     <h3 className="text-[10px] uppercase font-bold text-gray-500 tracking-widest mb-2">
                                         {pickedOrder.length === 0
@@ -312,7 +328,7 @@ export default function FinishRaceModal({ race, onClose, onFinished }: Props) {
                             )}
 
                             {/* All picked message */}
-                            {allPicked && !race.completed && (
+                            {allPicked && !isCompleted && (
                                 <div className="text-center text-xs text-green-400 bg-green-900/20 border border-green-500/20 rounded-xl py-3 font-bold">
                                     ✅ Wszyscy kierowcy ustawieni — kliknij dwóch aby zamienić lub zatwierdź
                                 </div>
@@ -323,14 +339,16 @@ export default function FinishRaceModal({ race, onClose, onFinished }: Props) {
 
                 {/* Footer actions */}
                 <div className="p-4 border-t border-white/5 shrink-0 space-y-2">
-                    {race.completed ? (
+                    {isCompleted ? (
                         <div className="space-y-2">
                             <button
                                 onClick={async () => {
                                     setSubmitting(true);
                                     try {
                                         const results = pickedOrder.map(d => d.slug);
-                                        const result = await finishRace(race.round, results);
+                                        const result = isSprint 
+                                            ? await finishSprint(race.round, results)
+                                            : await finishRace(race.round, results);
                                         if (result.error) {
                                             toast.error(result.error);
                                         } else {
@@ -374,7 +392,7 @@ export default function FinishRaceModal({ race, onClose, onFinished }: Props) {
                             )}
                         >
                             <CheckCircle2 className="w-5 h-5" />
-                            {submitting ? "Obliczanie punktów..." : "🏁 Zakończ Wyścig i Oblicz Punkty"}
+                            {submitting ? "Obliczanie punktów..." : `🏁 Zakończ ${isSprint ? 'Sprint' : 'Wyścig'} i Oblicz Punkty`}
                         </button>
                     )}
                 </div>

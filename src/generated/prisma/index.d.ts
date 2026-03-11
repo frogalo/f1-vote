@@ -7619,6 +7619,9 @@ export namespace Prisma {
     isTesting: boolean | null
     completed: boolean | null
     canceled: boolean | null
+    hasSprint: boolean | null
+    sprintDate: Date | null
+    sprintCompleted: boolean | null
   }
 
   export type RaceMaxAggregateOutputType = {
@@ -7634,6 +7637,9 @@ export namespace Prisma {
     isTesting: boolean | null
     completed: boolean | null
     canceled: boolean | null
+    hasSprint: boolean | null
+    sprintDate: Date | null
+    sprintCompleted: boolean | null
   }
 
   export type RaceCountAggregateOutputType = {
@@ -7650,6 +7656,10 @@ export namespace Prisma {
     completed: number
     canceled: number
     results: number
+    hasSprint: number
+    sprintDate: number
+    sprintCompleted: number
+    sprintResults: number
     _all: number
   }
 
@@ -7675,6 +7685,9 @@ export namespace Prisma {
     isTesting?: true
     completed?: true
     canceled?: true
+    hasSprint?: true
+    sprintDate?: true
+    sprintCompleted?: true
   }
 
   export type RaceMaxAggregateInputType = {
@@ -7690,6 +7703,9 @@ export namespace Prisma {
     isTesting?: true
     completed?: true
     canceled?: true
+    hasSprint?: true
+    sprintDate?: true
+    sprintCompleted?: true
   }
 
   export type RaceCountAggregateInputType = {
@@ -7706,6 +7722,10 @@ export namespace Prisma {
     completed?: true
     canceled?: true
     results?: true
+    hasSprint?: true
+    sprintDate?: true
+    sprintCompleted?: true
+    sprintResults?: true
     _all?: true
   }
 
@@ -7809,6 +7829,10 @@ export namespace Prisma {
     completed: boolean
     canceled: boolean
     results: string[]
+    hasSprint: boolean
+    sprintDate: Date | null
+    sprintCompleted: boolean
+    sprintResults: string[]
     _count: RaceCountAggregateOutputType | null
     _avg: RaceAvgAggregateOutputType | null
     _sum: RaceSumAggregateOutputType | null
@@ -7844,6 +7868,10 @@ export namespace Prisma {
     completed?: boolean
     canceled?: boolean
     results?: boolean
+    hasSprint?: boolean
+    sprintDate?: boolean
+    sprintCompleted?: boolean
+    sprintResults?: boolean
     scores?: boolean | Race$scoresArgs<ExtArgs>
     _count?: boolean | RaceCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["race"]>
@@ -7862,6 +7890,10 @@ export namespace Prisma {
     completed?: boolean
     canceled?: boolean
     results?: boolean
+    hasSprint?: boolean
+    sprintDate?: boolean
+    sprintCompleted?: boolean
+    sprintResults?: boolean
   }, ExtArgs["result"]["race"]>
 
   export type RaceSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -7878,6 +7910,10 @@ export namespace Prisma {
     completed?: boolean
     canceled?: boolean
     results?: boolean
+    hasSprint?: boolean
+    sprintDate?: boolean
+    sprintCompleted?: boolean
+    sprintResults?: boolean
   }, ExtArgs["result"]["race"]>
 
   export type RaceSelectScalar = {
@@ -7894,9 +7930,13 @@ export namespace Prisma {
     completed?: boolean
     canceled?: boolean
     results?: boolean
+    hasSprint?: boolean
+    sprintDate?: boolean
+    sprintCompleted?: boolean
+    sprintResults?: boolean
   }
 
-  export type RaceOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "round" | "name" | "location" | "date" | "circuitId" | "url" | "country" | "trackImage" | "isTesting" | "completed" | "canceled" | "results", ExtArgs["result"]["race"]>
+  export type RaceOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "round" | "name" | "location" | "date" | "circuitId" | "url" | "country" | "trackImage" | "isTesting" | "completed" | "canceled" | "results" | "hasSprint" | "sprintDate" | "sprintCompleted" | "sprintResults", ExtArgs["result"]["race"]>
   export type RaceInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     scores?: boolean | Race$scoresArgs<ExtArgs>
     _count?: boolean | RaceCountOutputTypeDefaultArgs<ExtArgs>
@@ -7923,6 +7963,10 @@ export namespace Prisma {
       completed: boolean
       canceled: boolean
       results: string[]
+      hasSprint: boolean
+      sprintDate: Date | null
+      sprintCompleted: boolean
+      sprintResults: string[]
     }, ExtArgs["result"]["race"]>
     composites: {}
   }
@@ -8360,6 +8404,10 @@ export namespace Prisma {
     readonly completed: FieldRef<"Race", 'Boolean'>
     readonly canceled: FieldRef<"Race", 'Boolean'>
     readonly results: FieldRef<"Race", 'String[]'>
+    readonly hasSprint: FieldRef<"Race", 'Boolean'>
+    readonly sprintDate: FieldRef<"Race", 'DateTime'>
+    readonly sprintCompleted: FieldRef<"Race", 'Boolean'>
+    readonly sprintResults: FieldRef<"Race", 'String[]'>
   }
     
 
@@ -8818,6 +8866,7 @@ export namespace Prisma {
     id: string | null
     userId: string | null
     raceRound: number | null
+    isSprint: boolean | null
     totalPoints: number | null
     perfectPredictions: number | null
     createdAt: Date | null
@@ -8827,6 +8876,7 @@ export namespace Prisma {
     id: string | null
     userId: string | null
     raceRound: number | null
+    isSprint: boolean | null
     totalPoints: number | null
     perfectPredictions: number | null
     createdAt: Date | null
@@ -8836,6 +8886,7 @@ export namespace Prisma {
     id: number
     userId: number
     raceRound: number
+    isSprint: number
     totalPoints: number
     perfectPredictions: number
     details: number
@@ -8860,6 +8911,7 @@ export namespace Prisma {
     id?: true
     userId?: true
     raceRound?: true
+    isSprint?: true
     totalPoints?: true
     perfectPredictions?: true
     createdAt?: true
@@ -8869,6 +8921,7 @@ export namespace Prisma {
     id?: true
     userId?: true
     raceRound?: true
+    isSprint?: true
     totalPoints?: true
     perfectPredictions?: true
     createdAt?: true
@@ -8878,6 +8931,7 @@ export namespace Prisma {
     id?: true
     userId?: true
     raceRound?: true
+    isSprint?: true
     totalPoints?: true
     perfectPredictions?: true
     details?: true
@@ -8975,6 +9029,7 @@ export namespace Prisma {
     id: string
     userId: string
     raceRound: number
+    isSprint: boolean
     totalPoints: number
     perfectPredictions: number
     details: JsonValue | null
@@ -9004,6 +9059,7 @@ export namespace Prisma {
     id?: boolean
     userId?: boolean
     raceRound?: boolean
+    isSprint?: boolean
     totalPoints?: boolean
     perfectPredictions?: boolean
     details?: boolean
@@ -9016,6 +9072,7 @@ export namespace Prisma {
     id?: boolean
     userId?: boolean
     raceRound?: boolean
+    isSprint?: boolean
     totalPoints?: boolean
     perfectPredictions?: boolean
     details?: boolean
@@ -9028,6 +9085,7 @@ export namespace Prisma {
     id?: boolean
     userId?: boolean
     raceRound?: boolean
+    isSprint?: boolean
     totalPoints?: boolean
     perfectPredictions?: boolean
     details?: boolean
@@ -9040,13 +9098,14 @@ export namespace Prisma {
     id?: boolean
     userId?: boolean
     raceRound?: boolean
+    isSprint?: boolean
     totalPoints?: boolean
     perfectPredictions?: boolean
     details?: boolean
     createdAt?: boolean
   }
 
-  export type RaceScoreOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "raceRound" | "totalPoints" | "perfectPredictions" | "details" | "createdAt", ExtArgs["result"]["raceScore"]>
+  export type RaceScoreOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "raceRound" | "isSprint" | "totalPoints" | "perfectPredictions" | "details" | "createdAt", ExtArgs["result"]["raceScore"]>
   export type RaceScoreInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | UserDefaultArgs<ExtArgs>
     race?: boolean | RaceDefaultArgs<ExtArgs>
@@ -9070,6 +9129,7 @@ export namespace Prisma {
       id: string
       userId: string
       raceRound: number
+      isSprint: boolean
       totalPoints: number
       perfectPredictions: number
       details: Prisma.JsonValue | null
@@ -9502,6 +9562,7 @@ export namespace Prisma {
     readonly id: FieldRef<"RaceScore", 'String'>
     readonly userId: FieldRef<"RaceScore", 'String'>
     readonly raceRound: FieldRef<"RaceScore", 'Int'>
+    readonly isSprint: FieldRef<"RaceScore", 'Boolean'>
     readonly totalPoints: FieldRef<"RaceScore", 'Int'>
     readonly perfectPredictions: FieldRef<"RaceScore", 'Int'>
     readonly details: FieldRef<"RaceScore", 'Json'>
@@ -10016,7 +10077,11 @@ export namespace Prisma {
     isTesting: 'isTesting',
     completed: 'completed',
     canceled: 'canceled',
-    results: 'results'
+    results: 'results',
+    hasSprint: 'hasSprint',
+    sprintDate: 'sprintDate',
+    sprintCompleted: 'sprintCompleted',
+    sprintResults: 'sprintResults'
   };
 
   export type RaceScalarFieldEnum = (typeof RaceScalarFieldEnum)[keyof typeof RaceScalarFieldEnum]
@@ -10026,6 +10091,7 @@ export namespace Prisma {
     id: 'id',
     userId: 'userId',
     raceRound: 'raceRound',
+    isSprint: 'isSprint',
     totalPoints: 'totalPoints',
     perfectPredictions: 'perfectPredictions',
     details: 'details',
@@ -10577,6 +10643,10 @@ export namespace Prisma {
     completed?: BoolFilter<"Race"> | boolean
     canceled?: BoolFilter<"Race"> | boolean
     results?: StringNullableListFilter<"Race">
+    hasSprint?: BoolFilter<"Race"> | boolean
+    sprintDate?: DateTimeNullableFilter<"Race"> | Date | string | null
+    sprintCompleted?: BoolFilter<"Race"> | boolean
+    sprintResults?: StringNullableListFilter<"Race">
     scores?: RaceScoreListRelationFilter
   }
 
@@ -10594,6 +10664,10 @@ export namespace Prisma {
     completed?: SortOrder
     canceled?: SortOrder
     results?: SortOrder
+    hasSprint?: SortOrder
+    sprintDate?: SortOrderInput | SortOrder
+    sprintCompleted?: SortOrder
+    sprintResults?: SortOrder
     scores?: RaceScoreOrderByRelationAggregateInput
   }
 
@@ -10614,6 +10688,10 @@ export namespace Prisma {
     completed?: BoolFilter<"Race"> | boolean
     canceled?: BoolFilter<"Race"> | boolean
     results?: StringNullableListFilter<"Race">
+    hasSprint?: BoolFilter<"Race"> | boolean
+    sprintDate?: DateTimeNullableFilter<"Race"> | Date | string | null
+    sprintCompleted?: BoolFilter<"Race"> | boolean
+    sprintResults?: StringNullableListFilter<"Race">
     scores?: RaceScoreListRelationFilter
   }, "id" | "round">
 
@@ -10631,6 +10709,10 @@ export namespace Prisma {
     completed?: SortOrder
     canceled?: SortOrder
     results?: SortOrder
+    hasSprint?: SortOrder
+    sprintDate?: SortOrderInput | SortOrder
+    sprintCompleted?: SortOrder
+    sprintResults?: SortOrder
     _count?: RaceCountOrderByAggregateInput
     _avg?: RaceAvgOrderByAggregateInput
     _max?: RaceMaxOrderByAggregateInput
@@ -10655,6 +10737,10 @@ export namespace Prisma {
     completed?: BoolWithAggregatesFilter<"Race"> | boolean
     canceled?: BoolWithAggregatesFilter<"Race"> | boolean
     results?: StringNullableListFilter<"Race">
+    hasSprint?: BoolWithAggregatesFilter<"Race"> | boolean
+    sprintDate?: DateTimeNullableWithAggregatesFilter<"Race"> | Date | string | null
+    sprintCompleted?: BoolWithAggregatesFilter<"Race"> | boolean
+    sprintResults?: StringNullableListFilter<"Race">
   }
 
   export type RaceScoreWhereInput = {
@@ -10664,6 +10750,7 @@ export namespace Prisma {
     id?: StringFilter<"RaceScore"> | string
     userId?: StringFilter<"RaceScore"> | string
     raceRound?: IntFilter<"RaceScore"> | number
+    isSprint?: BoolFilter<"RaceScore"> | boolean
     totalPoints?: IntFilter<"RaceScore"> | number
     perfectPredictions?: IntFilter<"RaceScore"> | number
     details?: JsonNullableFilter<"RaceScore">
@@ -10676,6 +10763,7 @@ export namespace Prisma {
     id?: SortOrder
     userId?: SortOrder
     raceRound?: SortOrder
+    isSprint?: SortOrder
     totalPoints?: SortOrder
     perfectPredictions?: SortOrder
     details?: SortOrderInput | SortOrder
@@ -10686,24 +10774,26 @@ export namespace Prisma {
 
   export type RaceScoreWhereUniqueInput = Prisma.AtLeast<{
     id?: string
-    userId_raceRound?: RaceScoreUserIdRaceRoundCompoundUniqueInput
+    userId_raceRound_isSprint?: RaceScoreUserIdRaceRoundIsSprintCompoundUniqueInput
     AND?: RaceScoreWhereInput | RaceScoreWhereInput[]
     OR?: RaceScoreWhereInput[]
     NOT?: RaceScoreWhereInput | RaceScoreWhereInput[]
     userId?: StringFilter<"RaceScore"> | string
     raceRound?: IntFilter<"RaceScore"> | number
+    isSprint?: BoolFilter<"RaceScore"> | boolean
     totalPoints?: IntFilter<"RaceScore"> | number
     perfectPredictions?: IntFilter<"RaceScore"> | number
     details?: JsonNullableFilter<"RaceScore">
     createdAt?: DateTimeFilter<"RaceScore"> | Date | string
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
     race?: XOR<RaceScalarRelationFilter, RaceWhereInput>
-  }, "id" | "userId_raceRound">
+  }, "id" | "userId_raceRound_isSprint">
 
   export type RaceScoreOrderByWithAggregationInput = {
     id?: SortOrder
     userId?: SortOrder
     raceRound?: SortOrder
+    isSprint?: SortOrder
     totalPoints?: SortOrder
     perfectPredictions?: SortOrder
     details?: SortOrderInput | SortOrder
@@ -10722,6 +10812,7 @@ export namespace Prisma {
     id?: StringWithAggregatesFilter<"RaceScore"> | string
     userId?: StringWithAggregatesFilter<"RaceScore"> | string
     raceRound?: IntWithAggregatesFilter<"RaceScore"> | number
+    isSprint?: BoolWithAggregatesFilter<"RaceScore"> | boolean
     totalPoints?: IntWithAggregatesFilter<"RaceScore"> | number
     perfectPredictions?: IntWithAggregatesFilter<"RaceScore"> | number
     details?: JsonNullableWithAggregatesFilter<"RaceScore">
@@ -11154,6 +11245,10 @@ export namespace Prisma {
     completed?: boolean
     canceled?: boolean
     results?: RaceCreateresultsInput | string[]
+    hasSprint?: boolean
+    sprintDate?: Date | string | null
+    sprintCompleted?: boolean
+    sprintResults?: RaceCreatesprintResultsInput | string[]
     scores?: RaceScoreCreateNestedManyWithoutRaceInput
   }
 
@@ -11171,6 +11266,10 @@ export namespace Prisma {
     completed?: boolean
     canceled?: boolean
     results?: RaceCreateresultsInput | string[]
+    hasSprint?: boolean
+    sprintDate?: Date | string | null
+    sprintCompleted?: boolean
+    sprintResults?: RaceCreatesprintResultsInput | string[]
     scores?: RaceScoreUncheckedCreateNestedManyWithoutRaceInput
   }
 
@@ -11188,6 +11287,10 @@ export namespace Prisma {
     completed?: BoolFieldUpdateOperationsInput | boolean
     canceled?: BoolFieldUpdateOperationsInput | boolean
     results?: RaceUpdateresultsInput | string[]
+    hasSprint?: BoolFieldUpdateOperationsInput | boolean
+    sprintDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    sprintCompleted?: BoolFieldUpdateOperationsInput | boolean
+    sprintResults?: RaceUpdatesprintResultsInput | string[]
     scores?: RaceScoreUpdateManyWithoutRaceNestedInput
   }
 
@@ -11205,6 +11308,10 @@ export namespace Prisma {
     completed?: BoolFieldUpdateOperationsInput | boolean
     canceled?: BoolFieldUpdateOperationsInput | boolean
     results?: RaceUpdateresultsInput | string[]
+    hasSprint?: BoolFieldUpdateOperationsInput | boolean
+    sprintDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    sprintCompleted?: BoolFieldUpdateOperationsInput | boolean
+    sprintResults?: RaceUpdatesprintResultsInput | string[]
     scores?: RaceScoreUncheckedUpdateManyWithoutRaceNestedInput
   }
 
@@ -11222,6 +11329,10 @@ export namespace Prisma {
     completed?: boolean
     canceled?: boolean
     results?: RaceCreateresultsInput | string[]
+    hasSprint?: boolean
+    sprintDate?: Date | string | null
+    sprintCompleted?: boolean
+    sprintResults?: RaceCreatesprintResultsInput | string[]
   }
 
   export type RaceUpdateManyMutationInput = {
@@ -11238,6 +11349,10 @@ export namespace Prisma {
     completed?: BoolFieldUpdateOperationsInput | boolean
     canceled?: BoolFieldUpdateOperationsInput | boolean
     results?: RaceUpdateresultsInput | string[]
+    hasSprint?: BoolFieldUpdateOperationsInput | boolean
+    sprintDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    sprintCompleted?: BoolFieldUpdateOperationsInput | boolean
+    sprintResults?: RaceUpdatesprintResultsInput | string[]
   }
 
   export type RaceUncheckedUpdateManyInput = {
@@ -11254,10 +11369,15 @@ export namespace Prisma {
     completed?: BoolFieldUpdateOperationsInput | boolean
     canceled?: BoolFieldUpdateOperationsInput | boolean
     results?: RaceUpdateresultsInput | string[]
+    hasSprint?: BoolFieldUpdateOperationsInput | boolean
+    sprintDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    sprintCompleted?: BoolFieldUpdateOperationsInput | boolean
+    sprintResults?: RaceUpdatesprintResultsInput | string[]
   }
 
   export type RaceScoreCreateInput = {
     id?: string
+    isSprint?: boolean
     totalPoints?: number
     perfectPredictions?: number
     details?: NullableJsonNullValueInput | InputJsonValue
@@ -11270,6 +11390,7 @@ export namespace Prisma {
     id?: string
     userId: string
     raceRound: number
+    isSprint?: boolean
     totalPoints?: number
     perfectPredictions?: number
     details?: NullableJsonNullValueInput | InputJsonValue
@@ -11278,6 +11399,7 @@ export namespace Prisma {
 
   export type RaceScoreUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
+    isSprint?: BoolFieldUpdateOperationsInput | boolean
     totalPoints?: IntFieldUpdateOperationsInput | number
     perfectPredictions?: IntFieldUpdateOperationsInput | number
     details?: NullableJsonNullValueInput | InputJsonValue
@@ -11290,6 +11412,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
     raceRound?: IntFieldUpdateOperationsInput | number
+    isSprint?: BoolFieldUpdateOperationsInput | boolean
     totalPoints?: IntFieldUpdateOperationsInput | number
     perfectPredictions?: IntFieldUpdateOperationsInput | number
     details?: NullableJsonNullValueInput | InputJsonValue
@@ -11300,6 +11423,7 @@ export namespace Prisma {
     id?: string
     userId: string
     raceRound: number
+    isSprint?: boolean
     totalPoints?: number
     perfectPredictions?: number
     details?: NullableJsonNullValueInput | InputJsonValue
@@ -11308,6 +11432,7 @@ export namespace Prisma {
 
   export type RaceScoreUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
+    isSprint?: BoolFieldUpdateOperationsInput | boolean
     totalPoints?: IntFieldUpdateOperationsInput | number
     perfectPredictions?: IntFieldUpdateOperationsInput | number
     details?: NullableJsonNullValueInput | InputJsonValue
@@ -11318,6 +11443,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
     raceRound?: IntFieldUpdateOperationsInput | number
+    isSprint?: BoolFieldUpdateOperationsInput | boolean
     totalPoints?: IntFieldUpdateOperationsInput | number
     perfectPredictions?: IntFieldUpdateOperationsInput | number
     details?: NullableJsonNullValueInput | InputJsonValue
@@ -11748,6 +11874,17 @@ export namespace Prisma {
     isEmpty?: boolean
   }
 
+  export type DateTimeNullableFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
+  }
+
   export type RaceCountOrderByAggregateInput = {
     id?: SortOrder
     round?: SortOrder
@@ -11762,6 +11899,10 @@ export namespace Prisma {
     completed?: SortOrder
     canceled?: SortOrder
     results?: SortOrder
+    hasSprint?: SortOrder
+    sprintDate?: SortOrder
+    sprintCompleted?: SortOrder
+    sprintResults?: SortOrder
   }
 
   export type RaceAvgOrderByAggregateInput = {
@@ -11781,6 +11922,9 @@ export namespace Prisma {
     isTesting?: SortOrder
     completed?: SortOrder
     canceled?: SortOrder
+    hasSprint?: SortOrder
+    sprintDate?: SortOrder
+    sprintCompleted?: SortOrder
   }
 
   export type RaceMinOrderByAggregateInput = {
@@ -11796,10 +11940,27 @@ export namespace Prisma {
     isTesting?: SortOrder
     completed?: SortOrder
     canceled?: SortOrder
+    hasSprint?: SortOrder
+    sprintDate?: SortOrder
+    sprintCompleted?: SortOrder
   }
 
   export type RaceSumOrderByAggregateInput = {
     round?: SortOrder
+  }
+
+  export type DateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedDateTimeNullableFilter<$PrismaModel>
+    _max?: NestedDateTimeNullableFilter<$PrismaModel>
   }
   export type JsonNullableFilter<$PrismaModel = never> =
     | PatchUndefined<
@@ -11830,15 +11991,17 @@ export namespace Prisma {
     isNot?: RaceWhereInput
   }
 
-  export type RaceScoreUserIdRaceRoundCompoundUniqueInput = {
+  export type RaceScoreUserIdRaceRoundIsSprintCompoundUniqueInput = {
     userId: string
     raceRound: number
+    isSprint: boolean
   }
 
   export type RaceScoreCountOrderByAggregateInput = {
     id?: SortOrder
     userId?: SortOrder
     raceRound?: SortOrder
+    isSprint?: SortOrder
     totalPoints?: SortOrder
     perfectPredictions?: SortOrder
     details?: SortOrder
@@ -11855,6 +12018,7 @@ export namespace Prisma {
     id?: SortOrder
     userId?: SortOrder
     raceRound?: SortOrder
+    isSprint?: SortOrder
     totalPoints?: SortOrder
     perfectPredictions?: SortOrder
     createdAt?: SortOrder
@@ -11864,6 +12028,7 @@ export namespace Prisma {
     id?: SortOrder
     userId?: SortOrder
     raceRound?: SortOrder
+    isSprint?: SortOrder
     totalPoints?: SortOrder
     perfectPredictions?: SortOrder
     createdAt?: SortOrder
@@ -12545,6 +12710,10 @@ export namespace Prisma {
     set: string[]
   }
 
+  export type RaceCreatesprintResultsInput = {
+    set: string[]
+  }
+
   export type RaceScoreCreateNestedManyWithoutRaceInput = {
     create?: XOR<RaceScoreCreateWithoutRaceInput, RaceScoreUncheckedCreateWithoutRaceInput> | RaceScoreCreateWithoutRaceInput[] | RaceScoreUncheckedCreateWithoutRaceInput[]
     connectOrCreate?: RaceScoreCreateOrConnectWithoutRaceInput | RaceScoreCreateOrConnectWithoutRaceInput[]
@@ -12560,6 +12729,15 @@ export namespace Prisma {
   }
 
   export type RaceUpdateresultsInput = {
+    set?: string[]
+    push?: string | string[]
+  }
+
+  export type NullableDateTimeFieldUpdateOperationsInput = {
+    set?: Date | string | null
+  }
+
+  export type RaceUpdatesprintResultsInput = {
     set?: string[]
     push?: string | string[]
   }
@@ -12780,6 +12958,31 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedDateTimeFilter<$PrismaModel>
     _max?: NestedDateTimeFilter<$PrismaModel>
+  }
+
+  export type NestedDateTimeNullableFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
+  }
+
+  export type NestedDateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedDateTimeNullableFilter<$PrismaModel>
+    _max?: NestedDateTimeNullableFilter<$PrismaModel>
   }
   export type NestedJsonNullableFilter<$PrismaModel = never> =
     | PatchUndefined<
@@ -13594,6 +13797,7 @@ export namespace Prisma {
 
   export type RaceScoreCreateWithoutUserInput = {
     id?: string
+    isSprint?: boolean
     totalPoints?: number
     perfectPredictions?: number
     details?: NullableJsonNullValueInput | InputJsonValue
@@ -13604,6 +13808,7 @@ export namespace Prisma {
   export type RaceScoreUncheckedCreateWithoutUserInput = {
     id?: string
     raceRound: number
+    isSprint?: boolean
     totalPoints?: number
     perfectPredictions?: number
     details?: NullableJsonNullValueInput | InputJsonValue
@@ -13852,6 +14057,7 @@ export namespace Prisma {
     id?: StringFilter<"RaceScore"> | string
     userId?: StringFilter<"RaceScore"> | string
     raceRound?: IntFilter<"RaceScore"> | number
+    isSprint?: BoolFilter<"RaceScore"> | boolean
     totalPoints?: IntFilter<"RaceScore"> | number
     perfectPredictions?: IntFilter<"RaceScore"> | number
     details?: JsonNullableFilter<"RaceScore">
@@ -14212,6 +14418,7 @@ export namespace Prisma {
 
   export type RaceScoreCreateWithoutRaceInput = {
     id?: string
+    isSprint?: boolean
     totalPoints?: number
     perfectPredictions?: number
     details?: NullableJsonNullValueInput | InputJsonValue
@@ -14222,6 +14429,7 @@ export namespace Prisma {
   export type RaceScoreUncheckedCreateWithoutRaceInput = {
     id?: string
     userId: string
+    isSprint?: boolean
     totalPoints?: number
     perfectPredictions?: number
     details?: NullableJsonNullValueInput | InputJsonValue
@@ -14315,6 +14523,10 @@ export namespace Prisma {
     completed?: boolean
     canceled?: boolean
     results?: RaceCreateresultsInput | string[]
+    hasSprint?: boolean
+    sprintDate?: Date | string | null
+    sprintCompleted?: boolean
+    sprintResults?: RaceCreatesprintResultsInput | string[]
   }
 
   export type RaceUncheckedCreateWithoutScoresInput = {
@@ -14331,6 +14543,10 @@ export namespace Prisma {
     completed?: boolean
     canceled?: boolean
     results?: RaceCreateresultsInput | string[]
+    hasSprint?: boolean
+    sprintDate?: Date | string | null
+    sprintCompleted?: boolean
+    sprintResults?: RaceCreatesprintResultsInput | string[]
   }
 
   export type RaceCreateOrConnectWithoutScoresInput = {
@@ -14416,6 +14632,10 @@ export namespace Prisma {
     completed?: BoolFieldUpdateOperationsInput | boolean
     canceled?: BoolFieldUpdateOperationsInput | boolean
     results?: RaceUpdateresultsInput | string[]
+    hasSprint?: BoolFieldUpdateOperationsInput | boolean
+    sprintDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    sprintCompleted?: BoolFieldUpdateOperationsInput | boolean
+    sprintResults?: RaceUpdatesprintResultsInput | string[]
   }
 
   export type RaceUncheckedUpdateWithoutScoresInput = {
@@ -14432,6 +14652,10 @@ export namespace Prisma {
     completed?: BoolFieldUpdateOperationsInput | boolean
     canceled?: BoolFieldUpdateOperationsInput | boolean
     results?: RaceUpdateresultsInput | string[]
+    hasSprint?: BoolFieldUpdateOperationsInput | boolean
+    sprintDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    sprintCompleted?: BoolFieldUpdateOperationsInput | boolean
+    sprintResults?: RaceUpdatesprintResultsInput | string[]
   }
 
   export type UserCreateManyTeamInput = {
@@ -14957,6 +15181,7 @@ export namespace Prisma {
   export type RaceScoreCreateManyUserInput = {
     id?: string
     raceRound: number
+    isSprint?: boolean
     totalPoints?: number
     perfectPredictions?: number
     details?: NullableJsonNullValueInput | InputJsonValue
@@ -15013,6 +15238,7 @@ export namespace Prisma {
 
   export type RaceScoreUpdateWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
+    isSprint?: BoolFieldUpdateOperationsInput | boolean
     totalPoints?: IntFieldUpdateOperationsInput | number
     perfectPredictions?: IntFieldUpdateOperationsInput | number
     details?: NullableJsonNullValueInput | InputJsonValue
@@ -15023,6 +15249,7 @@ export namespace Prisma {
   export type RaceScoreUncheckedUpdateWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
     raceRound?: IntFieldUpdateOperationsInput | number
+    isSprint?: BoolFieldUpdateOperationsInput | boolean
     totalPoints?: IntFieldUpdateOperationsInput | number
     perfectPredictions?: IntFieldUpdateOperationsInput | number
     details?: NullableJsonNullValueInput | InputJsonValue
@@ -15032,6 +15259,7 @@ export namespace Prisma {
   export type RaceScoreUncheckedUpdateManyWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
     raceRound?: IntFieldUpdateOperationsInput | number
+    isSprint?: BoolFieldUpdateOperationsInput | boolean
     totalPoints?: IntFieldUpdateOperationsInput | number
     perfectPredictions?: IntFieldUpdateOperationsInput | number
     details?: NullableJsonNullValueInput | InputJsonValue
@@ -15041,6 +15269,7 @@ export namespace Prisma {
   export type RaceScoreCreateManyRaceInput = {
     id?: string
     userId: string
+    isSprint?: boolean
     totalPoints?: number
     perfectPredictions?: number
     details?: NullableJsonNullValueInput | InputJsonValue
@@ -15049,6 +15278,7 @@ export namespace Prisma {
 
   export type RaceScoreUpdateWithoutRaceInput = {
     id?: StringFieldUpdateOperationsInput | string
+    isSprint?: BoolFieldUpdateOperationsInput | boolean
     totalPoints?: IntFieldUpdateOperationsInput | number
     perfectPredictions?: IntFieldUpdateOperationsInput | number
     details?: NullableJsonNullValueInput | InputJsonValue
@@ -15059,6 +15289,7 @@ export namespace Prisma {
   export type RaceScoreUncheckedUpdateWithoutRaceInput = {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
+    isSprint?: BoolFieldUpdateOperationsInput | boolean
     totalPoints?: IntFieldUpdateOperationsInput | number
     perfectPredictions?: IntFieldUpdateOperationsInput | number
     details?: NullableJsonNullValueInput | InputJsonValue
@@ -15068,6 +15299,7 @@ export namespace Prisma {
   export type RaceScoreUncheckedUpdateManyWithoutRaceInput = {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
+    isSprint?: BoolFieldUpdateOperationsInput | boolean
     totalPoints?: IntFieldUpdateOperationsInput | number
     perfectPredictions?: IntFieldUpdateOperationsInput | number
     details?: NullableJsonNullValueInput | InputJsonValue

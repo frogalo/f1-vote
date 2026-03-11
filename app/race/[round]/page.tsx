@@ -1,4 +1,5 @@
 import { VoteComponent } from "./VoteComponent";
+import { Suspense } from "react";
 import { prisma } from "@/lib/prisma";
 import { Metadata, ResolvingMetadata } from "next";
 
@@ -73,8 +74,16 @@ export default async function Page({ params }: { params: Promise<{ round: string
     url: race.url || undefined,
     country: race.country || undefined,
     trackImage: race.trackImage || undefined,
-    isTesting: race.isTesting || undefined
+    isTesting: race.isTesting || undefined,
+    hasSprint: race.hasSprint,
+    sprintDate: race.sprintDate ? race.sprintDate.toISOString() : undefined,
+    sprintCompleted: race.sprintCompleted,
+    completed: race.completed,
   };
 
-  return <VoteComponent race={serializedRace} drivers={mappedDrivers} />;
+  return (
+    <Suspense fallback={<div className="flex justify-center p-8"><div className="animate-spin rounded-full h-8 w-8 border-t-2 border-[#E60000]"></div></div>}>
+      <VoteComponent race={serializedRace} drivers={mappedDrivers} />
+    </Suspense>
+  );
 }

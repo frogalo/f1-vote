@@ -3,9 +3,17 @@ import WrappedContent from "./WrappedContent";
 
 export const dynamic = "force-dynamic";
 
-export default async function WrappedPage({ params }: { params: Promise<{ round: string }> }) {
+export default async function WrappedPage({ 
+  params,
+  searchParams
+}: { 
+  params: Promise<{ round: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
     const { round: roundStr } = await params;
+    const sParams = await searchParams;
     const raceRound = Number(roundStr);
+    const isSprint = sParams.isSprint === 'true';
 
     return (
         <Suspense fallback={
@@ -16,7 +24,7 @@ export default async function WrappedPage({ params }: { params: Promise<{ round:
                 </div>
             </div>
         }>
-            <WrappedContent raceRound={raceRound} />
+            <WrappedContent raceRound={raceRound} isSprint={isSprint} />
         </Suspense>
     );
 }

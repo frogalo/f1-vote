@@ -203,6 +203,11 @@
   0%, 100% { text-shadow: 0 0 20px rgba(230, 0, 0, 0); }
   50% { text-shadow: 0 0 40px rgba(230, 0, 0, 0.4); }
 }
+.w-glow {
+  text-shadow:
+    0 0 20px rgba(230, 0, 0, 0.3),
+    0 0 60px rgba(230, 0, 0, 0.15);
+}
 
 .w-fade-up    { animation: w-fade-up 0.6s ease-out both; }
 .w-fade-down  { animation: w-fade-down 0.6s ease-out both; }

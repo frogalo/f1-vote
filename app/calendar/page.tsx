@@ -44,11 +44,16 @@ type Race = {
     trackImage: string | null;
     completed: boolean;
     canceled: boolean;
+    hasSprint?: boolean;
+    sprintDate?: string | Date;
+    sprintCompleted?: boolean;
 };
 
 type UserScore = {
     raceRound: number;
     totalPoints: number;
+    racePoints: number;
+    sprintPoints: number;
 };
 
 export default function CalendarPage() {
@@ -133,10 +138,12 @@ export default function CalendarPage() {
         }
     };
 
-    const formatDate = (date: Date) => {
+    const formatDateTime = (date: Date) => {
         return new Date(date).toLocaleDateString("pl-PL", {
             day: "2-digit",
             month: "short",
+            hour: "2-digit",
+            minute: "2-digit"
         });
     };
 
@@ -191,26 +198,39 @@ export default function CalendarPage() {
 
                     // Get user's score for this race from the database
                     const raceScore = myScores.find(s => s.raceRound === race.round);
-                    const points = raceScore?.totalPoints || 0;
+                    const totalPoints = raceScore?.totalPoints || 0;
+                    const racePoints = raceScore?.racePoints || 0;
+                    const sprintPoints = raceScore?.sprintPoints || 0;
 
-                    const href = status === "completed"
-                        ? `/race/${race.round}/results`
-                        : status === "active" || status === "upcoming"
-                            ? `/race/${race.round}`
-                            : null;
+                    const href = (status === "completed" || status === "active" || status === "upcoming")
+                        ? `/race/${race.round}`
+                        : null;
 
                     const cardClasses = clsx(
                         "block p-6 rounded-[2rem] transition-all relative overflow-hidden group",
-                        "bg-[#1C1C1E] border border-white/5",
+                        !race.hasSprint && "bg-[#1C1C1E] border border-white/5",
+                        race.hasSprint && "border border-transparent",
                         status === "completed" && "opacity-80 hover:opacity-100",
                         status === "canceled" && "opacity-50 grayscale hover:grayscale-0",
-                        status === "active" && "bg-gradient-to-br from-[#1C1C1E] to-[#2C2C2E] border-[#E60000]/30 shadow-2xl shadow-red-900/10 scale-[1.02] z-10",
-                        status === "upcoming" && "bg-gradient-to-br from-[#1C1C1E] to-[#2C2C2E] border-white/20 shadow-lg scale-[1.01]",
+                        status === "active" && !race.hasSprint && "bg-gradient-to-br from-[#1C1C1E] to-[#2C2C2E] border-[#E60000]/30 shadow-2xl shadow-red-900/10 scale-[1.02] z-10",
+                        status === "active" && race.hasSprint && "shadow-2xl shadow-orange-900/10 scale-[1.02] z-10",
+                        status === "upcoming" && !race.hasSprint && "bg-gradient-to-br from-[#1C1C1E] to-[#2C2C2E] border-white/20 shadow-lg scale-[1.01]",
+                        status === "upcoming" && race.hasSprint && "shadow-lg scale-[1.01]",
                         status === "future" && "opacity-40"
                     );
 
+                    const sprintBorderLeft = "rgba(255, 255, 255, 0.05)";
+                    const sprintBorderRight = status === "active" || status === "upcoming" ? "rgba(255, 120, 0, 0.4)" : "rgba(255, 120, 0, 0.15)";
+                    const sprintBackgroundStyle = race.hasSprint 
+                        ? { 
+                            background: `linear-gradient(to right, #1c1c1e 49.7%, rgba(255, 120, 0, 0.4) 49.7%, rgba(255, 120, 0, 0.4) 50.3%, #3a1a05 50.3%), linear-gradient(to right, ${sprintBorderLeft} 50%, ${sprintBorderRight} 50%)`,
+                            backgroundClip: 'padding-box, border-box',
+                            backgroundOrigin: 'padding-box, border-box'
+                          } 
+                        : undefined;
+
                     const cardContent = (
-                        <>
+                        <div className="relative z-10 flex flex-col h-full">
                             <div className="flex items-start justify-between mb-2">
                                 <div className="flex flex-col">
                                     <span className={clsx(
@@ -264,56 +284,129 @@ export default function CalendarPage() {
                                     )}
                                 />
 
-                                {status === "completed" && points > 0 && (
-                                    <div className="absolute inset-0 flex items-center justify-center">
+                                {status === "completed" && totalPoints > 0 && !race.hasSprint && (
+                                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                                         <div className="bg-[#E60000] text-white font-black px-3 py-1 rounded-full text-sm shadow-lg">
-                                            +{points} PKT
+                                            +{totalPoints} PKT
                                         </div>
                                     </div>
                                 )}
+
+                                {race.hasSprint && (
+                                    <>
+                                        {/* Left Side (Race) Points */}
+                                        {status === "completed" && racePoints > 0 && (
+                                           <div className="absolute inset-y-0 left-2 flex items-center pointer-events-none">
+                                                <div className="bg-[#E60000] text-white font-black px-2 py-1 rounded-full text-xs shadow-lg">
+                                                    +{racePoints} PKT
+                                                </div>
+                                            </div>
+                                        )}
+                                        {/* Right Side (Sprint) Points */}
+                                        {race.sprintCompleted && sprintPoints > 0 && (
+                                           <div className="absolute inset-y-0 right-2 flex items-center pointer-events-none">
+                                                <div className="bg-orange-500 text-white font-black px-2 py-1 rounded-full text-xs shadow-lg">
+                                                    +{sprintPoints} PKT
+                                                </div>
+                                            </div>
+                                        )}
+                                        {/* Total Summary */}
+                                        {status === "completed" && totalPoints > 0 && (
+                                            <div className="absolute inset-x-0 bottom-[35px] flex justify-center pointer-events-none">
+                                                <div className="bg-[#1C1C1E] border border-white/10 text-gray-300 font-black px-2 py-0.5 rounded-lg text-[10px] shadow-lg scale-90 sm:scale-100">
+                                                    SUMA: +{totalPoints}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </>
+                                )}
                             </div>
 
-                            <div className="flex items-center justify-between border-t border-white/5 pt-4">
-                                <div className="flex items-center gap-2">
-                                    <div className="text-xs text-gray-400 font-bold uppercase">
-                                        {formatDate(race.date)}
-                                    </div>
+                            <div className="relative flex items-end justify-between border-t border-white/5 pt-5 mt-auto">
+                                {/* Centered Status / Countdown Pill */}
+                                <div className="absolute left-1/2 -translate-x-1/2 -top-0 -translate-y-1/2 z-30">
+                                    {status === "completed" ? (
+                                        <div className="text-[10px] font-black text-gray-400 uppercase flex items-center gap-1 group-hover:text-white transition-colors bg-[#1C1C1E] px-3 py-1 rounded-full border border-white/10 shadow-lg whitespace-nowrap">
+                                            WYNIKI <span>→</span>
+                                        </div>
+                                    ) : status === "canceled" ? (
+                                        <div className="text-[10px] font-black text-red-500/80 uppercase bg-[#1C1C1E] px-3 py-1 rounded-full border border-red-500/20 shadow-lg whitespace-nowrap">
+                                            BRAK WYNIKÓW
+                                        </div>
+                                    ) : countdownInfo ? (
+                                        <div className={clsx(
+                                            "px-3 py-1 rounded-xl font-black uppercase tracking-widest flex items-center justify-center transition-all duration-300 whitespace-nowrap",
+                                            (status === "active" || countdownInfo.type === 'urgent') ? "bg-gradient-to-r from-[#E60000] to-[#ff4d4d] text-white shadow-lg" : "bg-[#2C2C2E] text-gray-400 border border-white/5",
+                                            countdownInfo.type === 'urgent' ? "text-xl scale-125 animate-bounce shadow-[0_0_30px_rgba(230,0,0,0.4)] z-50 border border-white/20" :
+                                            countdownInfo.type === 'seconds' ? "text-sm text-white border border-white/10" :
+                                            countdownInfo.type === 'hours' ? "text-sm shadow-md" : "text-[10px] shadow-sm"
+                                        )}>
+                                            {countdownInfo.text}
+                                        </div>
+                                    ) : null}
                                 </div>
 
-                                {status === "completed" ? (
-                                    <div className="text-xs font-black text-gray-500 uppercase flex items-center gap-1 group-hover:text-white transition-colors">
-                                        WYNIKI <span>→</span>
+                                {!race.hasSprint ? (
+                                    <div className="flex flex-col gap-1.5 w-full">
+                                        <div className="text-[10px] text-gray-500 font-bold uppercase leading-none">Wyścig</div>
+                                        <div className="text-xs text-gray-400 font-bold uppercase flex items-center gap-2">
+                                            <div className="w-1.5 h-1.5 rounded-full bg-gray-500" />
+                                            {formatDateTime(race.date)}
+                                        </div>
                                     </div>
-                                ) : status === "canceled" ? (
-                                    <div className="text-[10px] font-black text-red-500/50 uppercase">
-                                        BRAK WYNIKÓW
-                                    </div>
-                                ) : countdownInfo ? (
-                                    <div className={clsx(
-                                        "px-3 py-1 rounded-xl font-black uppercase tracking-widest flex items-center justify-center transition-all duration-300",
-                                        (status === "active" || countdownInfo.type === 'urgent') ? "bg-gradient-to-r from-[#E60000] to-[#ff4d4d] text-white" : "bg-[#2C2C2E] text-gray-400",
-                                        countdownInfo.type === 'urgent' ? "text-xl scale-125 animate-bounce shadow-[0_0_30px_rgba(230,0,0,0.4)] z-50 border border-white/20" :
-                                        countdownInfo.type === 'seconds' ? "text-sm text-white border border-white/10" :
-                                        countdownInfo.type === 'hours' ? "text-sm" : "text-[10px]"
-                                    )}>
-                                        {countdownInfo.text}
-                                    </div>
-                                ) : null}
+                                ) : (
+                                    <>
+                                        {/* Left side: Race Date */}
+                                        <div className="flex flex-col gap-1.5 w-1/2 pr-2">
+                                            <div className="text-[10px] text-gray-500 font-bold uppercase leading-none">Wyścig</div>
+                                            <div className="text-[11px] sm:text-xs text-gray-400 font-bold uppercase flex items-center gap-1.5">
+                                                <div className="w-1.5 h-1.5 rounded-full shrink-0 bg-gray-500" />
+                                                <span className="truncate">{formatDateTime(race.date)}</span>
+                                            </div>
+                                        </div>
+                                        
+                                        {/* Right side: Sprint Date */}
+                                        <div className="flex flex-col gap-1.5 w-1/2 pl-2 border-l border-white/10">
+                                            <div className="text-[10px] text-orange-500/70 font-bold uppercase text-right leading-none">Sprint</div>
+                                            <div className="text-[11px] sm:text-xs text-orange-400 font-bold uppercase flex items-center justify-end gap-1.5 drop-shadow-md">
+                                                <span className="truncate">{formatDateTime(race.sprintDate ? new Date(race.sprintDate) : new Date())}</span>
+                                                <div className="w-1.5 h-1.5 rounded-full shrink-0 bg-orange-500" />
+                                            </div>
+                                        </div>
+                                    </>
+                                )}
                             </div>
 
                             {/* Accent Glow */}
                             {status === "active" && (
                                 <div className="absolute -top-10 -left-10 w-32 h-32 bg-[#E60000] opacity-5 blur-[40px] rounded-full pointer-events-none" />
                             )}
-                        </>
+                        </div>
                     );
 
-                    return href ? (
-                        <Link key={race.round} href={href} className={cardClasses}>
-                            {cardContent}
-                        </Link>
-                    ) : (
-                        <div key={race.round} className={cardClasses}>
+                    return (
+                        <div key={race.round} className={cardClasses} style={sprintBackgroundStyle}>
+                            {/* Clickable Overlay Links */}
+                            {href && !race.hasSprint && (
+                                <Link href={href} className="absolute inset-0 z-20" />
+                            )}
+                            {href && race.hasSprint && (
+                                <>
+                                    {/* Left: Main Race Link */}
+                                    <Link 
+                                        href={`${href}?tab=race`} 
+                                        className="absolute inset-y-0 left-0 w-1/2 z-20" 
+                                        title="Typuj Wyścig"
+                                    />
+                                    {/* Right: Sprint Link */}
+                                    <Link 
+                                        href={`${href}?tab=sprint`} 
+                                        className="absolute inset-y-0 right-0 w-1/2 z-20" 
+                                        title="Typuj Sprint"
+                                    />
+                                </>
+                            )}
+                            
                             {cardContent}
                         </div>
                     );

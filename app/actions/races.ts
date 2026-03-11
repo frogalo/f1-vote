@@ -64,6 +64,8 @@ export async function addRace(formData: FormData) {
     const trackImage = formData.get("trackImage") as string;
     const country = formData.get("country") as string;
     const circuitId = formData.get("circuitId") as string;
+    const hasSprint = formData.get("hasSprint") === "true";
+    const sprintDate = formData.get("sprintDate") as string;
 
     if (!round || !name || !location || !date) {
         return { error: "Brakuje wymaganych pól (Runda, Nazwa, Lokalizacja, Data)" };
@@ -79,6 +81,8 @@ export async function addRace(formData: FormData) {
                 trackImage: trackImage || null,
                 country: country || null,
                 circuitId: circuitId || null,
+                hasSprint,
+                sprintDate: hasSprint && sprintDate ? new Date(sprintDate) : null,
             },
         });
         revalidatePath("/admin");
@@ -100,6 +104,8 @@ export async function updateRace(formData: FormData) {
     const trackImage = formData.get("trackImage") as string;
     const country = formData.get("country") as string;
     const circuitId = formData.get("circuitId") as string;
+    const hasSprint = formData.get("hasSprint") === "true";
+    const sprintDate = formData.get("sprintDate") as string;
 
     if (!id || !round || !name || !location || !date) {
         return { error: "Brakuje wymaganych pól" };
@@ -116,6 +122,8 @@ export async function updateRace(formData: FormData) {
                 trackImage: trackImage || null,
                 country: country || null,
                 circuitId: circuitId || null,
+                hasSprint,
+                sprintDate: hasSprint && sprintDate ? new Date(sprintDate) : null,
             },
         });
         revalidatePath("/admin");
@@ -158,6 +166,33 @@ export async function getLiveRaceVotes(round: number) {
 
     const votes = await prisma.vote.findMany({
         where: { raceRound: { startsWith: `race-${round}-position-` } },
+        include: {
+            user: {
+                select: { id: true, name: true, avatar: true }
+            }
+        }
+    });
+
+    return { 
+        votes: votes.map(v => ({
+            driverId: v.driverId,
+            position: parseInt(v.raceRound.split('-').pop() || '0'),
+            userId: v.user.id,
+            userName: v.user.name,
+            userAvatar: v.user.avatar
+        }))
+    };
+}
+
+export async function getLiveSprintVotes(round: number) {
+    const race = await prisma.race.findUnique({ where: { round } });
+    if (!race || !race.hasSprint || !race.sprintDate) return { votes: [] };
+    
+    // Only return votes if sprint is locked
+    if (Date.now() < race.sprintDate.getTime()) return { votes: [] };
+
+    const votes = await prisma.vote.findMany({
+        where: { raceRound: { startsWith: `sprint-${round}-position-` } },
         include: {
             user: {
                 select: { id: true, name: true, avatar: true }

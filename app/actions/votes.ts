@@ -117,3 +117,114 @@ export async function getRaceVoterStatus(round: number) {
         return [];
     }
 }
+
+// ─── Sprint Vote Functions ──────────────────────────────────────────────────
+
+/**
+ * Save sprint votes to the database.
+ */
+export async function saveSprintVotes(
+    round: number,
+    driverIds: string[]
+) {
+    const cookieStore = await cookies();
+    const userId = cookieStore.get("userId")?.value;
+    if (!userId) return { error: "Nie zalogowano" };
+
+    try {
+        await prisma.vote.deleteMany({
+            where: {
+                userId,
+                raceRound: { startsWith: `sprint-${round}-position-` },
+            },
+        });
+
+        const votesToCreate = driverIds.map((driverId, index) => ({
+            userId,
+            driverId,
+            raceRound: `sprint-${round}-position-${index + 1}`,
+        }));
+
+        await prisma.vote.createMany({
+            data: votesToCreate,
+        });
+
+        return { success: true };
+    } catch (e: unknown) {
+        console.error("Error saving sprint votes:", e);
+        return { error: (e instanceof Error ? e.message : String(e)) };
+    }
+}
+
+/**
+ * Get the current user's saved sprint votes for a specific round.
+ */
+export async function getMySprintVotes(round: number) {
+    const cookieStore = await cookies();
+    const userId = cookieStore.get("userId")?.value;
+    if (!userId) return [];
+
+    try {
+        const votes = await prisma.vote.findMany({
+            where: {
+                userId,
+                raceRound: { startsWith: `sprint-${round}-position-` },
+            },
+            orderBy: { raceRound: "asc" },
+        });
+
+        const sorted = votes.sort((a, b) => {
+            const posA = parseInt(a.raceRound.split("-").pop() || "0");
+            const posB = parseInt(b.raceRound.split("-").pop() || "0");
+            return posA - posB;
+        });
+
+        return sorted.map(v => v.driverId);
+    } catch (e) {
+        console.error("Error fetching user sprint votes:", e);
+        return [];
+    }
+}
+
+/**
+ * Get sprint voter status for all active users.
+ */
+export async function getSprintVoterStatus(round: number) {
+    try {
+        const users = await prisma.user.findMany({
+            where: {
+                isAdmin: false,
+                username: { not: "testadmin" },
+                name: { not: "testadmin" },
+            },
+            select: {
+                id: true,
+                name: true,
+                avatar: true,
+                team: { select: { name: true } }
+            },
+            orderBy: { name: "asc" }
+        });
+
+        const votedUserIds = await prisma.vote.groupBy({
+            by: ['userId'],
+            where: {
+                raceRound: { startsWith: `sprint-${round}-position-` }
+            }
+        });
+
+        const votedIdsSet = new Set(votedUserIds.map(v => v.userId));
+
+        return users.map(u => ({
+            id: u.id,
+            name: u.name,
+            avatar: u.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name || "U")}&background=E60000&color=fff&bold=true`,
+            team: u.team?.name,
+            hasVoted: votedIdsSet.has(u.id)
+        }));
+    } catch (e) {
+        console.error("Error fetching sprint voter status:", e);
+        return [];
+    }
+}
+
