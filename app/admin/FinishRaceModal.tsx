@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { X, CheckCircle2, RotateCcw, Trophy, ArrowRightLeft, Undo2 } from "lucide-react";
 import { clsx } from "clsx";
 import { getActiveDriversForResults, finishRace, reopenRace, finishSprint, reopenSprint } from "@/app/actions/raceResults";
+import { saveRaceExtras, getRaceExtras } from "@/app/actions/raceExtras";
 import { toast } from "sonner";
 import { getTeamLogo, normalizeCountryCode } from "@/lib/data";
 import ReactCountryFlag from "react-country-flag";
@@ -46,6 +47,12 @@ export default function FinishRaceModal({ race, onClose, onFinished }: Props) {
     // Swap mode: click two drivers in the picked list to swap them
     const [swapFirst, setSwapFirst] = useState<number | null>(null);
 
+    // Extra race data (only for race, not sprint)
+    const [extraDotd, setExtraDotd] = useState<string>("");
+    const [extraDnfCount, setExtraDnfCount] = useState<string>("");
+    const [extraFastestLap, setExtraFastestLap] = useState<string>("");
+    const [extraStartCollision, setExtraStartCollision] = useState<string>("");
+
     useEffect(() => {
         async function loadDrivers() {
             try {
@@ -69,8 +76,24 @@ export default function FinishRaceModal({ race, onClose, onFinished }: Props) {
                 setLoading(false);
             }
         }
+
+        async function loadExtras() {
+            if (race.finishTarget !== 'sprint') {
+                try {
+                    const extras = await getRaceExtras(race.round);
+                    if (extras) {
+                        setExtraDotd(extras.actualDotd || "");
+                        setExtraDnfCount(extras.actualDnfCount !== null ? String(extras.actualDnfCount) : "");
+                        setExtraFastestLap(extras.actualFastestLap || "");
+                        setExtraStartCollision(extras.actualStartCollision !== null ? String(extras.actualStartCollision) : "");
+                    }
+                } catch { /* ignore */ }
+            }
+        }
+
         loadDrivers();
-    }, [race.results]);
+        loadExtras();
+    }, [race.results, race.round, race.finishTarget]);
 
     // Drivers not yet picked
     const remainingDrivers = allDrivers.filter(
@@ -134,6 +157,17 @@ export default function FinishRaceModal({ race, onClose, onFinished }: Props) {
         setSubmitting(true);
         try {
             const results = pickedOrder.map(d => d.slug);
+
+            // Save extras before finishing (race only)
+            if (!isSprint) {
+                await saveRaceExtras(race.round, {
+                    actualDotd: extraDotd || null,
+                    actualDnfCount: extraDnfCount ? parseInt(extraDnfCount) : null,
+                    actualFastestLap: extraFastestLap || null,
+                    actualStartCollision: extraStartCollision ? extraStartCollision === "true" : null,
+                });
+            }
+
             const result = isSprint 
                 ? await finishSprint(race.round, results)
                 : await finishRace(race.round, results);
@@ -290,6 +324,67 @@ export default function FinishRaceModal({ race, onClose, onFinished }: Props) {
                                 </div>
                             )}
 
+                            {/* ── EXTRA RACE DATA (race only, not sprint) ── */}
+                            {!isSprint && allPicked && (
+                                <div className="space-y-3">
+                                    <h3 className="text-[10px] uppercase font-bold text-gray-500 tracking-widest flex items-center gap-1.5">
+                                        ⚡ Dodatkowe dane wyścigu
+                                    </h3>
+                                    <div className="space-y-2">
+                                        <div>
+                                            <label className="text-[10px] uppercase font-bold text-gray-500 tracking-widest mb-1 block">Driver of the Day</label>
+                                            <select
+                                                value={extraDotd}
+                                                onChange={(e) => setExtraDotd(e.target.value)}
+                                                className="w-full bg-[#2C2C2E] border border-white/10 p-2.5 rounded-xl text-white text-sm font-medium focus:border-[#E60000] outline-none transition-colors appearance-none"
+                                            >
+                                                <option value="">Wybierz...</option>
+                                                {allDrivers.map(d => (
+                                                    <option key={d.slug} value={d.slug}>{d.name} ({d.team})</option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label className="text-[10px] uppercase font-bold text-gray-500 tracking-widest mb-1 block">Liczba DNF</label>
+                                            <input
+                                                type="number"
+                                                min="0"
+                                                max="20"
+                                                value={extraDnfCount}
+                                                onChange={(e) => setExtraDnfCount(e.target.value)}
+                                                placeholder="0"
+                                                className="w-full bg-[#2C2C2E] border border-white/10 p-2.5 rounded-xl text-white text-sm font-medium focus:border-[#E60000] outline-none transition-colors"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="text-[10px] uppercase font-bold text-gray-500 tracking-widest mb-1 block">Najszybsze okrążenie (kierowca)</label>
+                                            <select
+                                                value={extraFastestLap}
+                                                onChange={(e) => setExtraFastestLap(e.target.value)}
+                                                className="w-full bg-[#2C2C2E] border border-white/10 p-2.5 rounded-xl text-white text-sm font-medium focus:border-[#E60000] outline-none transition-colors appearance-none"
+                                            >
+                                                <option value="">Wybierz...</option>
+                                                {allDrivers.map(d => (
+                                                    <option key={d.slug} value={d.slug}>{d.name} ({d.team})</option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label className="text-[10px] uppercase font-bold text-gray-500 tracking-widest mb-1 block">Kolizja na starcie?</label>
+                                            <select
+                                                value={extraStartCollision}
+                                                onChange={(e) => setExtraStartCollision(e.target.value)}
+                                                className="w-full bg-[#2C2C2E] border border-white/10 p-2.5 rounded-xl text-white text-sm font-medium focus:border-[#E60000] outline-none transition-colors appearance-none"
+                                            >
+                                                <option value="">Wybierz...</option>
+                                                <option value="true">Tak</option>
+                                                <option value="false">Nie</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
                             {/* ── REMAINING DRIVERS TO PICK ── */}
                             {!isCompleted && remainingDrivers.length > 0 && (
                                 <div>
@@ -345,6 +440,15 @@ export default function FinishRaceModal({ race, onClose, onFinished }: Props) {
                                 onClick={async () => {
                                     setSubmitting(true);
                                     try {
+                                        // Save extras before recalculating (race only)
+                                        if (!isSprint) {
+                                            await saveRaceExtras(race.round, {
+                                                actualDotd: extraDotd || null,
+                                                actualDnfCount: extraDnfCount ? parseInt(extraDnfCount) : null,
+                                                actualFastestLap: extraFastestLap || null,
+                                                actualStartCollision: extraStartCollision ? extraStartCollision === "true" : null,
+                                            });
+                                        }
                                         const results = pickedOrder.map(d => d.slug);
                                         const result = isSprint 
                                             ? await finishSprint(race.round, results)

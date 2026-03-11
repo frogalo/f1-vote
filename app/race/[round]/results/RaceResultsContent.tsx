@@ -25,6 +25,8 @@ import {
   Flame,
   Bolt,
   Medal,
+  Star,
+  AlertTriangle,
 } from "lucide-react";
 
 type PredictionDetail = {
@@ -42,6 +44,18 @@ type ScoreDetails = {
   bonusP1: number;
   bonusPodium: number;
   fromSeason?: boolean;
+  extraPredictions?: {
+    dotd: { predicted: string | null; actual: string | null; correct: boolean } | null;
+    dnfCount: { predicted: number | null; actual: number | null; correct: boolean } | null;
+    fastestLap: { predicted: string | null; actual: string | null; correct: boolean } | null;
+    startCollision: { predicted: boolean | null; actual: boolean | null; correct: boolean } | null;
+  } | null;
+  extraDotd?: number;
+  extraDnf?: number;
+  extraFastestLap?: number;
+  extraCollision?: number;
+  extraAllBonus?: number;
+  extraTotal?: number;
 };
 
 type RaceScore = {
@@ -154,8 +168,9 @@ export default function RaceResultsContent({ raceRound, isSprint = false, hideHe
 
   const myScore = raceData.scores.find((s) => s.user.id === user?.id);
   const myDetails = myScore?.details as ScoreDetails | null;
+  const maxPoints = isSprint ? 70 : 75;
   const scorePercent = myScore
-    ? Math.round((myScore.totalPoints / 70) * 100)
+    ? Math.round((myScore.totalPoints / maxPoints) * 100)
     : 0;
 
   const toggleSection = (id: string) =>
@@ -337,6 +352,22 @@ export default function RaceResultsContent({ raceRound, isSprint = false, hideHe
                     </div>
                   </div>
                 )}
+                {/* Extra predictions badges */}
+                {myDetails.extraTotal !== undefined && myDetails.extraTotal > 0 && (
+                  <div className="flex items-center gap-3 rounded-xl border border-cyan-500/30 bg-cyan-500/10 px-3 py-2 backdrop-blur-sm">
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-cyan-500/20 text-cyan-400">
+                      <Zap className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <div className="text-[9px] font-black uppercase tracking-wider text-cyan-400/80">
+                        Dodatkowe
+                      </div>
+                      <div className="text-sm font-black text-white">
+                        +{myDetails.extraTotal} <span className="text-[10px] text-gray-500">PKT</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -501,12 +532,130 @@ export default function RaceResultsContent({ raceRound, isSprint = false, hideHe
         </CollapsibleSection>
       )}
 
+      {/* ── EXTRA PREDICTIONS ── */}
+      {myDetails && myDetails.extraPredictions && !isSprint && (
+        <CollapsibleSection
+          id="extras"
+          icon={Zap}
+          title="Dodatkowe Typy"
+          count={myDetails.extraTotal ?? 0}
+          expanded={expandedSection === "extras"}
+          onToggle={() => toggleSection("extras")}
+        >
+          <div className="space-y-2">
+            {[
+              {
+                label: "Driver of the Day",
+                icon: <Star className="h-4 w-4 text-yellow-400" />,
+                data: myDetails.extraPredictions.dotd,
+                points: myDetails.extraDotd ?? 0,
+                format: (val: string | number | boolean | null) => {
+                  if (!val) return "—";
+                  const d = drivers.find(dr => dr.slug === val);
+                  return d ? d.name : String(val);
+                },
+              },
+              {
+                label: "Liczba DNF",
+                icon: <AlertTriangle className="h-4 w-4 text-red-400" />,
+                data: myDetails.extraPredictions.dnfCount,
+                points: myDetails.extraDnf ?? 0,
+                format: (val: string | number | boolean | null) => val !== null ? String(val) : "—",
+              },
+              {
+                label: "Najszybsze okrążenie",
+                icon: <CircleDot className="h-4 w-4 text-purple-400" />,
+                data: myDetails.extraPredictions.fastestLap,
+                points: myDetails.extraFastestLap ?? 0,
+                format: (val: string | number | boolean | null) => {
+                  if (!val) return "—";
+                  const d = drivers.find(dr => dr.slug === val);
+                  return d ? d.name : String(val);
+                },
+              },
+              {
+                label: "Kolizja na starcie",
+                icon: <Flame className="h-4 w-4 text-amber-400" />,
+                data: myDetails.extraPredictions.startCollision,
+                points: myDetails.extraCollision ?? 0,
+                format: (val: string | number | boolean | null) => val === true ? "Tak" : val === false ? "Nie" : "—",
+              },
+            ].map((item) => {
+              const isCorrect = item.data?.correct ?? false;
+              const predicted = item.data ? item.format(item.data.predicted) : "—";
+              const actual = item.data ? item.format(item.data.actual) : "—";
+
+              return (
+                <div
+                  key={item.label}
+                  className={clsx(
+                    "relative overflow-hidden rounded-2xl border p-3.5 sm:p-4 backdrop-blur-sm transition-all",
+                    isCorrect
+                      ? "border-emerald-500/30 bg-emerald-500/5"
+                      : "border-white/[0.06] bg-white/[0.02] opacity-70"
+                  )}
+                >
+                  {isCorrect && (
+                    <div className="absolute inset-y-0 left-0 w-1 bg-emerald-500" />
+                  )}
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/[0.05]">
+                      {item.icon}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-xs font-black text-white mb-0.5">{item.label}</div>
+                      <div className="flex items-center gap-3 text-[11px]">
+                        <div>
+                          <span className="text-gray-500 mr-1">Twój typ:</span>
+                          <span className="font-bold text-gray-300">{predicted}</span>
+                        </div>
+                        <div>
+                          <span className="text-gray-500 mr-1">Wynik:</span>
+                          <span className="font-bold text-white">{actual}</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className={clsx(
+                      "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl font-black text-sm",
+                      isCorrect
+                        ? "bg-emerald-500/15 text-emerald-400 ring-1 ring-emerald-500/30"
+                        : "bg-white/[0.03] text-gray-700"
+                    )}>
+                      +{item.points}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+
+            {/* All correct bonus */}
+            {(myDetails.extraAllBonus ?? 0) > 0 && (
+              <div className="relative overflow-hidden rounded-2xl border border-cyan-500/30 bg-cyan-500/5 p-3.5 sm:p-4">
+                <div className="absolute inset-y-0 left-0 w-1 bg-cyan-500" />
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-cyan-500/15">
+                    <Sparkles className="h-4 w-4 text-cyan-400" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="text-xs font-black text-white">Bonus — Wszystkie trafione!</div>
+                    <div className="text-[10px] text-cyan-400/80 font-bold">Wszystkie 4 dodatkowe typy poprawne</div>
+                  </div>
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-cyan-500/15 text-cyan-400 font-black text-sm ring-1 ring-cyan-500/30">
+                    +1
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </CollapsibleSection>
+      )}
+
       {/* ── RESULTS — Podium Focus ── */}
       <CollapsibleSection
         id="classification"
         icon={Flag}
         title="Wyniki"
-        count={10}
+        count={(isSprint ? (raceData as any).sprintResults : raceData.results).length}
         expanded={expandedSection === "classification"}
         onToggle={() => toggleSection("classification")}
       >
@@ -590,7 +739,7 @@ export default function RaceResultsContent({ raceRound, isSprint = false, hideHe
           </div>
 
           <div className="overflow-hidden rounded-2xl border border-white/[0.06] bg-[#131315]">
-            {(isSprint ? (raceData as any).sprintResults : raceData.results).slice(3, isSprint ? 20 : 10).map((driverId: string, pos: number) => {
+            {(isSprint ? (raceData as any).sprintResults : raceData.results).slice(3).map((driverId: string, pos: number) => {
               const driver = drivers.find((d) => d.slug === driverId);
               if (!driver) return null;
 
@@ -791,12 +940,50 @@ export default function RaceResultsContent({ raceRound, isSprint = false, hideHe
 
               <div className="flex items-center justify-between bg-[#E60000]/[0.08] p-4">
                 <span className="text-xs font-black uppercase text-white">
-                  Maksimum
+                  Maksimum {isSprint ? '(sprint)' : '(wyścig)'}
                 </span>
                 <span className="text-2xl font-black text-[#E60000]">
-                  70 pkt
+                  {isSprint ? '70' : '75'} pkt
                 </span>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* Extra predictions section (race only) */}
+        {showScoringInfo && !isSprint && (
+          <div className="mt-3 overflow-hidden rounded-2xl border border-white/[0.06] bg-[#131315]">
+            <div className="p-4">
+              <div className="mb-3 text-[10px] font-black uppercase tracking-wider text-gray-500">
+                Dodatkowe Typowanie (tylko wyścig)
+              </div>
+              <div className="space-y-2">
+                {[
+                  { l: "Driver of the Day", p: "+1", c: "text-yellow-400" },
+                  { l: "Liczba DNF", p: "+1", c: "text-red-400" },
+                  { l: "Najszybsze okrążenie", p: "+1", c: "text-purple-400" },
+                  { l: "Kolizja na starcie", p: "+1", c: "text-amber-400" },
+                  { l: "Wszystkie 4 trafione (bonus)", p: "+1", c: "text-cyan-400" },
+                ].map((r) => (
+                  <div
+                    key={r.l}
+                    className="flex items-center justify-between text-xs"
+                  >
+                    <span className="text-gray-400">{r.l}</span>
+                    <span className={clsx("font-black", r.c)}>
+                      {r.p}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="flex items-center justify-between bg-[#E60000]/[0.08] p-4">
+              <span className="text-xs font-black uppercase text-white">
+                Maks. Dodatkowe
+              </span>
+              <span className="text-2xl font-black text-cyan-400">
+                5 pkt
+              </span>
             </div>
           </div>
         )}

@@ -2,9 +2,9 @@
 
 import { Driver, getTeamLogo, normalizeCountryCode } from "@/lib/data";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { clsx } from "clsx";
-import { GripVertical, ArrowUpDown, CheckCircle2, CircleDashed, ArrowDownToLine } from "lucide-react";
+import { GripVertical, ArrowUpDown, CheckCircle2, CircleDashed, ArrowDownToLine, Star, Timer, AlertTriangle, Flame, ChevronDown, Check, Zap } from "lucide-react";
 import { useAuth } from "@/app/providers/AuthProvider";
 import ReactCountryFlag from "react-country-flag";
 import { Card, CardContent } from "@/components/ui/card";
@@ -34,6 +34,7 @@ import { toast } from "sonner";
 import { getSeasonVotes } from "@/app/actions/seasonVote";
 import { getLiveRaceVotes, getLiveSprintVotes } from "@/app/actions/races";
 import { saveRaceVotes, getRaceVoterStatus, getMyRaceVotes, saveSprintVotes, getMySprintVotes, getSprintVoterStatus } from "@/app/actions/votes";
+import { saveRaceExtraVote, getMyRaceExtraVote } from "@/app/actions/raceExtras";
 import RaceResultsContent from "./results/RaceResultsContent";
 
 type Props = {
@@ -94,6 +95,13 @@ export function VoteComponent({ race, drivers }: Props) {
   const [activeId, setActiveId] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  
+  // ── Race Extra Predictions state ──
+  const [extraDotd, setExtraDotd] = useState<string | null>(null);
+  const [extraDnfCount, setExtraDnfCount] = useState<number | null>(null);
+  const [extraFastestLap, setExtraFastestLap] = useState<string | null>(null);
+  const [extraStartCollision, setExtraStartCollision] = useState<boolean | null>(null);
+  const [extraSaving, setExtraSaving] = useState(false);
 
   // Screen-width based mobile detection (< 768px)
   useEffect(() => {
@@ -173,6 +181,17 @@ export function VoteComponent({ race, drivers }: Props) {
       } catch {
         // Network error
       }
+
+      // Load race extra predictions
+      try {
+        const extraVote = await getMyRaceExtraVote(race.round);
+        if (extraVote) {
+          setExtraDotd(extraVote.dotdDriverId);
+          setExtraDnfCount(extraVote.dnfCount);
+          setExtraFastestLap(extraVote.fastestLapDriverId);
+          setExtraStartCollision(extraVote.startCollision);
+        }
+      } catch { /* ignore */ }
 
       try {
         const statuses = await getRaceVoterStatus(race.round);
@@ -617,6 +636,36 @@ export function VoteComponent({ race, drivers }: Props) {
           </motion.div>
         </AnimatePresence>
       )}
+
+      {/* ── Race Extra Predictions ── */}
+      {!isSprint && !race.completed && user && (
+        <RaceExtraPredictions
+          drivers={drivers}
+          isLocked={raceIsLocked}
+          extraDotd={extraDotd}
+          extraDnfCount={extraDnfCount}
+          extraFastestLap={extraFastestLap}
+          extraStartCollision={extraStartCollision}
+          extraSaving={extraSaving}
+          onSave={async (data) => {
+            setExtraSaving(true);
+            if (data.dotdDriverId !== undefined) setExtraDotd(data.dotdDriverId ?? null);
+            if (data.dnfCount !== undefined) setExtraDnfCount(data.dnfCount ?? null);
+            if (data.fastestLapDriverId !== undefined) setExtraFastestLap(data.fastestLapDriverId ?? null);
+            if (data.startCollision !== undefined) setExtraStartCollision(data.startCollision ?? null);
+            
+            const fullData = {
+              dotdDriverId: data.dotdDriverId !== undefined ? data.dotdDriverId : extraDotd,
+              dnfCount: data.dnfCount !== undefined ? data.dnfCount : extraDnfCount,
+              fastestLapDriverId: data.fastestLapDriverId !== undefined ? data.fastestLapDriverId : extraFastestLap,
+              startCollision: data.startCollision !== undefined ? data.startCollision : extraStartCollision,
+            };
+            await saveRaceExtraVote(race.round, fullData);
+            setExtraSaving(false);
+            toast.success("Dodatkowe typy zapisane!");
+          }}
+        />
+      )}
     </div>
   );
 }
@@ -846,5 +895,256 @@ function InsertSlot({
         → P{position + 1}
       </span>
     </button>
+  );
+}
+
+// ─── Custom Select for Race Extras ──────────────────────────────────────────
+function RaceCustomSelect({
+  value,
+  options,
+  placeholder,
+  disabled,
+  onChange,
+}: {
+  value: string;
+  options: { value: string; label: React.ReactNode }[];
+  placeholder: string;
+  disabled?: boolean;
+  onChange: (val: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
+
+  const selectedOption = options.find(o => o.value === value);
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={() => setOpen(!open)}
+        className={clsx(
+          "w-full bg-white/[0.03] border border-transparent p-3 rounded-xl text-sm font-medium text-left flex items-center justify-between transition-colors outline-none",
+          selectedOption ? "text-white" : "text-gray-500",
+          open && "bg-white/[0.06] ring-1 ring-[#E60000]/30",
+          disabled && "opacity-50 cursor-not-allowed",
+          !disabled && "hover:bg-white/[0.06]"
+        )}
+      >
+        <span className="flex-1 truncate">{selectedOption ? selectedOption.label : placeholder}</span>
+        <ChevronDown className={clsx("w-4 h-4 transition-transform flex-shrink-0 ml-2", selectedOption ? "text-white/50" : "text-gray-500", open && "rotate-180")} />
+      </button>
+
+      {open && !disabled && (
+        <div className="absolute z-50 top-full mt-1.5 left-0 right-0 bg-[#1C1C1E] border border-white/10 rounded-xl shadow-2xl overflow-y-auto overflow-hidden" style={{ maxHeight: "250px" }}>
+          {options.map(o => (
+            <button
+              key={o.value}
+              type="button"
+              onClick={() => {
+                onChange(o.value);
+                setOpen(false);
+              }}
+              className={clsx(
+                "w-full flex items-center gap-2 px-3 py-3 text-left hover:bg-white/5 hover:text-white transition-colors text-sm",
+                value === o.value ? "text-[#E60000] bg-[#E60000]/10 font-bold" : "text-gray-300"
+              )}
+            >
+              {o.label}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Race Extra Predictions Component ──────────────────────────────────────
+
+
+function RaceExtraPredictions({
+  drivers,
+  isLocked,
+  extraDotd,
+  extraDnfCount,
+  extraFastestLap,
+  extraStartCollision,
+  extraSaving,
+  onSave,
+}: {
+  drivers: Driver[];
+  isLocked: boolean;
+  extraDotd: string | null;
+  extraDnfCount: number | null;
+  extraFastestLap: string | null;
+  extraStartCollision: boolean | null;
+  extraSaving: boolean;
+  onSave: (data: {
+    dotdDriverId?: string | null;
+    dnfCount?: number | null;
+    fastestLapDriverId?: string | null;
+    startCollision?: boolean | null;
+  }) => Promise<void>;
+}) {
+  const driverOptions = drivers.map(d => ({
+    value: d.id,
+    label: (
+      <div className="flex items-center gap-2 truncate">
+        <span className="truncate">{d.name}</span>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={getTeamLogo(d.team)} alt={d.team} className="w-3.5 h-3.5 object-contain flex-shrink-0" />
+        <span className="text-[10px] text-muted-foreground uppercase shrink-0">{d.team}</span>
+      </div>
+    ),
+  }));
+
+  const dnfOptions = Array.from({ length: 11 }, (_, i) => ({
+    value: String(i),
+    label: <span className="font-medium">{i}</span>,
+  }));
+
+  const yesNoOptions = [
+    { value: "true", label: <span className="font-medium text-green-500">Tak</span> },
+    { value: "false", label: <span className="font-medium text-[#E60000]">Nie</span> },
+  ];
+
+  const items = [
+    {
+      icon: <Star className="h-4 w-4 text-yellow-400" />,
+      label: "Driver of the Day",
+      sublabel: "Kierowca",
+      placeholder: "Wybierz kierowcę...",
+      value: extraDotd || "",
+      options: driverOptions,
+      color: "yellow",
+      onChange: async (val: string) => {
+        await onSave({ dotdDriverId: val });
+      },
+    },
+    {
+      icon: <AlertTriangle className="h-4 w-4 text-red-400" />,
+      label: "Liczba DNF",
+      sublabel: "W wyścigu",
+      placeholder: "Wybierz liczbę...",
+      value: extraDnfCount !== null ? String(extraDnfCount) : "",
+      options: dnfOptions,
+      color: "red",
+      onChange: async (val: string) => {
+        await onSave({ dnfCount: parseInt(val) });
+      },
+    },
+    {
+      icon: <Timer className="h-4 w-4 text-purple-400" />,
+      label: "Najszybsze okrążenie",
+      sublabel: "Kierowca",
+      placeholder: "Wybierz kierowcę...",
+      value: extraFastestLap || "",
+      options: driverOptions,
+      color: "purple",
+      onChange: async (val: string) => {
+        await onSave({ fastestLapDriverId: val });
+      },
+    },
+    {
+      icon: <Flame className="h-4 w-4 text-amber-400" />,
+      label: "Kolizja na starcie?",
+      sublabel: "W wyścigu",
+      placeholder: "Tak / Nie",
+      value: extraStartCollision === null ? "" : String(extraStartCollision),
+      options: yesNoOptions,
+      color: "amber",
+      onChange: async (val: string) => {
+        await onSave({ startCollision: val === "true" });
+      },
+    },
+  ];
+
+  return (
+    <div className="mt-8 mb-4">
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#E60000]/15 ring-1 ring-[#E60000]/20">
+            <Zap className="h-5 w-5 text-[#E60000]" />
+          </div>
+          <div>
+            <h3 className="text-base sm:text-lg font-black text-white uppercase tracking-tight">
+              Dodatkowe Typy
+            </h3>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-gray-500">
+              Każdy trafiony typ = +1 pkt, wszystkie = bonus +1
+            </p>
+          </div>
+        </div>
+        {extraSaving && (
+          <div className="flex items-center gap-1.5 rounded-lg bg-white/[0.05] px-2.5 py-1">
+            <div className="h-2 w-2 animate-pulse rounded-full bg-[#E60000]" />
+            <span className="text-[10px] font-bold text-gray-400">Zapisuję…</span>
+          </div>
+        )}
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+        {items.map((item, index) => {
+          const hasValue = item.value !== "";
+          return (
+            <div
+              key={item.label}
+              style={{ zIndex: 100 - index }}
+              className={clsx(
+                "group relative rounded-2xl border transition-all duration-200",
+                hasValue
+                  ? "bg-[#1C1C1E] border-white/[0.04]"
+                  : "bg-white/[0.02] border-transparent"
+              )}
+            >
+              {hasValue && (
+                <div className="absolute left-0 right-0 top-0 h-px rounded-t-2xl bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+              )}
+              <div className="p-3.5 sm:p-4">
+                <div className="mb-3 flex items-start justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-white/[0.05]">
+                      {item.icon}
+                    </div>
+                    <div>
+                      <div className="text-sm font-black leading-tight text-white">{item.label}</div>
+                      <div className="text-[9px] font-bold uppercase tracking-widest text-gray-500">{item.sublabel}</div>
+                    </div>
+                  </div>
+                  {hasValue && (
+                    <div className="flex h-5 w-5 items-center justify-center rounded-full bg-green-500/15">
+                      <Check className="h-3 w-3 text-green-400" />
+                    </div>
+                  )}
+                </div>
+                <RaceCustomSelect
+                  placeholder={item.placeholder}
+                  value={item.value}
+                  options={item.options}
+                  disabled={isLocked || extraSaving}
+                  onChange={item.onChange}
+                />
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {isLocked && (
+        <div className="mt-3 flex items-center gap-3 rounded-2xl bg-white/[0.03] px-4 py-3">
+          <span className="text-xs font-bold text-gray-500">
+            Typy dodatkowe zostały zamknięte.
+          </span>
+        </div>
+      )}
+    </div>
   );
 }

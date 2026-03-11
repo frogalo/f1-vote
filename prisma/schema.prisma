@@ -59,6 +59,7 @@ model User {
   votes            Vote[]
   seasonVotes      SeasonVote[]
   raceScores       RaceScore[]
+  raceExtraVotes   RaceExtraVote[]
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 }
@@ -111,6 +112,30 @@ model Race {
   sprintCompleted Boolean  @default(false)
   sprintResults   String[] // Array of driver slugs in sprint finish order
   scores          RaceScore[]
+  extraVotes      RaceExtraVote[]
+  // Actual race extras (filled by admin when finishing race)
+  actualDotd          String?  // Driver slug - Driver of the Day
+  actualDnfCount      Int?     // Number of DNFs in the race
+  actualFastestLap    String?  // Driver slug - Fastest lap
+  actualStartCollision Boolean? // Was there a collision at the start?
+}
+
+model RaceExtraVote {
+  id                String   @id @default(cuid())
+  userId            String
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  raceRound         Int
+  race              Race     @relation(fields: [raceRound], references: [round], onDelete: Cascade)
+  dotdDriverId      String?  // Driver of the Day prediction
+  dnfCount          Int?     // Number of DNFs prediction
+  fastestLapDriverId String? // Fastest lap driver prediction
+  startCollision    Boolean? // Collision at start prediction
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@unique([userId, raceRound])
+  @@index([userId])
+  @@index([raceRound])
 }
 
 model RaceScore {

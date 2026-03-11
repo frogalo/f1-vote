@@ -33,9 +33,17 @@ async function requireAdmin() {
  *   - Perfect P1: +1
  *   - Perfect full podium (P1, P2, P3 all correct): +3
  *
+ * Extra predictions (race only, not sprint):
+ *   - Driver of the Day correct: +1
+ *   - DNF count correct: +1
+ *   - Fastest lap driver correct: +1
+ *   - Start collision correct: +1
+ *   - All 4 extras correct: +1 bonus
+ *
  * Max per driver: 3
  * Max base: 66 (22 × 3)
- * Max total: 70 (66 + 1 + 3)
+ * Max total (race): 75 (66 + 1 + 3 + 5)
+ * Max total (sprint): 70 (66 + 1 + 3)
  */
 
 const POSITION_POINTS: Record<number, number> = {
@@ -196,12 +204,81 @@ export async function finishRace(round: number, results: string[]) {
                 totalPoints += bonusPodium;
             }
 
+            // ── Extra Predictions Scoring ──
+            let extraDotd = 0;
+            let extraDnf = 0;
+            let extraFastestLap = 0;
+            let extraCollision = 0;
+            let extraAllBonus = 0;
+            let extraTotal = 0;
+            let extraPredictions: {
+                dotd: { predicted: string | null; actual: string | null; correct: boolean } | null;
+                dnfCount: { predicted: number | null; actual: number | null; correct: boolean } | null;
+                fastestLap: { predicted: string | null; actual: string | null; correct: boolean } | null;
+                startCollision: { predicted: boolean | null; actual: boolean | null; correct: boolean } | null;
+            } | null = null;
+
+            // Get race extras (actual results)
+            const raceData = await prisma.race.findUnique({
+                where: { round },
+                select: { actualDotd: true, actualDnfCount: true, actualFastestLap: true, actualStartCollision: true },
+            });
+
+            // Get user's extra predictions
+            const userExtra = await prisma.raceExtraVote.findUnique({
+                where: { userId_raceRound: { userId, raceRound: round } },
+            });
+
+            // Only score extras if race has actual extra data set
+            const hasActualExtras = raceData && (
+                raceData.actualDotd !== null || 
+                raceData.actualDnfCount !== null || 
+                raceData.actualFastestLap !== null || 
+                raceData.actualStartCollision !== null
+            );
+
+            if (hasActualExtras && userExtra) {
+                const dotdCorrect = raceData.actualDotd !== null && userExtra.dotdDriverId === raceData.actualDotd;
+                const dnfCorrect = raceData.actualDnfCount !== null && userExtra.dnfCount === raceData.actualDnfCount;
+                const fastestLapCorrect = raceData.actualFastestLap !== null && userExtra.fastestLapDriverId === raceData.actualFastestLap;
+                const collisionCorrect = raceData.actualStartCollision !== null && userExtra.startCollision === raceData.actualStartCollision;
+
+                if (dotdCorrect) extraDotd = 1;
+                if (dnfCorrect) extraDnf = 1;
+                if (fastestLapCorrect) extraFastestLap = 1;
+                if (collisionCorrect) extraCollision = 1;
+
+                extraTotal = extraDotd + extraDnf + extraFastestLap + extraCollision;
+
+                // All 4 correct bonus
+                if (extraTotal === 4) {
+                    extraAllBonus = 1;
+                    extraTotal += 1;
+                }
+
+                totalPoints += extraTotal;
+
+                extraPredictions = {
+                    dotd: { predicted: userExtra.dotdDriverId, actual: raceData.actualDotd, correct: dotdCorrect },
+                    dnfCount: { predicted: userExtra.dnfCount, actual: raceData.actualDnfCount, correct: dnfCorrect },
+                    fastestLap: { predicted: userExtra.fastestLapDriverId, actual: raceData.actualFastestLap, correct: fastestLapCorrect },
+                    startCollision: { predicted: userExtra.startCollision, actual: raceData.actualStartCollision, correct: collisionCorrect },
+                };
+            }
+
             // Upsert score for this user + race
             const detailsWithBonuses = {
                 predictions: details,
                 bonusP1,
                 bonusPodium,
                 fromSeason: isFromSeason,
+                extraPredictions,
+                extraDotd,
+                extraDnf,
+                extraFastestLap,
+                extraCollision,
+                extraAllBonus,
+                extraTotal,
             };
 
             scoreOps.push(

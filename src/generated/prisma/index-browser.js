@@ -191,7 +191,23 @@ exports.Prisma.RaceScalarFieldEnum = {
   hasSprint: 'hasSprint',
   sprintDate: 'sprintDate',
   sprintCompleted: 'sprintCompleted',
-  sprintResults: 'sprintResults'
+  sprintResults: 'sprintResults',
+  actualDotd: 'actualDotd',
+  actualDnfCount: 'actualDnfCount',
+  actualFastestLap: 'actualFastestLap',
+  actualStartCollision: 'actualStartCollision'
+};
+
+exports.Prisma.RaceExtraVoteScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  raceRound: 'raceRound',
+  dotdDriverId: 'dotdDriverId',
+  dnfCount: 'dnfCount',
+  fastestLapDriverId: 'fastestLapDriverId',
+  startCollision: 'startCollision',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 };
 
 exports.Prisma.RaceScoreScalarFieldEnum = {
@@ -239,6 +255,7 @@ exports.Prisma.ModelName = {
   Vote: 'Vote',
   SeasonVote: 'SeasonVote',
   Race: 'Race',
+  RaceExtraVote: 'RaceExtraVote',
   RaceScore: 'RaceScore'
 };
 
