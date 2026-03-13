@@ -4,10 +4,10 @@ import { useAuth } from "@/app/providers/AuthProvider";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { getTeamLogo, normalizeCountryCode } from "@/lib/data";
-import { getTeams, getDrivers, addDriver, updateDriver, deleteDriver, getAllUsersWithVotes, deleteUser, getUserDetails, toggleDriverStatus } from "@/app/actions/admin";
+import { getTeams, getDrivers, addDriver, updateDriver, deleteDriver, getAllUsersWithVotes, deleteUser, getUserDetails, toggleDriverStatus, toggleUserSeasonUnlock } from "@/app/actions/admin";
 import { getRaces, addRace, updateRace, deleteRace, seedRaces, toggleRaceCanceled } from "@/app/actions/races";
 import { toast } from "sonner";
-import { Plus, Trash2, Edit3, X, Shield, ChevronDown, Trophy, Flag, LogOut, CheckCircle2 } from "lucide-react";
+import { Plus, Trash2, Edit3, X, Shield, ChevronDown, Trophy, Flag, LogOut, CheckCircle2, Unlock, Lock } from "lucide-react";
 import { logoutUser } from "@/app/actions/auth";
 import { clsx } from "clsx";
 import ReactCountryFlag from "react-country-flag";
@@ -41,6 +41,7 @@ type UserRow = {
     team: string;
     votesCount: number;
     seasonVotesCount: number;
+    unlockedSeason: boolean;
     createdAt: Date;
 };
 
@@ -48,8 +49,14 @@ type UserDetails = {
     id: string;
     name: string | null;
     username: string;
+    unlockedSeason: boolean;
     seasonVotes: { position: number; driver: string; team: string }[];
     raceVotes: { raceRound: string; driver: string; createdAt: Date }[];
+    stats?: {
+        totalPoints: number;
+        perfectPredictions: number;
+        racesCount: number;
+    }
 };
 
 type Race = {
@@ -371,6 +378,23 @@ export default function AdminPage() {
             toast.error("Błąd pobierania szczegółów");
         } finally {
             setDetailsLoading(false);
+        }
+    }
+
+    async function handleToggleSeasonUnlock(userId: string, unlocked: boolean) {
+        try {
+            const result = await toggleUserSeasonUnlock(userId, unlocked);
+            if (result.success) {
+                setUsers(prev => prev.map(u => u.id === userId ? { ...u, unlockedSeason: unlocked } : u));
+                if (selectedUser?.id === userId) {
+                    setSelectedUser(prev => prev ? { ...prev, unlockedSeason: unlocked } : null);
+                }
+                toast.success(unlocked ? "Głosowanie sezonowe odblokowane dla użytkownika" : "Głosowanie sezonowe zablokowane dla użytkownika");
+            } else {
+                toast.error(result.error);
+            }
+        } catch {
+            toast.error("Błąd zmiany statusu");
         }
     }
 
@@ -1064,15 +1088,48 @@ export default function AdminPage() {
                                     </div>
                                 ) : selectedUser && (
                                     <div className="space-y-8">
-                                        <div className="flex items-center gap-4 border-b border-white/5 pb-6">
-                                            <div className="w-16 h-16 rounded-full bg-[#2C2C2E] flex items-center justify-center font-black text-2xl text-gray-500">
-                                                {selectedUser.name?.[0] || "U"}
+                                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/5 pb-6">
+                                            <div className="flex items-center gap-4">
+                                                <div className="w-16 h-16 rounded-full bg-[#2C2C2E] flex items-center justify-center font-black text-2xl text-gray-500 border-2 border-white/5">
+                                                    {selectedUser.name?.[0] || "U"}
+                                                </div>
+                                                <div>
+                                                    <h3 className="text-2xl font-bold text-white">{selectedUser.name || "Anonim"}</h3>
+                                                    <p className="text-gray-500 font-medium">@{selectedUser.username}</p>
+                                                </div>
                                             </div>
-                                            <div>
-                                                <h3 className="text-2xl font-bold text-white">{selectedUser.name || "Anonim"}</h3>
-                                                <p className="text-gray-500 font-medium">@{selectedUser.username}</p>
+                                            <div className="flex flex-col items-end gap-2">
+                                                <div className="text-[10px] text-gray-500 font-black uppercase tracking-widest">Głosowanie sezonowe</div>
+                                                <button
+                                                    onClick={(e) => { e.stopPropagation(); handleToggleSeasonUnlock(selectedUser.id, !selectedUser.unlockedSeason); }}
+                                                    className={clsx(
+                                                        "px-3 py-1.5 rounded-xl uppercase text-[10px] font-black tracking-tight border transition-all flex items-center gap-2",
+                                                        selectedUser.unlockedSeason
+                                                            ? "bg-green-500/10 text-green-400 border-green-500/20"
+                                                            : "bg-red-500/10 text-red-400 border-red-500/20"
+                                                    )}
+                                                >
+                                                    {selectedUser.unlockedSeason ? <><Unlock className="w-3 h-3" /> Odblokowane</> : <><Lock className="w-3 h-3" /> Zablokowane</>}
+                                                </button>
                                             </div>
                                         </div>
+
+                                        {selectedUser.stats && (
+                                            <div className="grid grid-cols-3 gap-3">
+                                                <div className="bg-white/5 rounded-2xl p-4 text-center border border-white/5">
+                                                    <div className="text-2xl font-black text-white">{selectedUser.stats.totalPoints}</div>
+                                                    <div className="text-[10px] text-gray-500 uppercase font-bold tracking-tight">Punkty</div>
+                                                </div>
+                                                <div className="bg-white/5 rounded-2xl p-4 text-center border border-white/5">
+                                                    <div className="text-2xl font-black text-[#E60000]">{selectedUser.stats.perfectPredictions}</div>
+                                                    <div className="text-[10px] text-gray-500 uppercase font-bold tracking-tight">Idealne</div>
+                                                </div>
+                                                <div className="bg-white/5 rounded-2xl p-4 text-center border border-white/5">
+                                                    <div className="text-2xl font-black text-white">{selectedUser.stats.racesCount}</div>
+                                                    <div className="text-[10px] text-gray-500 uppercase font-bold tracking-tight">Wyścigi</div>
+                                                </div>
+                                            </div>
+                                        )}
 
                                         {/* Season Votes */}
                                         <div>
@@ -1081,42 +1138,64 @@ export default function AdminPage() {
                                                 Typy Sezonowe ({selectedUser.seasonVotes.length})
                                             </h4>
                                             {selectedUser.seasonVotes.length > 0 ? (
-                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                                    {selectedUser.seasonVotes.map((vote) => (
-                                                        <div key={vote.position} className="flex items-center gap-3 bg-white/[0.03] p-2 rounded-xl">
-                                                            <div className="w-8 h-8 rounded-lg bg-[#2C2C2E] flex items-center justify-center font-black text-white text-sm">
-                                                                {vote.position}
-                                                            </div>
-                                                            <div>
-                                                                <div className="text-sm font-bold text-white">{vote.driver}</div>
-                                                                <div className="text-[10px] text-gray-500 uppercase">{vote.team}</div>
-                                                            </div>
+                                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                                                    {selectedUser.seasonVotes.slice(0, 12).map((vote) => (
+                                                        <div key={vote.position} className="flex flex-col bg-white/[0.03] p-2 rounded-xl border border-white/5">
+                                                            <div className="text-[10px] font-black text-gray-500 mb-1">P{vote.position}</div>
+                                                            <div className="text-[11px] font-bold text-white truncate">{vote.driver}</div>
+                                                            <div className="text-[9px] text-gray-600 uppercase truncate">{vote.team}</div>
                                                         </div>
                                                     ))}
+                                                    {selectedUser.seasonVotes.length > 12 && (
+                                                        <div className="flex items-center justify-center bg-white/[0.01] p-2 rounded-xl border border-dashed border-white/5 text-[10px] text-gray-600 font-bold">
+                                                            + {selectedUser.seasonVotes.length - 12} więcej
+                                                        </div>
+                                                    )}
                                                 </div>
                                             ) : (
                                                 <p className="text-gray-600 text-sm italic">Brak typów na sezon.</p>
                                             )}
                                         </div>
 
-                                        {/* Race Votes */}
+                                        {/* Race Votes Grouped */}
                                         <div>
                                             <h4 className="text-xs font-black text-gray-500 uppercase tracking-widest mb-4 flex items-center gap-2">
                                                 <Flag className="w-4 h-4 text-white" />
-                                                Ostatnie Głosy ({selectedUser.raceVotes.length})
+                                                Głosy na Wyścigi
                                             </h4>
                                             {selectedUser.raceVotes.length > 0 ? (
-                                                <div className="space-y-2">
-                                                    {selectedUser.raceVotes.map((vote, idx) => (
-                                                        <div key={idx} className="flex items-center justify-between bg-white/[0.03] p-3 rounded-xl">
-                                                            <div>
-                                                                <div className="text-xs text-gray-500 font-bold uppercase mb-1">
-                                                                    {vote.raceRound}
-                                                                </div>
-                                                                <div className="text-sm font-bold text-white">{vote.driver}</div>
+                                                <div className="space-y-4">
+                                                    {Object.entries(
+                                                        selectedUser.raceVotes.reduce((acc, vote) => {
+                                                            const parts = vote.raceRound.split('-');
+                                                            const round = parts[1];
+                                                            const type = vote.raceRound.startsWith('sprint') ? 'Sprint' : 'Wyścig';
+                                                            const key = `Runda ${round} (${type})`;
+                                                            if (!acc[key]) acc[key] = [];
+                                                            acc[key].push(vote);
+                                                            return acc;
+                                                        }, {} as Record<string, typeof selectedUser.raceVotes>)
+                                                    ).sort((a, b) => {
+                                                        const rA = parseInt(a[0].match(/\d+/)?.[0] || '0');
+                                                        const rB = parseInt(b[0].match(/\d+/)?.[0] || '0');
+                                                        return rB - rA;
+                                                    }).map(([groupName, votes]) => (
+                                                        <div key={groupName} className="bg-white/[0.03] rounded-2xl p-4 overflow-hidden border border-white/5">
+                                                            <div className="text-[10px] font-black text-[#E60000] uppercase tracking-widest mb-3 flex items-center justify-between">
+                                                                {groupName}
+                                                                <span className="text-gray-500 text-[9px]">{votes.length} kierowców</span>
                                                             </div>
-                                                            <div className="text-[10px] text-gray-600">
-                                                                {new Date(vote.createdAt).toLocaleDateString()}
+                                                            <div className="flex flex-wrap gap-1.5">
+                                                                {votes.sort((a, b) => {
+                                                                    const pA = parseInt(a.raceRound.split('-').pop() || '0');
+                                                                    const pB = parseInt(b.raceRound.split('-').pop() || '0');
+                                                                    return pA - pB;
+                                                                }).map((v, idx) => (
+                                                                    <div key={idx} className="bg-[#2C2C2E] px-2 py-1.5 rounded-lg flex items-center gap-2 border border-white/5">
+                                                                        <span className="text-[9px] font-black text-gray-500">P{v.raceRound.split('-').pop()}</span>
+                                                                        <span className="text-[11px] font-bold text-white shrink-0">{v.driver}</span>
+                                                                    </div>
+                                                                ))}
                                                             </div>
                                                         </div>
                                                     ))}
@@ -1167,6 +1246,19 @@ export default function AdminPage() {
                                             <span className="text-white">{userRow.votesCount}</span>
                                             <span className="opacity-50">Wyścig</span>
                                         </div>
+                                        {!userRow.isAdmin && (
+                                            <button
+                                                onClick={(e) => { e.stopPropagation(); handleToggleSeasonUnlock(userRow.id, !userRow.unlockedSeason); }}
+                                                className={clsx(
+                                                    "text-[9px] px-1.5 py-0.5 rounded uppercase font-bold tracking-wider border transition-colors cursor-pointer mt-1 flex items-center gap-1",
+                                                    userRow.unlockedSeason
+                                                        ? "bg-green-900/30 text-green-300 border-green-500/30"
+                                                        : "bg-red-900/30 text-red-300 border-red-500/20"
+                                                )}
+                                            >
+                                                {userRow.unlockedSeason ? <><Unlock className="w-2.5 h-2.5" /> Odblokowany</> : <><Lock className="w-2.5 h-2.5" /> Zablokowany</>}
+                                            </button>
+                                        )}
                                     </div>
                                     
                                     {!userRow.isAdmin && (

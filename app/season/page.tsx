@@ -372,7 +372,16 @@ export default function SeasonVotePage() {
     const firstRaceDate = new Date("2026-03-08T05:00:00Z");
     const update = () => {
       const diff = firstRaceDate.getTime() - Date.now();
-      if (diff <= 0) { setTimeLeft("ZABLOKOWANE"); setLocked(true); return; }
+      if (diff <= 0) { 
+        if (user?.unlockedSeason) {
+          setTimeLeft("OTWARTE");
+          setLocked(false);
+        } else {
+          setTimeLeft("ZABLOKOWANE"); 
+          setLocked(true); 
+        }
+        return; 
+      }
       const d = Math.floor(diff / 86400000);
       const h = Math.floor((diff % 86400000) / 3600000);
       const m = Math.floor((diff % 3600000) / 60000);
@@ -381,7 +390,7 @@ export default function SeasonVotePage() {
     update();
     const id = setInterval(update, 60000);
     return () => clearInterval(id);
-  }, []);
+  }, [user?.unlockedSeason]);
 
   // Redirect
   useEffect(() => {

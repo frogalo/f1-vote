@@ -9,6 +9,7 @@ type User = {
   id: string;
   name: string | null;
   isAdmin: boolean;
+  unlockedSeason: boolean;
   team: string | null;
   avatar: string | null;
   favoriteDriver: string | null;

@@ -136,8 +136,22 @@ export async function getAllUsersWithVotes() {
         team: u.team?.name || "Brak",
         votesCount: u.votes.length,
         seasonVotesCount: u.seasonVotes.length,
+        unlockedSeason: u.unlockedSeason,
         createdAt: u.createdAt
     }));
+}
+
+export async function toggleUserSeasonUnlock(userId: string, unlocked: boolean) {
+    await requireAdmin();
+    try {
+        await prisma.user.update({
+            where: { id: userId },
+            data: { unlockedSeason: unlocked }
+        });
+        return { success: true };
+    } catch (e: unknown) {
+        return { error: "Błąd aktualizacji statusu" };
+    }
 }
 
 export async function deleteUser(userId: string) {
@@ -168,6 +182,9 @@ export async function getUserDetails(userId: string) {
                 include: {
                     driver: { select: { slug: true, name: true } }
                 }
+            },
+            raceScores: {
+                orderBy: { raceRound: "asc" }
             }
         }
     });
@@ -179,6 +196,7 @@ export async function getUserDetails(userId: string) {
             id: user.id,
             name: user.name,
             username: user.username,
+            unlockedSeason: user.unlockedSeason,
             seasonVotes: user.seasonVotes.map(v => ({
                 position: v.position,
                 driver: v.driver.name,
@@ -188,7 +206,12 @@ export async function getUserDetails(userId: string) {
                 raceRound: v.raceRound,
                 driver: v.driver.name,
                 createdAt: v.createdAt
-            }))
+            })),
+            stats: {
+                totalPoints: user.raceScores.reduce((sum, s) => sum + s.totalPoints, 0),
+                perfectPredictions: user.raceScores.reduce((sum, s) => sum + s.perfectPredictions, 0),
+                racesCount: new Set(user.raceScores.map(s => s.raceRound)).size
+            }
         }
     };
 }

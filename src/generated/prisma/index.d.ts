@@ -4109,6 +4109,7 @@ export namespace Prisma {
     mostDnfRange: string | null
     firstRaceCollision: boolean | null
     firstRaceRain: boolean | null
+    unlockedSeason: boolean | null
     avatar: string | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -4128,6 +4129,7 @@ export namespace Prisma {
     mostDnfRange: string | null
     firstRaceCollision: boolean | null
     firstRaceRain: boolean | null
+    unlockedSeason: boolean | null
     avatar: string | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -4147,6 +4149,7 @@ export namespace Prisma {
     mostDnfRange: number
     firstRaceCollision: number
     firstRaceRain: number
+    unlockedSeason: number
     avatar: number
     createdAt: number
     updatedAt: number
@@ -4168,6 +4171,7 @@ export namespace Prisma {
     mostDnfRange?: true
     firstRaceCollision?: true
     firstRaceRain?: true
+    unlockedSeason?: true
     avatar?: true
     createdAt?: true
     updatedAt?: true
@@ -4187,6 +4191,7 @@ export namespace Prisma {
     mostDnfRange?: true
     firstRaceCollision?: true
     firstRaceRain?: true
+    unlockedSeason?: true
     avatar?: true
     createdAt?: true
     updatedAt?: true
@@ -4206,6 +4211,7 @@ export namespace Prisma {
     mostDnfRange?: true
     firstRaceCollision?: true
     firstRaceRain?: true
+    unlockedSeason?: true
     avatar?: true
     createdAt?: true
     updatedAt?: true
@@ -4298,6 +4304,7 @@ export namespace Prisma {
     mostDnfRange: string | null
     firstRaceCollision: boolean | null
     firstRaceRain: boolean | null
+    unlockedSeason: boolean
     avatar: string | null
     createdAt: Date
     updatedAt: Date
@@ -4334,6 +4341,7 @@ export namespace Prisma {
     mostDnfRange?: boolean
     firstRaceCollision?: boolean
     firstRaceRain?: boolean
+    unlockedSeason?: boolean
     avatar?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -4363,6 +4371,7 @@ export namespace Prisma {
     mostDnfRange?: boolean
     firstRaceCollision?: boolean
     firstRaceRain?: boolean
+    unlockedSeason?: boolean
     avatar?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -4387,6 +4396,7 @@ export namespace Prisma {
     mostDnfRange?: boolean
     firstRaceCollision?: boolean
     firstRaceRain?: boolean
+    unlockedSeason?: boolean
     avatar?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -4411,12 +4421,13 @@ export namespace Prisma {
     mostDnfRange?: boolean
     firstRaceCollision?: boolean
     firstRaceRain?: boolean
+    unlockedSeason?: boolean
     avatar?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "username" | "password" | "name" | "isAdmin" | "teamId" | "favoriteDriverId" | "fastestLapDriverId" | "fastestPitstopTeamId" | "mostDotdDriverId" | "mostDnfRange" | "firstRaceCollision" | "firstRaceRain" | "avatar" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "username" | "password" | "name" | "isAdmin" | "teamId" | "favoriteDriverId" | "fastestLapDriverId" | "fastestPitstopTeamId" | "mostDotdDriverId" | "mostDnfRange" | "firstRaceCollision" | "firstRaceRain" | "unlockedSeason" | "avatar" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
   export type UserInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     team?: boolean | User$teamArgs<ExtArgs>
     favoriteDriver?: boolean | User$favoriteDriverArgs<ExtArgs>
@@ -4471,6 +4482,7 @@ export namespace Prisma {
       mostDnfRange: string | null
       firstRaceCollision: boolean | null
       firstRaceRain: boolean | null
+      unlockedSeason: boolean
       avatar: string | null
       createdAt: Date
       updatedAt: Date
@@ -4919,6 +4931,7 @@ export namespace Prisma {
     readonly mostDnfRange: FieldRef<"User", 'String'>
     readonly firstRaceCollision: FieldRef<"User", 'Boolean'>
     readonly firstRaceRain: FieldRef<"User", 'Boolean'>
+    readonly unlockedSeason: FieldRef<"User", 'Boolean'>
     readonly avatar: FieldRef<"User", 'String'>
     readonly createdAt: FieldRef<"User", 'DateTime'>
     readonly updatedAt: FieldRef<"User", 'DateTime'>
@@ -11409,6 +11422,7 @@ export namespace Prisma {
     mostDnfRange: 'mostDnfRange',
     firstRaceCollision: 'firstRaceCollision',
     firstRaceRain: 'firstRaceRain',
+    unlockedSeason: 'unlockedSeason',
     avatar: 'avatar',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
@@ -11778,6 +11792,7 @@ export namespace Prisma {
     mostDnfRange?: StringNullableFilter<"User"> | string | null
     firstRaceCollision?: BoolNullableFilter<"User"> | boolean | null
     firstRaceRain?: BoolNullableFilter<"User"> | boolean | null
+    unlockedSeason?: BoolFilter<"User"> | boolean
     avatar?: StringNullableFilter<"User"> | string | null
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
@@ -11806,6 +11821,7 @@ export namespace Prisma {
     mostDnfRange?: SortOrderInput | SortOrder
     firstRaceCollision?: SortOrderInput | SortOrder
     firstRaceRain?: SortOrderInput | SortOrder
+    unlockedSeason?: SortOrder
     avatar?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -11837,6 +11853,7 @@ export namespace Prisma {
     mostDnfRange?: StringNullableFilter<"User"> | string | null
     firstRaceCollision?: BoolNullableFilter<"User"> | boolean | null
     firstRaceRain?: BoolNullableFilter<"User"> | boolean | null
+    unlockedSeason?: BoolFilter<"User"> | boolean
     avatar?: StringNullableFilter<"User"> | string | null
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
@@ -11865,6 +11882,7 @@ export namespace Prisma {
     mostDnfRange?: SortOrderInput | SortOrder
     firstRaceCollision?: SortOrderInput | SortOrder
     firstRaceRain?: SortOrderInput | SortOrder
+    unlockedSeason?: SortOrder
     avatar?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -11890,6 +11908,7 @@ export namespace Prisma {
     mostDnfRange?: StringNullableWithAggregatesFilter<"User"> | string | null
     firstRaceCollision?: BoolNullableWithAggregatesFilter<"User"> | boolean | null
     firstRaceRain?: BoolNullableWithAggregatesFilter<"User"> | boolean | null
+    unlockedSeason?: BoolWithAggregatesFilter<"User"> | boolean
     avatar?: StringNullableWithAggregatesFilter<"User"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
@@ -12481,6 +12500,7 @@ export namespace Prisma {
     mostDnfRange?: string | null
     firstRaceCollision?: boolean | null
     firstRaceRain?: boolean | null
+    unlockedSeason?: boolean
     avatar?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -12509,6 +12529,7 @@ export namespace Prisma {
     mostDnfRange?: string | null
     firstRaceCollision?: boolean | null
     firstRaceRain?: boolean | null
+    unlockedSeason?: boolean
     avatar?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -12527,6 +12548,7 @@ export namespace Prisma {
     mostDnfRange?: NullableStringFieldUpdateOperationsInput | string | null
     firstRaceCollision?: NullableBoolFieldUpdateOperationsInput | boolean | null
     firstRaceRain?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    unlockedSeason?: BoolFieldUpdateOperationsInput | boolean
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -12555,6 +12577,7 @@ export namespace Prisma {
     mostDnfRange?: NullableStringFieldUpdateOperationsInput | string | null
     firstRaceCollision?: NullableBoolFieldUpdateOperationsInput | boolean | null
     firstRaceRain?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    unlockedSeason?: BoolFieldUpdateOperationsInput | boolean
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -12578,6 +12601,7 @@ export namespace Prisma {
     mostDnfRange?: string | null
     firstRaceCollision?: boolean | null
     firstRaceRain?: boolean | null
+    unlockedSeason?: boolean
     avatar?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -12592,6 +12616,7 @@ export namespace Prisma {
     mostDnfRange?: NullableStringFieldUpdateOperationsInput | string | null
     firstRaceCollision?: NullableBoolFieldUpdateOperationsInput | boolean | null
     firstRaceRain?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    unlockedSeason?: BoolFieldUpdateOperationsInput | boolean
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -12611,6 +12636,7 @@ export namespace Prisma {
     mostDnfRange?: NullableStringFieldUpdateOperationsInput | string | null
     firstRaceCollision?: NullableBoolFieldUpdateOperationsInput | boolean | null
     firstRaceRain?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    unlockedSeason?: BoolFieldUpdateOperationsInput | boolean
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -13346,6 +13372,7 @@ export namespace Prisma {
     mostDnfRange?: SortOrder
     firstRaceCollision?: SortOrder
     firstRaceRain?: SortOrder
+    unlockedSeason?: SortOrder
     avatar?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -13365,6 +13392,7 @@ export namespace Prisma {
     mostDnfRange?: SortOrder
     firstRaceCollision?: SortOrder
     firstRaceRain?: SortOrder
+    unlockedSeason?: SortOrder
     avatar?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -13384,6 +13412,7 @@ export namespace Prisma {
     mostDnfRange?: SortOrder
     firstRaceCollision?: SortOrder
     firstRaceRain?: SortOrder
+    unlockedSeason?: SortOrder
     avatar?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -14887,6 +14916,7 @@ export namespace Prisma {
     mostDnfRange?: string | null
     firstRaceCollision?: boolean | null
     firstRaceRain?: boolean | null
+    unlockedSeason?: boolean
     avatar?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -14913,6 +14943,7 @@ export namespace Prisma {
     mostDnfRange?: string | null
     firstRaceCollision?: boolean | null
     firstRaceRain?: boolean | null
+    unlockedSeason?: boolean
     avatar?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -14941,6 +14972,7 @@ export namespace Prisma {
     mostDnfRange?: string | null
     firstRaceCollision?: boolean | null
     firstRaceRain?: boolean | null
+    unlockedSeason?: boolean
     avatar?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -14967,6 +14999,7 @@ export namespace Prisma {
     mostDnfRange?: string | null
     firstRaceCollision?: boolean | null
     firstRaceRain?: boolean | null
+    unlockedSeason?: boolean
     avatar?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -15059,6 +15092,7 @@ export namespace Prisma {
     mostDnfRange?: StringNullableFilter<"User"> | string | null
     firstRaceCollision?: BoolNullableFilter<"User"> | boolean | null
     firstRaceRain?: BoolNullableFilter<"User"> | boolean | null
+    unlockedSeason?: BoolFilter<"User"> | boolean
     avatar?: StringNullableFilter<"User"> | string | null
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
@@ -15192,6 +15226,7 @@ export namespace Prisma {
     mostDnfRange?: string | null
     firstRaceCollision?: boolean | null
     firstRaceRain?: boolean | null
+    unlockedSeason?: boolean
     avatar?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -15218,6 +15253,7 @@ export namespace Prisma {
     mostDnfRange?: string | null
     firstRaceCollision?: boolean | null
     firstRaceRain?: boolean | null
+    unlockedSeason?: boolean
     avatar?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -15246,6 +15282,7 @@ export namespace Prisma {
     mostDnfRange?: string | null
     firstRaceCollision?: boolean | null
     firstRaceRain?: boolean | null
+    unlockedSeason?: boolean
     avatar?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -15272,6 +15309,7 @@ export namespace Prisma {
     mostDnfRange?: string | null
     firstRaceCollision?: boolean | null
     firstRaceRain?: boolean | null
+    unlockedSeason?: boolean
     avatar?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -15300,6 +15338,7 @@ export namespace Prisma {
     mostDnfRange?: string | null
     firstRaceCollision?: boolean | null
     firstRaceRain?: boolean | null
+    unlockedSeason?: boolean
     avatar?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -15326,6 +15365,7 @@ export namespace Prisma {
     mostDnfRange?: string | null
     firstRaceCollision?: boolean | null
     firstRaceRain?: boolean | null
+    unlockedSeason?: boolean
     avatar?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -16016,6 +16056,7 @@ export namespace Prisma {
     mostDnfRange?: string | null
     firstRaceCollision?: boolean | null
     firstRaceRain?: boolean | null
+    unlockedSeason?: boolean
     avatar?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -16043,6 +16084,7 @@ export namespace Prisma {
     mostDnfRange?: string | null
     firstRaceCollision?: boolean | null
     firstRaceRain?: boolean | null
+    unlockedSeason?: boolean
     avatar?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -16111,6 +16153,7 @@ export namespace Prisma {
     mostDnfRange?: NullableStringFieldUpdateOperationsInput | string | null
     firstRaceCollision?: NullableBoolFieldUpdateOperationsInput | boolean | null
     firstRaceRain?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    unlockedSeason?: BoolFieldUpdateOperationsInput | boolean
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -16138,6 +16181,7 @@ export namespace Prisma {
     mostDnfRange?: NullableStringFieldUpdateOperationsInput | string | null
     firstRaceCollision?: NullableBoolFieldUpdateOperationsInput | boolean | null
     firstRaceRain?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    unlockedSeason?: BoolFieldUpdateOperationsInput | boolean
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -16196,6 +16240,7 @@ export namespace Prisma {
     mostDnfRange?: string | null
     firstRaceCollision?: boolean | null
     firstRaceRain?: boolean | null
+    unlockedSeason?: boolean
     avatar?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -16223,6 +16268,7 @@ export namespace Prisma {
     mostDnfRange?: string | null
     firstRaceCollision?: boolean | null
     firstRaceRain?: boolean | null
+    unlockedSeason?: boolean
     avatar?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -16291,6 +16337,7 @@ export namespace Prisma {
     mostDnfRange?: NullableStringFieldUpdateOperationsInput | string | null
     firstRaceCollision?: NullableBoolFieldUpdateOperationsInput | boolean | null
     firstRaceRain?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    unlockedSeason?: BoolFieldUpdateOperationsInput | boolean
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -16318,6 +16365,7 @@ export namespace Prisma {
     mostDnfRange?: NullableStringFieldUpdateOperationsInput | string | null
     firstRaceCollision?: NullableBoolFieldUpdateOperationsInput | boolean | null
     firstRaceRain?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    unlockedSeason?: BoolFieldUpdateOperationsInput | boolean
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -16470,6 +16518,7 @@ export namespace Prisma {
     mostDnfRange?: string | null
     firstRaceCollision?: boolean | null
     firstRaceRain?: boolean | null
+    unlockedSeason?: boolean
     avatar?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -16497,6 +16546,7 @@ export namespace Prisma {
     mostDnfRange?: string | null
     firstRaceCollision?: boolean | null
     firstRaceRain?: boolean | null
+    unlockedSeason?: boolean
     avatar?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -16585,6 +16635,7 @@ export namespace Prisma {
     mostDnfRange?: NullableStringFieldUpdateOperationsInput | string | null
     firstRaceCollision?: NullableBoolFieldUpdateOperationsInput | boolean | null
     firstRaceRain?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    unlockedSeason?: BoolFieldUpdateOperationsInput | boolean
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -16612,6 +16663,7 @@ export namespace Prisma {
     mostDnfRange?: NullableStringFieldUpdateOperationsInput | string | null
     firstRaceCollision?: NullableBoolFieldUpdateOperationsInput | boolean | null
     firstRaceRain?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    unlockedSeason?: BoolFieldUpdateOperationsInput | boolean
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -16690,6 +16742,7 @@ export namespace Prisma {
     mostDnfRange?: string | null
     firstRaceCollision?: boolean | null
     firstRaceRain?: boolean | null
+    unlockedSeason?: boolean
     avatar?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -16717,6 +16770,7 @@ export namespace Prisma {
     mostDnfRange?: string | null
     firstRaceCollision?: boolean | null
     firstRaceRain?: boolean | null
+    unlockedSeason?: boolean
     avatar?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -16805,6 +16859,7 @@ export namespace Prisma {
     mostDnfRange?: NullableStringFieldUpdateOperationsInput | string | null
     firstRaceCollision?: NullableBoolFieldUpdateOperationsInput | boolean | null
     firstRaceRain?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    unlockedSeason?: BoolFieldUpdateOperationsInput | boolean
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -16832,6 +16887,7 @@ export namespace Prisma {
     mostDnfRange?: NullableStringFieldUpdateOperationsInput | string | null
     firstRaceCollision?: NullableBoolFieldUpdateOperationsInput | boolean | null
     firstRaceRain?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    unlockedSeason?: BoolFieldUpdateOperationsInput | boolean
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -16914,6 +16970,7 @@ export namespace Prisma {
     mostDnfRange?: string | null
     firstRaceCollision?: boolean | null
     firstRaceRain?: boolean | null
+    unlockedSeason?: boolean
     avatar?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -16932,6 +16989,7 @@ export namespace Prisma {
     mostDnfRange?: string | null
     firstRaceCollision?: boolean | null
     firstRaceRain?: boolean | null
+    unlockedSeason?: boolean
     avatar?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -16956,6 +17014,7 @@ export namespace Prisma {
     mostDnfRange?: NullableStringFieldUpdateOperationsInput | string | null
     firstRaceCollision?: NullableBoolFieldUpdateOperationsInput | boolean | null
     firstRaceRain?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    unlockedSeason?: BoolFieldUpdateOperationsInput | boolean
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -16982,6 +17041,7 @@ export namespace Prisma {
     mostDnfRange?: NullableStringFieldUpdateOperationsInput | string | null
     firstRaceCollision?: NullableBoolFieldUpdateOperationsInput | boolean | null
     firstRaceRain?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    unlockedSeason?: BoolFieldUpdateOperationsInput | boolean
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -17004,6 +17064,7 @@ export namespace Prisma {
     mostDnfRange?: NullableStringFieldUpdateOperationsInput | string | null
     firstRaceCollision?: NullableBoolFieldUpdateOperationsInput | boolean | null
     firstRaceRain?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    unlockedSeason?: BoolFieldUpdateOperationsInput | boolean
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -17018,6 +17079,7 @@ export namespace Prisma {
     mostDnfRange?: NullableStringFieldUpdateOperationsInput | string | null
     firstRaceCollision?: NullableBoolFieldUpdateOperationsInput | boolean | null
     firstRaceRain?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    unlockedSeason?: BoolFieldUpdateOperationsInput | boolean
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -17044,6 +17106,7 @@ export namespace Prisma {
     mostDnfRange?: NullableStringFieldUpdateOperationsInput | string | null
     firstRaceCollision?: NullableBoolFieldUpdateOperationsInput | boolean | null
     firstRaceRain?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    unlockedSeason?: BoolFieldUpdateOperationsInput | boolean
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -17066,6 +17129,7 @@ export namespace Prisma {
     mostDnfRange?: NullableStringFieldUpdateOperationsInput | string | null
     firstRaceCollision?: NullableBoolFieldUpdateOperationsInput | boolean | null
     firstRaceRain?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    unlockedSeason?: BoolFieldUpdateOperationsInput | boolean
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -17140,6 +17204,7 @@ export namespace Prisma {
     mostDnfRange?: string | null
     firstRaceCollision?: boolean | null
     firstRaceRain?: boolean | null
+    unlockedSeason?: boolean
     avatar?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -17158,6 +17223,7 @@ export namespace Prisma {
     mostDnfRange?: string | null
     firstRaceCollision?: boolean | null
     firstRaceRain?: boolean | null
+    unlockedSeason?: boolean
     avatar?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -17176,6 +17242,7 @@ export namespace Prisma {
     mostDnfRange?: string | null
     firstRaceCollision?: boolean | null
     firstRaceRain?: boolean | null
+    unlockedSeason?: boolean
     avatar?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -17238,6 +17305,7 @@ export namespace Prisma {
     mostDnfRange?: NullableStringFieldUpdateOperationsInput | string | null
     firstRaceCollision?: NullableBoolFieldUpdateOperationsInput | boolean | null
     firstRaceRain?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    unlockedSeason?: BoolFieldUpdateOperationsInput | boolean
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -17264,6 +17332,7 @@ export namespace Prisma {
     mostDnfRange?: NullableStringFieldUpdateOperationsInput | string | null
     firstRaceCollision?: NullableBoolFieldUpdateOperationsInput | boolean | null
     firstRaceRain?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    unlockedSeason?: BoolFieldUpdateOperationsInput | boolean
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -17286,6 +17355,7 @@ export namespace Prisma {
     mostDnfRange?: NullableStringFieldUpdateOperationsInput | string | null
     firstRaceCollision?: NullableBoolFieldUpdateOperationsInput | boolean | null
     firstRaceRain?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    unlockedSeason?: BoolFieldUpdateOperationsInput | boolean
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -17300,6 +17370,7 @@ export namespace Prisma {
     mostDnfRange?: NullableStringFieldUpdateOperationsInput | string | null
     firstRaceCollision?: NullableBoolFieldUpdateOperationsInput | boolean | null
     firstRaceRain?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    unlockedSeason?: BoolFieldUpdateOperationsInput | boolean
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -17326,6 +17397,7 @@ export namespace Prisma {
     mostDnfRange?: NullableStringFieldUpdateOperationsInput | string | null
     firstRaceCollision?: NullableBoolFieldUpdateOperationsInput | boolean | null
     firstRaceRain?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    unlockedSeason?: BoolFieldUpdateOperationsInput | boolean
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -17348,6 +17420,7 @@ export namespace Prisma {
     mostDnfRange?: NullableStringFieldUpdateOperationsInput | string | null
     firstRaceCollision?: NullableBoolFieldUpdateOperationsInput | boolean | null
     firstRaceRain?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    unlockedSeason?: BoolFieldUpdateOperationsInput | boolean
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -17362,6 +17435,7 @@ export namespace Prisma {
     mostDnfRange?: NullableStringFieldUpdateOperationsInput | string | null
     firstRaceCollision?: NullableBoolFieldUpdateOperationsInput | boolean | null
     firstRaceRain?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    unlockedSeason?: BoolFieldUpdateOperationsInput | boolean
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -17388,6 +17462,7 @@ export namespace Prisma {
     mostDnfRange?: NullableStringFieldUpdateOperationsInput | string | null
     firstRaceCollision?: NullableBoolFieldUpdateOperationsInput | boolean | null
     firstRaceRain?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    unlockedSeason?: BoolFieldUpdateOperationsInput | boolean
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -17410,6 +17485,7 @@ export namespace Prisma {
     mostDnfRange?: NullableStringFieldUpdateOperationsInput | string | null
     firstRaceCollision?: NullableBoolFieldUpdateOperationsInput | boolean | null
     firstRaceRain?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    unlockedSeason?: BoolFieldUpdateOperationsInput | boolean
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string

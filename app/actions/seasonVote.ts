@@ -11,8 +11,23 @@ async function getAuthUserId(): Promise<string | null> {
     return cookieStore.get("userId")?.value || null;
 }
 
-export async function isSeasonLocked(): Promise<boolean> {
-    return Date.now() > FIRST_RACE_DATE.getTime();
+export async function isSeasonLocked(userIdOverride?: string): Promise<boolean> {
+    const isPastDate = Date.now() > FIRST_RACE_DATE.getTime();
+    if (!isPastDate) return false;
+
+    // If past date, check for bypass for current user
+    const userId = userIdOverride || await getAuthUserId();
+    if (!userId) return true;
+
+    try {
+        const user = await prisma.user.findUnique({
+            where: { id: userId },
+            select: { unlockedSeason: true }
+        });
+        return !user?.unlockedSeason;
+    } catch (e) {
+        return true;
+    }
 }
 
 export async function hasSeasonVotes(): Promise<boolean> {

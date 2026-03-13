@@ -151,6 +151,7 @@ exports.Prisma.UserScalarFieldEnum = {
   mostDnfRange: 'mostDnfRange',
   firstRaceCollision: 'firstRaceCollision',
   firstRaceRain: 'firstRaceRain',
+  unlockedSeason: 'unlockedSeason',
   avatar: 'avatar',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'

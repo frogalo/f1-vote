@@ -55,6 +55,7 @@ model User {
   mostDnfRange         String?
   firstRaceCollision   Boolean?
   firstRaceRain        Boolean?
+  unlockedSeason       Boolean         @default(false)
   avatar               String? // URL to avatar image
   votes                Vote[]
   seasonVotes          SeasonVote[]
