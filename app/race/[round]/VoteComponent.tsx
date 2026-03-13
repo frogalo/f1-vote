@@ -342,8 +342,12 @@ export function VoteComponent({ race, drivers }: Props) {
       const next = arrayMove(orderedDrivers, oldIdx, newIdx);
       setOrderedDrivers(next);
       // Persist to server DB (source of truth)
-      saveFn(race.round, next.map((d) => d.id)).catch(() => {});
-      toast.success("Typy zapisano!");
+      saveFn(race.round, next.map((d) => d.id)).then((res: any) => {
+        if (res?.error) toast.error("Błąd zapisu: " + res.error);
+        else toast.success("Typy zapisano!");
+      }).catch(() => {
+        toast.error("Wystąpił błąd połączenia.");
+      });
     }
   };
 
@@ -362,8 +366,12 @@ export function VoteComponent({ race, drivers }: Props) {
     setOrderedDrivers(next);
     setSelectedId(null);
     // Persist to server DB (source of truth)
-    saveFn(race.round, next.map((d) => d.id)).catch(() => {});
-    toast.success("Pozycje zamienione!");
+    saveFn(race.round, next.map((d) => d.id)).then((res: any) => {
+      if (res?.error) toast.error("Błąd zapisu: " + res.error);
+      else toast.success("Pozycje zamienione!");
+    }).catch(() => {
+      toast.error("Wystąpił błąd połączenia.");
+    });
   };
 
   // ── Mobile insert-between ────────────────────────────────────────────────
@@ -385,8 +393,12 @@ export function VoteComponent({ race, drivers }: Props) {
 
     setOrderedDrivers(next);
     setSelectedId(null);
-    saveRaceVotes(race.round, next.map((d) => d.id)).catch(() => {});
-    toast.success("Kierowca przeniesiony!");
+    saveFn(race.round, next.map((d) => d.id)).then((res: any) => {
+      if (res?.error) toast.error("Błąd zapisu: " + res.error);
+      else toast.success("Kierowca przeniesiony!");
+    }).catch(() => {
+      toast.error("Wystąpił błąd połączenia.");
+    });
   };
 
   const activeDriver = activeId ? orderedDrivers.find((d) => d.id === activeId) : null;
