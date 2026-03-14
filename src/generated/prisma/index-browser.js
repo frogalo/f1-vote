@@ -222,6 +222,15 @@ exports.Prisma.RaceScoreScalarFieldEnum = {
   createdAt: 'createdAt'
 };
 
+exports.Prisma.PasswordResetTokenScalarFieldEnum = {
+  id: 'id',
+  token: 'token',
+  userId: 'userId',
+  expiresAt: 'expiresAt',
+  used: 'used',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -257,7 +266,8 @@ exports.Prisma.ModelName = {
   SeasonVote: 'SeasonVote',
   Race: 'Race',
   RaceExtraVote: 'RaceExtraVote',
-  RaceScore: 'RaceScore'
+  RaceScore: 'RaceScore',
+  PasswordResetToken: 'PasswordResetToken'
 };
 
 /**

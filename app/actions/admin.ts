@@ -215,3 +215,25 @@ export async function getUserDetails(userId: string) {
         }
     };
 }
+
+export async function generatePasswordResetLink(userId: string) {
+    await requireAdmin();
+
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user) return { error: "Nie znaleziono użytkownika" };
+
+    // Generate token
+    const token = crypto.randomUUID();
+    const expiresAt = new Date(Date.now() + 1000 * 60 * 60); // 1 hour
+
+    await prisma.passwordResetToken.create({
+        data: {
+            token,
+            userId,
+            expiresAt,
+        }
+    });
+
+    return { success: true, link: `/reset-password/${token}` };
+}
+

@@ -61,6 +61,7 @@ model User {
   seasonVotes      SeasonVote[]
   raceScores       RaceScore[]
   raceExtraVotes   RaceExtraVote[]
+  passwordResetTokens PasswordResetToken[]
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 }
@@ -155,3 +156,16 @@ model RaceScore {
   @@index([userId])
   @@index([raceRound])
 }
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+

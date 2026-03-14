@@ -4,10 +4,10 @@ import { useAuth } from "@/app/providers/AuthProvider";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { getTeamLogo, normalizeCountryCode } from "@/lib/data";
-import { getTeams, getDrivers, addDriver, updateDriver, deleteDriver, getAllUsersWithVotes, deleteUser, getUserDetails, toggleDriverStatus, toggleUserSeasonUnlock } from "@/app/actions/admin";
+import { getTeams, getDrivers, addDriver, updateDriver, deleteDriver, getAllUsersWithVotes, deleteUser, getUserDetails, toggleDriverStatus, toggleUserSeasonUnlock, generatePasswordResetLink } from "@/app/actions/admin";
 import { getRaces, addRace, updateRace, deleteRace, seedRaces, toggleRaceCanceled } from "@/app/actions/races";
 import { toast } from "sonner";
-import { Plus, Trash2, Edit3, X, Shield, ChevronDown, Trophy, Flag, LogOut, CheckCircle2, Unlock, Lock } from "lucide-react";
+import { Plus, Trash2, Edit3, X, Shield, ChevronDown, Trophy, Flag, LogOut, CheckCircle2, Unlock, Lock, KeyRound, Copy } from "lucide-react";
 import { logoutUser } from "@/app/actions/auth";
 import { clsx } from "clsx";
 import ReactCountryFlag from "react-country-flag";
@@ -119,6 +119,8 @@ export default function AdminPage() {
     const [selectedUser, setSelectedUser] = useState<UserDetails | null>(null);
     const [detailsLoading, setDetailsLoading] = useState(false);
     const [finishingRace, setFinishingRace] = useState<Race | null>(null);
+    const [resetLink, setResetLink] = useState<string | null>(null);
+    const [generatingLink, setGeneratingLink] = useState(false);
 
     useEffect(() => {
         if (!loading && (!user || !user.isAdmin)) {
@@ -358,6 +360,7 @@ export default function AdminPage() {
     async function handleUserClick(userId: string) {
         setDetailsLoading(true);
         setSelectedUser(null);
+        setResetLink(null);
         // Show modal immediately/loading state
         setShowForm(false); // Close other forms if open
         
@@ -378,6 +381,23 @@ export default function AdminPage() {
             toast.error("Błąd pobierania szczegółów");
         } finally {
             setDetailsLoading(false);
+        }
+    }
+
+    async function handleGenerateResetLink(userId: string) {
+        setGeneratingLink(true);
+        try {
+            const result = await generatePasswordResetLink(userId);
+            if (result.error) {
+                toast.error(result.error);
+            } else {
+                setResetLink(window.location.origin + result.link);
+                toast.success("Wygenerowano link resetujący hasło");
+            }
+        } catch {
+            toast.error("Błąd generowania linku");
+        } finally {
+            setGeneratingLink(false);
         }
     }
 
@@ -1111,8 +1131,43 @@ export default function AdminPage() {
                                                 >
                                                     {selectedUser.unlockedSeason ? <><Unlock className="w-3 h-3" /> Odblokowane</> : <><Lock className="w-3 h-3" /> Zablokowane</>}
                                                 </button>
+                                                <button
+                                                    onClick={(e) => { e.stopPropagation(); handleGenerateResetLink(selectedUser.id); }}
+                                                    disabled={generatingLink}
+                                                    className={clsx(
+                                                        "px-3 py-1.5 rounded-xl uppercase text-[10px] font-black tracking-tight border transition-all flex items-center gap-2 w-full justify-center mt-2",
+                                                        "bg-blue-500/10 text-blue-400 border-blue-500/20 hover:bg-blue-500/20"
+                                                    )}
+                                                >
+                                                    <KeyRound className="w-3 h-3" /> {generatingLink ? "Generowanie..." : "Reset Hasła"}
+                                                </button>
                                             </div>
                                         </div>
+
+                                        {resetLink && (
+                                            <div className="bg-blue-900/20 border border-blue-500/20 rounded-xl p-4 flex flex-col gap-2 relative">
+                                                <div className="text-[10px] text-blue-400 font-black uppercase tracking-widest flex items-center gap-2">
+                                                    <KeyRound className="w-3 h-3" /> Jednorazowy link do resetu (Ważny 1h)
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    <input 
+                                                        readOnly 
+                                                        value={resetLink} 
+                                                        className="flex-1 bg-black/40 border border-white/5 p-2 rounded-lg text-xs font-mono text-white/80 focus:outline-none focus:border-blue-500/30" 
+                                                    />
+                                                    <button
+                                                        onClick={() => {
+                                                            navigator.clipboard.writeText(resetLink);
+                                                            toast.success("Skopiowano link!");
+                                                        }}
+                                                        className="p-2 bg-blue-500/20 hover:bg-blue-500/40 border border-blue-500/30 rounded-lg transition-colors text-blue-300"
+                                                        title="Kopiuj"
+                                                    >
+                                                        <Copy className="w-4 h-4" />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        )}
 
                                         {selectedUser.stats && (
                                             <div className="grid grid-cols-3 gap-3">
