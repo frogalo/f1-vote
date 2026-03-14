@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 // Routes that require NO authentication
-const PUBLIC_ROUTES = ["/login", "/register", "/privacy-policy", "/invite", "/race"];
+const PUBLIC_ROUTES = ["/login", "/register", "/privacy-policy", "/invite", "/race", "/reset-password"];
 
 // Routes that are ONLY for admins
 const ADMIN_ROUTES = ["/admin"];
