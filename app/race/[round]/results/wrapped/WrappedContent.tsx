@@ -877,55 +877,76 @@ export default function WrappedContent({ raceRound, isSprint = false }: Props) {
                       <motion.div variants={scaleReveal}>
                         {data.favoriteDriverFinishPos !== null ? (
                           <motion.div
-                            className={`inline-flex items-center gap-3 rounded-2xl px-5 py-3 ${
-                              data.favoriteDriverFinishPos <= 3
-                                ? "border border-[#E60000]/30 bg-[#E60000]/10"
-                                : data.favoriteDriverInTop10
-                                  ? "border border-emerald-500/30 bg-emerald-500/10"
-                                  : "border border-white/10 bg-white/5"
+                            className={`inline-flex flex-col items-center gap-2 rounded-2xl px-6 py-4 ${
+                              data.favoriteDriverFinishPos === 1
+                                ? "border border-[#E60000]/40 bg-[#E60000]/10"
+                                : data.favoriteDriverFinishPos <= 3
+                                  ? "border border-amber-500/30 bg-amber-500/10"
+                                  : data.favoriteDriverInTop10
+                                    ? "border border-emerald-500/30 bg-emerald-500/10"
+                                    : "border border-white/10 bg-white/5"
                             }`}
                             whileHover={{ scale: 1.02 }}
                           >
-                            <motion.span
-                              className="text-4xl font-black text-white"
+                            {/* Big emoji reaction */}
+                            <motion.div
+                              className="text-5xl"
                               initial={{ scale: 0, rotate: -20 }}
                               animate={{ scale: 1, rotate: 0 }}
-                              transition={{
-                                ...SPRING_BOUNCY,
-                                delay: 0.3,
-                              }}
+                              transition={{ ...SPRING_BOUNCY, delay: 0.2 }}
                             >
-                              P{data.favoriteDriverFinishPos}
-                            </motion.span>
-                            <div className="text-left">
-                              <div className="text-[10px] font-bold uppercase tracking-wider text-gray-400">
-                                Pozycja
-                              </div>
-                              <div
-                                className={`text-sm font-black ${
-                                  data.favoriteDriverFinishPos === 1
-                                    ? "text-[#E60000]"
-                                    : data.favoriteDriverFinishPos <= 3
-                                      ? "text-amber-400"
-                                      : data.favoriteDriverInTop10
-                                        ? "text-emerald-400"
-                                        : "text-gray-400"
-                                }`}
+                              {data.favoriteDriverFinishPos === 1
+                                ? "🏆"
+                                : data.favoriteDriverFinishPos <= 3
+                                  ? "🥇"
+                                  : data.favoriteDriverFinishPos <= 10
+                                    ? "👏"
+                                    : data.favoriteDriverFinishPos <= 15
+                                      ? "😐"
+                                      : "😢"}
+                            </motion.div>
+                            <div className="flex items-center gap-3">
+                              <motion.span
+                                className="text-4xl font-black text-white"
+                                initial={{ scale: 0, rotate: -20 }}
+                                animate={{ scale: 1, rotate: 0 }}
+                                transition={{ ...SPRING_BOUNCY, delay: 0.3 }}
                               >
-                                {data.favoriteDriverFinishPos === 1
-                                  ? "🏆 Zwycięstwo!"
-                                  : data.favoriteDriverFinishPos <= 3
-                                    ? "🥇 Podium!"
-                                    : data.favoriteDriverInTop10
-                                      ? "✅ W top 10"
-                                      : "Poza top 10"}
+                                P{data.favoriteDriverFinishPos}
+                              </motion.span>
+                              <div className="text-left">
+                                <div className="text-[10px] font-bold uppercase tracking-wider text-gray-400">
+                                  Pozycja
+                                </div>
+                                <div
+                                  className={`text-sm font-black ${
+                                    data.favoriteDriverFinishPos === 1
+                                      ? "text-[#E60000]"
+                                      : data.favoriteDriverFinishPos <= 3
+                                        ? "text-amber-400"
+                                        : data.favoriteDriverInTop10
+                                          ? "text-emerald-400"
+                                          : "text-gray-400"
+                                  }`}
+                                >
+                                  {data.favoriteDriverFinishPos === 1
+                                    ? "Zwycięstwo!"
+                                    : data.favoriteDriverFinishPos <= 3
+                                      ? "Podium!"
+                                      : data.favoriteDriverInTop10
+                                        ? "W top 10"
+                                        : data.favoriteDriverFinishPos <= 15
+                                          ? "Poza top 10"
+                                          : "Koniec stawki"}
+                                </div>
                               </div>
                             </div>
                           </motion.div>
                         ) : (
-                          <div className="rounded-2xl border border-gray-600/30 bg-gray-600/10 px-5 py-3">
+                          <div className="flex flex-col items-center gap-2 rounded-2xl border border-gray-600/30 bg-gray-600/10 px-5 py-4">
+                            <span className="text-4xl">💀</span>
                             <span className="text-base font-black text-gray-400">
-                              Nie ukończył w top 20
+                              DNF
                             </span>
                           </div>
                         )}
@@ -1030,7 +1051,21 @@ export default function WrappedContent({ raceRound, isSprint = false }: Props) {
                             <span className="text-sm font-bold text-white">
                               {dr.driverName}
                             </span>
-                            <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-2">
+                              {/* Emoji reaction */}
+                              <span className="text-base">
+                                {dr.finishPos === null
+                                  ? "💀"
+                                  : dr.finishPos === 1
+                                    ? "🏆"
+                                    : dr.finishPos <= 3
+                                      ? "🥇"
+                                      : dr.finishPos <= 10
+                                        ? "👍"
+                                        : dr.finishPos <= 15
+                                          ? "😐"
+                                          : "😢"}
+                              </span>
                               {dr.f1Points > 0 && (
                                 <span className="rounded-md bg-purple-500/15 px-2 py-0.5 text-[10px] font-black text-purple-400">
                                   +{dr.f1Points} pkt
@@ -1142,17 +1177,46 @@ export default function WrappedContent({ raceRound, isSprint = false }: Props) {
                     miejsce w rankingu
                   </motion.div>
 
-                  {data.playersBeaten > 0 && (
-                    <motion.div
-                      variants={staggerItem}
-                      className="mb-4 rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-2"
-                      whileHover={{ scale: 1.05 }}
+                  {/* Ranking reaction */}
+                  <motion.div
+                    variants={staggerItem}
+                    className={`mb-5 flex flex-col items-center gap-1 rounded-2xl border px-6 py-3 ${
+                      data.userRank <= 2
+                        ? "border-[#E60000]/30 bg-[#E60000]/10"
+                        : data.userRank >= data.totalPlayers - 1
+                          ? "border-gray-600/30 bg-gray-600/10"
+                          : "border-amber-500/30 bg-amber-500/10"
+                    }`}
+                  >
+                    <motion.span
+                      className="text-4xl"
+                      animate={{ scale: [1, 1.2, 1] }}
+                      transition={{ duration: 1.5, repeat: Infinity }}
                     >
-                      <span className="text-xs font-black text-amber-400">
-                        Lepszy od {data.playersBeaten} graczy! 🔥
-                      </span>
-                    </motion.div>
-                  )}
+                      {data.userRank <= 2
+                        ? data.userRank === 1 ? "🥇" : "🥈"
+                        : data.userRank >= data.totalPlayers - 1
+                          ? data.userRank === data.totalPlayers ? "💀" : "😬"
+                          : "💪"}
+                    </motion.span>
+                    <span className={`text-sm font-black ${
+                      data.userRank <= 2
+                        ? "text-[#E60000]"
+                        : data.userRank >= data.totalPlayers - 1
+                          ? "text-gray-400"
+                          : "text-amber-400"
+                    }`}>
+                      {data.userRank === 1
+                        ? "Jesteś na szczycie!"
+                        : data.userRank === 2
+                          ? "Prawie lider! 🔥"
+                          : data.userRank >= data.totalPlayers
+                            ? "Ostatnie miejsce 😅"
+                            : data.userRank >= data.totalPlayers - 1
+                              ? "Przedostatnie..."
+                              : `Lepszy od ${data.playersBeaten} graczy 🔥`}
+                    </span>
+                  </motion.div>
 
                   <motion.div
                     variants={staggerItem}

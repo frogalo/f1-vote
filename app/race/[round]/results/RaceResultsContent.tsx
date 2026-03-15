@@ -660,86 +660,8 @@ export default function RaceResultsContent({ raceRound, isSprint = false, hideHe
         onToggle={() => toggleSection("classification")}
       >
         <div className="space-y-2">
-          {/* Podium (1-3) */}
-          <div className="mb-4 grid grid-cols-3 gap-2 items-end">
-            {(isSprint ? (raceData as any).sprintResults : raceData.results).slice(0, 3).map((driverId: string, pos: number) => {
-              const driver = drivers.find((d) => d.slug === driverId);
-              if (!driver) return null;
-
-              const podiumClass = [
-                "order-2 z-10",
-                "order-1 opacity-90",
-                "order-3 opacity-90",
-              ];
-
-              return (
-                <div
-                  key={driverId}
-                  className={clsx("flex flex-col items-center transition-transform hover:scale-105", podiumClass[pos])}
-                >
-                  {/* Card */}
-                  <div
-                    className={clsx(
-                      "w-full overflow-hidden rounded-xl border relative bg-[#131315] flex flex-col items-center p-3 text-center",
-                      pos === 0
-                        ? "border-[#E60000]/40 shadow-[0_0_20px_rgba(230,0,0,0.15)] pt-5 pb-4"
-                        : pos === 1
-                          ? "border-gray-400/30 pt-4 pb-3"
-                          : "border-orange-500/30 pt-4 pb-3"
-                    )}
-                  >
-                    {/* Position Highlight */}
-                    <div
-                      className={clsx(
-                        "absolute top-0 inset-x-0 h-1",
-                        pos === 0
-                          ? "bg-gradient-to-r from-[#E60000] to-[#FF6B6B]"
-                          : pos === 1
-                            ? "bg-gradient-to-r from-gray-300 to-gray-500"
-                            : "bg-gradient-to-r from-orange-400 to-orange-600"
-                      )}
-                    />
-                    
-                    {/* Medal */}
-                    <div
-                      className={clsx(
-                        "mb-3 flex items-center justify-center rounded-lg font-black",
-                        pos === 0
-                          ? "h-12 w-12 text-2xl bg-gradient-to-br from-[#E60000] to-[#FF6B6B] shadow-lg shadow-[#E60000]/50 text-white"
-                          : pos === 1
-                            ? "h-10 w-10 text-xl bg-gradient-to-br from-gray-300 to-gray-400 text-gray-900"
-                            : "h-10 w-10 text-xl bg-gradient-to-br from-orange-400 to-orange-600 text-white"
-                      )}
-                    >
-                      {pos + 1}
-                    </div>
-
-                    {/* Logo instead of placeholder */}
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={getTeamLogo(driver.team)}
-                      alt=""
-                      className="mb-2 h-8 w-8 object-contain opacity-80 invert brightness-0"
-                    />
-
-                    {/* Driver Name */}
-                    <div className={clsx(
-                      "font-black tracking-tight",
-                      pos === 0 ? "text-base text-white" : "text-sm text-gray-200"
-                    )}>
-                      {driver.name.split(" ").pop()}
-                    </div>
-                    <div className="mt-0.5 text-[9px] font-bold uppercase tracking-widest text-gray-500">
-                      {driver.team}
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-
           <div className="overflow-hidden rounded-2xl border border-white/[0.06] bg-[#131315]">
-            {(isSprint ? (raceData as any).sprintResults : raceData.results).slice(3).map((driverId: string, pos: number) => {
+            {(isSprint ? (raceData as any).sprintResults : raceData.results).map((driverId: string, pos: number) => {
               const driver = drivers.find((d) => d.slug === driverId);
               if (!driver) return null;
 
@@ -747,31 +669,42 @@ export default function RaceResultsContent({ raceRound, isSprint = false, hideHe
                 <div
                   key={driverId}
                   className={clsx(
-                    "flex items-center gap-3 px-3.5 py-3 sm:px-4 border-b border-white/[0.05] last:border-0"
+                    "flex flex-col gap-2 px-3.5 py-3 sm:px-4 border-b border-white/[0.05] last:border-0"
                   )}
                 >
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/10 text-xs font-black text-gray-300">
-                    {pos + 4}
+                  <div className="flex items-center gap-3">
+                    <div className={clsx(
+                      "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-xs font-black",
+                      pos === 0 ? "bg-gradient-to-br from-[#E60000] to-[#FF6B6B] shadow-lg shadow-[#E60000]/50 text-white" :
+                      pos === 1 ? "bg-gradient-to-br from-gray-300 to-gray-400 text-gray-900" :
+                      pos === 2 ? "bg-gradient-to-br from-orange-400 to-orange-600 text-white" :
+                      "bg-white/10 text-gray-300"
+                    )}>
+                      {pos + 1}
+                    </div>
+
+                    {/* Color dot */}
+                    <div
+                      className="h-5 w-1 shrink-0 rounded-full"
+                      style={{
+                        backgroundColor:
+                          driver.color.split(" ")[0] || "#666",
+                      }}
+                    />
+
+                    {/* Info */}
+                    <div className="min-w-0 flex-1">
+                      <div className="text-sm font-black text-white truncate">
+                        {driver.name}
+                      </div>
+                      <div className="text-[9px] text-gray-500">
+                        {driver.team} • #{driver.number}
+                      </div>
+                    </div>
                   </div>
 
-                  {/* Color dot */}
-                  <div
-                    className="h-5 w-1 shrink-0 rounded-full"
-                    style={{
-                      backgroundColor:
-                        driver.color.split(" ")[0] || "#666",
-                    }}
-                  />
-
-                  {/* Info */}
-                  <div className="min-w-0 flex-1">
-                    <div className="text-sm font-black text-white truncate">
-                      {driver.name}
-                    </div>
-                    <div className="text-[9px] text-gray-500">
-                      {driver.team} • #{driver.number}
-                    </div>
-                  </div>
+                  {/* How people voted */}
+                  <DriverVotesGrouped driverId={driverId} actualPos={pos + 1} scores={raceData.scores} />
                 </div>
               );
             })}
@@ -990,6 +923,100 @@ export default function RaceResultsContent({ raceRound, isSprint = false, hideHe
       </div>
 
       <div className="h-8" />
+    </div>
+  );
+}
+
+/* ── DRIVER VOTES COMPONENT ── */
+function DriverVotesGrouped({ driverId, actualPos, scores }: { driverId: string, actualPos: number, scores: RaceScore[] }) {
+  // Gather all predictions for this driver from all users that have details
+  const predictions = scores.flatMap(score => {
+    if (!score.details?.predictions) return [];
+    const prediction = score.details.predictions.find(p => p.driverId === driverId);
+    if (!prediction) return [];
+    const diff = Math.abs(prediction.predictedPos - actualPos);
+    const pts = diff === 0 ? 3 : diff === 1 ? 2 : diff === 2 ? 1 : 0;
+    return [{ user: score.user, predictedPos: prediction.predictedPos, diff, pts }];
+  });
+
+  if (predictions.length === 0) return null;
+
+  // Group by predicted position for pts > 0; lump all 0-pt together
+  type Group = { key: string, pos: number | null, pts: number, diff: number, entries: { user: RaceScore['user'], predictedPos: number }[] };
+  const grouped: Record<string, Group> = {};
+
+  for (const p of predictions) {
+    const key = p.pts > 0 ? String(p.predictedPos) : '0pts';
+    if (!grouped[key]) {
+      grouped[key] = { key, pos: p.pts > 0 ? p.predictedPos : null, pts: p.pts, diff: p.diff, entries: [] };
+    }
+    grouped[key].entries.push({ user: p.user, predictedPos: p.predictedPos });
+  }
+
+  const sortedGroups = Object.values(grouped).sort((a, b) => {
+    if (a.pts !== b.pts) return b.pts - a.pts;
+    return (a.pos ?? 99) - (b.pos ?? 99);
+  });
+
+  return (
+    <div className="mt-2.5 flex flex-col gap-2 w-full">
+      {sortedGroups.map((group) => (
+        <div key={group.key} className={clsx("flex items-center gap-3 rounded-xl px-3 py-2 border",
+          group.pts === 3 ? "border-[#E60000]/30 bg-[#E60000]/10" :
+          group.pts === 2 ? "border-orange-400/20 bg-orange-400/10" :
+          group.pts === 1 ? "border-amber-500/20 bg-amber-500/10" :
+          "border-white/[0.05] bg-white/[0.02]"
+        )}>
+          {/* Position label */}
+          <div className={clsx("text-xs font-black shrink-0 text-center min-w-[2rem]",
+            group.pts === 3 ? "text-[#E60000]" :
+            group.pts === 2 ? "text-orange-400" :
+            group.pts === 1 ? "text-amber-500" :
+            "text-gray-500"
+          )}>
+            {group.pos != null ? `P${group.pos}` : "inne"}
+          </div>
+
+          {/* Avatars */}
+          <div className="flex flex-wrap gap-2 flex-1 min-w-0">
+            {group.entries.map((e) => (
+              group.pts === 0 ? (
+                <div key={e.user.id} className="flex flex-col items-center gap-0.5">
+                  <img
+                    src={e.user.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(e.user.name || "U")}&background=444&color=fff&bold=true`}
+                    alt={e.user.name || "User"}
+                    title={`${e.user.name || "User"} → P${e.predictedPos}`}
+                    className="h-8 w-8 rounded-full object-cover border-2 border-white/10 shadow-sm"
+                  />
+                  <span className="text-[9px] font-black text-gray-500">P{e.predictedPos}</span>
+                </div>
+              ) : (
+                <img
+                  key={e.user.id}
+                  src={e.user.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(e.user.name || "U")}&background=E60000&color=fff&bold=true`}
+                  alt={e.user.name || "User"}
+                  title={`${e.user.name || "User"} → P${e.predictedPos}`}
+                  className={clsx("h-8 w-8 rounded-full object-cover border-2 shadow-sm transition-transform hover:scale-110",
+                    group.pts === 3 ? "border-[#E60000]/50" :
+                    group.pts === 2 ? "border-orange-400/50" :
+                    "border-amber-500/50"
+                  )}
+                />
+              )
+            ))}
+          </div>
+
+          {/* Points badge */}
+          <div className={clsx("shrink-0 rounded-lg px-2 py-1 text-xs font-black",
+            group.pts === 3 ? "bg-[#E60000]/20 text-[#E60000]" :
+            group.pts === 2 ? "bg-orange-400/20 text-orange-400" :
+            group.pts === 1 ? "bg-amber-500/20 text-amber-500" :
+            "bg-white/[0.04] text-gray-600"
+          )}>
+            +{group.pts}
+          </div>
+        </div>
+      ))}
     </div>
   );
 }

@@ -5,9 +5,12 @@ import { cookies } from "next/headers";
 
 // F1 2026 points system: top 10 only
 const F1_POINTS = [25, 18, 15, 12, 10, 8, 6, 4, 2, 1];
-function getF1Points(position: number | null): number {
-  if (position === null || position < 1 || position > 10) return 0;
-  return F1_POINTS[position - 1];
+// Sprint points: top 8 only
+const F1_SPRINT_POINTS = [8, 7, 6, 5, 4, 3, 2, 1];
+function getF1Points(position: number | null, sprint = false): number {
+  if (position === null || position < 1) return 0;
+  if (sprint) return position <= 8 ? F1_SPRINT_POINTS[position - 1] : 0;
+  return position <= 10 ? F1_POINTS[position - 1] : 0;
 }
 
 export type WrappedData = {
@@ -18,7 +21,7 @@ export type WrappedData = {
 
   // User score
   userPoints: number;
-  maxPoints: number; // 70
+  maxPoints: number; // 75 race / 70 sprint
   perfectPredictions: number;
   bonusP1: number;
   bonusPodium: number;
@@ -165,7 +168,7 @@ export async function getWrappedData(round: number, isSprint: boolean = false): 
     for (const td of teamDrivers) {
       const pos = results.indexOf(td.slug);
       const finishPos = pos !== -1 ? pos + 1 : null;
-      const pts = getF1Points(finishPos);
+      const pts = getF1Points(finishPos, isSprint);
       teamTotalF1Points += pts;
       teamDriverResults.push({
         driverName: td.name,
@@ -327,7 +330,7 @@ export async function getWrappedData(round: number, isSprint: boolean = false): 
     raceLocation: race.location,
     raceRound: race.round,
     userPoints,
-    maxPoints: 70,
+    maxPoints: isSprint ? 70 : 75,
     perfectPredictions,
     bonusP1,
     bonusPodium,
@@ -339,7 +342,7 @@ export async function getWrappedData(round: number, isSprint: boolean = false): 
     favoriteDriverSlug: favDriverSlug,
     favoriteDriverFinishPos: favDriverPos !== -1 ? favDriverPos + 1 : null,
     favoriteDriverInTop10: favDriverPos !== -1 && favDriverPos < 10,
-    favoriteDriverF1Points: getF1Points(favDriverPos !== -1 ? favDriverPos + 1 : null),
+    favoriteDriverF1Points: getF1Points(favDriverPos !== -1 ? favDriverPos + 1 : null, isSprint),
     favoriteTeamName: favTeamName,
     favoriteTeamDriverResults: teamDriverResults,
     favoriteTeamBestPos: teamBest,
