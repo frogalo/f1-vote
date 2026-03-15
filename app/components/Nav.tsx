@@ -13,6 +13,7 @@ export default function Nav({ nextRound = 1, hidden = false }: { nextRound?: num
   if (hidden) return null;
   if (loading || !user) return null;
   if (pathname === "/login" || pathname === "/register") return null;
+  if (pathname.includes("/wrapped")) return null;
 
   const tabs = [
     { name: 'Sezon', href: '/season', icon: Home },

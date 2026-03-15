@@ -1,6 +1,12 @@
 "use client";
 
-import { useEffect, useState, useCallback, useRef, useMemo } from "react";
+import {
+  useEffect,
+  useState,
+  useCallback,
+  useRef,
+  useMemo,
+} from "react";
 import { getWrappedData, type WrappedData } from "@/app/actions/wrapped";
 import { useAuth } from "@/app/providers/AuthProvider";
 import { useRouter } from "next/navigation";
@@ -29,9 +35,21 @@ type Props = { raceRound: number; isSprint?: boolean };
 /* ─────────────────────────────────────────────
    SPRING CONFIGS
    ───────────────────────────────────────────── */
-const SPRING_BOUNCY = { type: "spring", stiffness: 400, damping: 25 } as const;
-const SPRING_SOFT = { type: "spring", stiffness: 200, damping: 30 } as const;
-const SPRING_HEAVY = { type: "spring", stiffness: 100, damping: 20 } as const;
+const SPRING_BOUNCY = {
+  type: "spring",
+  stiffness: 400,
+  damping: 25,
+} as const;
+const SPRING_SOFT = {
+  type: "spring",
+  stiffness: 200,
+  damping: 30,
+} as const;
+const SPRING_HEAVY = {
+  type: "spring",
+  stiffness: 100,
+  damping: 20,
+} as const;
 
 /* ─────────────────────────────────────────────
    ANIMATION VARIANTS
@@ -49,17 +67,14 @@ const heroText: Variants = {
 
 const staggerContainer: Variants = {
   hidden: {},
-  visible: { transition: { staggerChildren: 0.12, delayChildren: 0.3 } },
+  visible: {
+    transition: { staggerChildren: 0.12, delayChildren: 0.3 },
+  },
 };
 
 const staggerItem: Variants = {
   hidden: { opacity: 0, y: 30, scale: 0.95 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    scale: 1,
-    transition: SPRING_SOFT,
-  },
+  visible: { opacity: 1, y: 0, scale: 1, transition: SPRING_SOFT },
 };
 
 const popIn: Variants = {
@@ -93,7 +108,181 @@ const scaleReveal: Variants = {
 };
 
 /* ─────────────────────────────────────────────
-   ANIMATED COUNTER with spring
+   PER-SLIDE TRANSITION VARIANTS
+   enter  = how the new slide arrives
+   center = resting state
+   exit   = how the old slide leaves
+   All transitions >= 2 s
+   ───────────────────────────────────────────── */
+const SLIDE_VARIANTS: Variants[] = [
+  // 0: Intro — cinematic scale + blur
+  {
+    enter: {
+      opacity: 0,
+      scale: 1.18,
+      filter: "blur(28px) brightness(1.6)",
+    },
+    center: {
+      opacity: 1,
+      scale: 1,
+      filter: "blur(0px) brightness(1)",
+      transition: {
+        duration: 2,
+        ease: [0.16, 1, 0.3, 1],
+      },
+    },
+    exit: {
+      opacity: 0,
+      scale: 0.82,
+      filter: "blur(20px) brightness(0.6)",
+      transition: { duration: 0.9, ease: [0.4, 0, 1, 1] },
+    },
+  },
+
+  // 1: Points — barrel-roll rise with long settle
+  {
+    enter: {
+      opacity: 0,
+      y: 120,
+      rotateX: "25deg",
+      scale: 0.88,
+      filter: "blur(12px)",
+    },
+    center: {
+      opacity: 1,
+      y: 0,
+      rotateX: "0deg",
+      scale: 1,
+      filter: "blur(0px)",
+      transition: {
+        duration: 2.1,
+        ease: [0.16, 1, 0.3, 1],
+      },
+    },
+    exit: {
+      opacity: 0,
+      y: -100,
+      rotateX: "-15deg",
+      scale: 0.9,
+      filter: "blur(10px)",
+      transition: { duration: 0.85, ease: [0.4, 0, 1, 1] },
+    },
+  },
+
+  // 2: Driver — deep warp slide from right
+  {
+    enter: {
+      opacity: 0,
+      x: 160,
+      skewX: "-12deg",
+      scale: 0.88,
+      filter: "blur(14px)",
+    },
+    center: {
+      opacity: 1,
+      x: 0,
+      skewX: "0deg",
+      scale: 1,
+      filter: "blur(0px)",
+      transition: {
+        duration: 2.0,
+        ease: [0.16, 1, 0.3, 1],
+      },
+    },
+    exit: {
+      opacity: 0,
+      x: -140,
+      skewX: "10deg",
+      scale: 0.9,
+      filter: "blur(10px)",
+      transition: { duration: 0.85, ease: [0.4, 0, 1, 1] },
+    },
+  },
+
+  // 3: Team — diagonal gravity drop
+  {
+    enter: {
+      opacity: 0,
+      x: -140,
+      y: 60,
+      rotate: -8,
+      filter: "blur(16px)",
+    },
+    center: {
+      opacity: 1,
+      x: 0,
+      y: 0,
+      rotate: 0,
+      filter: "blur(0px)",
+      transition: {
+        duration: 2.1,
+        ease: [0.16, 1, 0.3, 1],
+      },
+    },
+    exit: {
+      opacity: 0,
+      x: 120,
+      y: -50,
+      rotate: 6,
+      filter: "blur(12px)",
+      transition: { duration: 0.85, ease: [0.4, 0, 1, 1] },
+    },
+  },
+
+  // 4: Comparison — 3-D flip Y with depth
+  {
+    enter: {
+      opacity: 0,
+      rotateY: "90deg",
+      scale: 0.8,
+      filter: "blur(18px)",
+    },
+    center: {
+      opacity: 1,
+      rotateY: "0deg",
+      scale: 1,
+      filter: "blur(0px)",
+      transition: {
+        duration: 2.0,
+        ease: [0.16, 1, 0.3, 1],
+      },
+    },
+    exit: {
+      opacity: 0,
+      rotateY: "-85deg",
+      scale: 0.85,
+      filter: "blur(14px)",
+      transition: { duration: 0.9, ease: [0.4, 0, 1, 1] },
+    },
+  },
+
+  // 5: Summary — supernova birth from pinpoint
+  {
+    enter: {
+      opacity: 0,
+      scale: 0.3,
+      filter: "blur(40px) brightness(3)",
+    },
+    center: {
+      opacity: 1,
+      scale: 1,
+      filter: "blur(0px) brightness(1)",
+      transition: {
+        duration: 2.2,
+        ease: [0.16, 1, 0.3, 1],
+      },
+    },
+    exit: {
+      opacity: 0,
+      scale: 1.2,
+      filter: "blur(20px) brightness(0.4)",
+      transition: { duration: 0.9, ease: [0.4, 0, 1, 1] },
+    },
+  },
+];
+
+/* ─────────────────────────────────────────────
+   ANIMATED COUNTER
    ───────────────────────────────────────────── */
 function AnimatedCounter({
   target,
@@ -122,13 +311,8 @@ function AnimatedCounter({
     const t0 = performance.now();
     function tick(now: number) {
       const p = Math.min((now - t0) / duration, 1);
-      // Anticipation: slight overshoot then settle
-      const ease =
-        p < 1
-          ? 1 - Math.pow(1 - p, 4)
-          : 1;
-      const overshoot = p > 0.85 && p < 1 ? 1.02 : 1;
-      setCount(Math.round(target * ease * overshoot));
+      const ease = p < 1 ? 1 - Math.pow(1 - p, 4) : 1;
+      setCount(Math.round(target * ease));
       if (p < 1) raf.current = requestAnimationFrame(tick);
       else setCount(target);
     }
@@ -138,7 +322,12 @@ function AnimatedCounter({
     };
   }, [target, duration, started]);
 
-  return <span className={className}>{count}{suffix}</span>;
+  return (
+    <span className={className}>
+      {count}
+      {suffix}
+    </span>
+  );
 }
 
 /* ─────────────────────────────────────────────
@@ -177,11 +366,7 @@ function ConfettiBurst({ active }: { active: boolean }) {
         <motion.div
           key={p.id}
           className="absolute left-1/2 top-1/2 rounded-sm"
-          style={{
-            width: p.w,
-            height: p.h,
-            backgroundColor: p.color,
-          }}
+          style={{ width: p.w, height: p.h, backgroundColor: p.color }}
           initial={{ x: 0, y: 0, rotate: 0, opacity: 1, scale: 0 }}
           animate={{
             x: p.x,
@@ -202,7 +387,7 @@ function ConfettiBurst({ active }: { active: boolean }) {
 }
 
 /* ─────────────────────────────────────────────
-   PARTICLES (enhanced with motion)
+   PARTICLES
    ───────────────────────────────────────────── */
 function Particles({ color = "#E60000" }: { color?: string }) {
   const pts = useMemo(
@@ -239,11 +424,7 @@ function Particles({ color = "#E60000" }: { color?: string }) {
             opacity: [p.o, p.o * 2, p.o * 0.5, p.o],
             scale: [1, 1.5, 0.8, 1],
           }}
-          transition={{
-            duration: p.dur,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
+          transition={{ duration: p.dur, repeat: Infinity, ease: "easeInOut" }}
         />
       ))}
     </div>
@@ -251,7 +432,7 @@ function Particles({ color = "#E60000" }: { color?: string }) {
 }
 
 /* ─────────────────────────────────────────────
-   PULSING GLOW RING
+   GLOW RING
    ───────────────────────────────────────────── */
 function GlowRing({
   color = "#E60000",
@@ -270,17 +451,14 @@ function GlowRing({
         height: size,
         background: `radial-gradient(circle, ${color}15 0%, transparent 70%)`,
       }}
-      animate={{
-        scale: [1, 1.3, 1],
-        opacity: [0.3, 0.6, 0.3],
-      }}
+      animate={{ scale: [1, 1.3, 1], opacity: [0.3, 0.6, 0.3] }}
       transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
     />
   );
 }
 
 /* ─────────────────────────────────────────────
-   STORY PROGRESS BARS (with real fill animation)
+   STORY PROGRESS BARS
    ───────────────────────────────────────────── */
 function StoryProgress({
   total,
@@ -312,85 +490,36 @@ function StoryProgress({
 }
 
 /* ─────────────────────────────────────────────
-   DRAMATIC REVEAL — "anticipation" wrapper
-   Shows a teaser label → pause → then reveals content
+   LAYOUT HELPERS
    ───────────────────────────────────────────── */
-function DramaticReveal({
-  label,
-  active,
-  revealDelay = 1.2,
+function Panel({ children }: { children: React.ReactNode }) {
+  return <div className="h-full w-full">{children}</div>;
+}
+
+function BG({
   children,
+  gradient,
 }: {
-  label: string;
-  active: boolean;
-  revealDelay?: number;
   children: React.ReactNode;
+  gradient: string;
 }) {
-  const [revealed, setRevealed] = useState(false);
-
-  useEffect(() => {
-    if (!active) {
-      setRevealed(false);
-      return;
-    }
-    const t = setTimeout(() => setRevealed(true), revealDelay * 1000);
-    return () => clearTimeout(t);
-  }, [active, revealDelay]);
-
-  if (!active) return null;
-
   return (
-    <AnimatePresence mode="wait">
-      {!revealed ? (
-        <motion.div
-          key="teaser"
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: [0.8, 1.05, 1] }}
-          exit={{ opacity: 0, scale: 1.2, filter: "blur(10px)" }}
-          transition={{ duration: 0.5 }}
-          className="text-center"
-        >
-          <motion.div
-            className="text-sm font-black uppercase tracking-[0.3em] text-white/40"
-            animate={{ opacity: [0.4, 1, 0.4] }}
-            transition={{ duration: 1.2, repeat: Infinity }}
-          >
-            {label}
-          </motion.div>
-          <motion.div className="mt-3 flex justify-center gap-1.5">
-            {[0, 1, 2].map((i) => (
-              <motion.div
-                key={i}
-                className="h-1.5 w-1.5 rounded-full bg-white/50"
-                animate={{ scale: [1, 1.5, 1], opacity: [0.3, 1, 0.3] }}
-                transition={{
-                  duration: 0.6,
-                  repeat: Infinity,
-                  delay: i * 0.15,
-                }}
-              />
-            ))}
-          </motion.div>
-        </motion.div>
-      ) : (
-        <motion.div
-          key="content"
-          initial={{ opacity: 0, y: 20, scale: 0.9 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          transition={SPRING_BOUNCY}
-        >
-          {children}
-        </motion.div>
-      )}
-    </AnimatePresence>
+    <div
+      className={`relative h-full w-full overflow-hidden bg-gradient-to-b ${gradient}`}
+    >
+      {children}
+    </div>
   );
 }
 
 /* ═══════════════════════════════════════════════
    MAIN COMPONENT
    ═══════════════════════════════════════════════ */
-export default function WrappedContent({ raceRound, isSprint = false }: Props) {
-  const { user, loading: authLoading } = useAuth();
+export default function WrappedContent({
+  raceRound,
+  isSprint = false,
+}: Props) {
+  const { loading: authLoading } = useAuth();
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<WrappedData | null>(null);
@@ -408,7 +537,7 @@ export default function WrappedContent({ raceRound, isSprint = false }: Props) {
     ? `/race/${raceRound}?tab=sprint`
     : `/race/${raceRound}?tab=race`;
 
-  // Parallax mouse tracking
+  /* Parallax mouse */
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
   const smoothX = useSpring(mouseX, { stiffness: 50, damping: 20 });
@@ -431,11 +560,11 @@ export default function WrappedContent({ raceRound, isSprint = false }: Props) {
       .finally(() => setLoading(false));
   }, [raceRound, isSprint, authLoading]);
 
-  // Confetti on points slide
+  /* Confetti on points slide */
   useEffect(() => {
     if (slide === 1 && prevSlide.current !== 1 && data && data.userPoints > 0) {
-      const t = setTimeout(() => setShowConfetti(true), 1600);
-      const t2 = setTimeout(() => setShowConfetti(false), 4000);
+      const t = setTimeout(() => setShowConfetti(true), 400);
+      const t2 = setTimeout(() => setShowConfetti(false), 3500);
       return () => {
         clearTimeout(t);
         clearTimeout(t2);
@@ -495,40 +624,169 @@ export default function WrappedContent({ raceRound, isSprint = false }: Props) {
     else if (x > w * 0.66) goNext();
   };
 
-  /* ── LOADING STATE ── */
+  /* ── LOADING ── */
   if (loading)
     return (
-      <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#0D0D0D]">
+      <div className="fixed inset-0 z-50 flex flex-col items-center justify-center overflow-hidden bg-[#0D0D0D]">
         <motion.div
-          className="relative"
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={SPRING_BOUNCY}
+          className="absolute inset-0"
+          animate={{
+            background: [
+              "radial-gradient(ellipse 60% 50% at 50% 50%, #E6000022 0%, transparent 70%)",
+              "radial-gradient(ellipse 60% 50% at 50% 50%, #8B5CF622 0%, transparent 70%)",
+              "radial-gradient(ellipse 60% 50% at 50% 50%, #F59E0B22 0%, transparent 70%)",
+              "radial-gradient(ellipse 60% 50% at 50% 50%, #10B98122 0%, transparent 70%)",
+              "radial-gradient(ellipse 60% 50% at 50% 50%, #E6000022 0%, transparent 70%)",
+            ],
+          }}
+          transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+        />
+
+        <div
+          className="relative flex items-center justify-center"
+          style={{ width: 200, height: 200 }}
         >
           <motion.div
-            className="h-20 w-20 rounded-full border-2 border-[#E60000]/20 border-t-[#E60000]"
+            className="absolute rounded-full"
+            style={{
+              width: 36,
+              height: 36,
+              background:
+                "radial-gradient(circle, #E60000 0%, #FF6B6B 100%)",
+            }}
+            animate={{ scale: [1, 1.4, 1], opacity: [0.9, 0.5, 0.9] }}
+            transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut" }}
+          />
+          <motion.div
+            className="absolute rounded-full border border-[#E60000]/40"
+            style={{ width: 60, height: 60 }}
+            animate={{ scale: [1, 1.8, 1], opacity: [0.4, 0, 0.4] }}
+            transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut" }}
+          />
+
+          <motion.div
+            className="absolute"
+            style={{ width: 110, height: 110 }}
             animate={{ rotate: 360 }}
-            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-          />
-          <motion.div
-            className="absolute inset-0 h-20 w-20 rounded-full border border-[#E60000]/10"
-            animate={{ scale: [1, 1.5, 1], opacity: [0.3, 0, 0.3] }}
-            transition={{ duration: 1.5, repeat: Infinity }}
-          />
-        </motion.div>
-        <motion.div
-          className="mt-10 text-sm font-black uppercase tracking-[0.4em] text-[#E60000]"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-        >
-          <motion.span
-            animate={{ opacity: [1, 0.3, 1] }}
-            transition={{ duration: 1.5, repeat: Infinity }}
+            transition={{ duration: 2.2, repeat: Infinity, ease: "linear" }}
           >
-            Przygotowuję podsumowanie...
-          </motion.span>
+            <motion.div
+              className="absolute -top-3 left-1/2 h-6 w-6 -translate-x-1/2 rounded-full bg-[#E60000] shadow-lg shadow-[#E60000]/60"
+              animate={{ scale: [1, 1.3, 1] }}
+              transition={{ duration: 1.1, repeat: Infinity }}
+            />
+          </motion.div>
+
+          <motion.div
+            className="absolute"
+            style={{ width: 150, height: 150 }}
+            animate={{ rotate: -360 }}
+            transition={{ duration: 3.5, repeat: Infinity, ease: "linear" }}
+          >
+            <motion.div
+              className="absolute -top-3 left-1/2 h-6 w-6 -translate-x-1/2 bg-purple-500 shadow-lg shadow-purple-500/60"
+              style={{ rotate: 45 }}
+              animate={{ scale: [1, 1.2, 1], rotate: [45, 90, 45] }}
+              transition={{ duration: 1.8, repeat: Infinity }}
+            />
+          </motion.div>
+
+          <motion.div
+            className="absolute"
+            style={{ width: 195, height: 195 }}
+            animate={{ rotate: 360 }}
+            transition={{ duration: 5.5, repeat: Infinity, ease: "linear" }}
+          >
+            <motion.div
+              className="absolute -top-3 left-1/2 -translate-x-1/2"
+              style={{
+                width: 0,
+                height: 0,
+                borderLeft: "8px solid transparent",
+                borderRight: "8px solid transparent",
+                borderBottom: "14px solid #F59E0B",
+                filter: "drop-shadow(0 0 6px #F59E0B)",
+              }}
+              animate={{ scale: [1, 1.4, 1] }}
+              transition={{ duration: 2.2, repeat: Infinity }}
+            />
+          </motion.div>
+
+          <motion.div
+            className="absolute"
+            style={{ width: 130, height: 130 }}
+            animate={{ rotate: -360 }}
+            transition={{ duration: 1.6, repeat: Infinity, ease: "linear" }}
+          >
+            <motion.div
+              className="absolute bottom-0 left-1/2 h-5 w-5 -translate-x-1/2 rounded-sm bg-emerald-400 shadow-lg shadow-emerald-400/60"
+              animate={{ scale: [1, 1.3, 1], rotate: [0, 45, 0] }}
+              transition={{ duration: 0.8, repeat: Infinity }}
+            />
+          </motion.div>
+        </div>
+
+        <motion.div
+          className="mt-10 flex gap-[2px]"
+          initial="hidden"
+          animate="visible"
+          variants={{
+            visible: {
+              transition: { staggerChildren: 0.06, delayChildren: 0.2 },
+            },
+          }}
+        >
+          {"F1 TYPY".split("").map((ch, i) => (
+            <motion.span
+              key={i}
+              className={
+                ch === " "
+                  ? "w-3"
+                  : "text-xs font-black uppercase tracking-[0.25em] text-[#E60000]"
+              }
+              variants={{
+                hidden: { opacity: 0, y: 12, scale: 0.8 },
+                visible: {
+                  opacity: 1,
+                  y: 0,
+                  scale: 1,
+                  transition: {
+                    type: "spring",
+                    stiffness: 400,
+                    damping: 20,
+                  },
+                },
+              }}
+            >
+              {ch}
+            </motion.span>
+          ))}
         </motion.div>
+
+        <motion.div
+          className="mt-6 h-[3px] w-40 overflow-hidden rounded-full bg-white/10"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.4 }}
+        >
+          <motion.div
+            className="h-full rounded-full"
+            style={{
+              background:
+                "linear-gradient(90deg, #E60000, #8B5CF6, #F59E0B, #10B981)",
+            }}
+            animate={{ x: ["-100%", "100%"] }}
+            transition={{ duration: 1.4, repeat: Infinity, ease: "easeInOut" }}
+          />
+        </motion.div>
+
+        <motion.p
+          className="mt-4 text-[10px] font-bold uppercase tracking-[0.4em] text-gray-600"
+          animate={{ opacity: [0.4, 1, 0.4] }}
+          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+        >
+          Przygotowuję podsumowanie
+        </motion.p>
       </div>
     );
 
@@ -563,7 +821,7 @@ export default function WrappedContent({ raceRound, isSprint = false }: Props) {
 
   return (
     <div
-      className="fixed inset-0 z-50 overflow-hidden bg-[#0D0D0D] select-none"
+      className="fixed inset-0 z-50 select-none overflow-hidden bg-[#0D0D0D]"
       style={{ height: "100dvh" }}
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
@@ -572,11 +830,11 @@ export default function WrappedContent({ raceRound, isSprint = false }: Props) {
       onMouseMove={onMouseMove}
     >
       {/* Story bars */}
-      <div className="absolute top-0 right-0 left-0 z-50 px-2 pb-1 pt-[env(safe-area-inset-top,8px)]">
+      <div className="absolute left-0 right-0 top-0 z-50 px-2 pb-1 pt-[env(safe-area-inset-top,8px)]">
         <StoryProgress total={totalSlides} current={slide} />
       </div>
 
-      {/* Close */}
+      {/* Close button */}
       <motion.button
         onClick={(e) => {
           e.stopPropagation();
@@ -590,1034 +848,1000 @@ export default function WrappedContent({ raceRound, isSprint = false }: Props) {
         <X className="h-4 w-4 text-white" />
       </motion.button>
 
-      {/* Slide track */}
-      <motion.div
-        className="flex h-full"
-        animate={{ x: `-${slide * 100}%` }}
-        transition={{ type: "spring", stiffness: 300, damping: 35 }}
-      >
-        {/* ════════════ SLIDE 0: INTRO ════════════ */}
-        <Panel>
-          <BG gradient="from-[#0D0D0D] via-[#1a0000] to-[#0D0D0D]">
-            <Particles />
-            <GlowRing
-              color="#E60000"
-              size={400}
-              className="left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
-            />
-            <motion.div
-              className="relative z-10 flex h-full flex-col items-center justify-center px-6 text-center"
-              style={{ x: bgX, y: bgY }}
-            >
-              <AnimatePresence>
-                {s(0) && (
+      {/* ── SLIDES ── */}
+      <AnimatePresence mode="wait" initial={false}>
+        <motion.div
+          key={slide}
+          className="absolute inset-0"
+          variants={SLIDE_VARIANTS[slide] ?? SLIDE_VARIANTS[0]}
+          initial="enter"
+          animate="center"
+          exit="exit"
+          style={{ perspective: 1200 }}
+        >
+          <div className="h-full w-full">
+            {/* ════════ SLIDE 0: INTRO ════════ */}
+            {s(0) && (
+              <Panel>
+                <BG gradient="from-[#0D0D0D] via-[#1a0000] to-[#0D0D0D]">
+                  <Particles />
+                  <GlowRing
+                    color="#E60000"
+                    size={400}
+                    className="left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+                  />
                   <motion.div
-                    className="flex flex-col items-center"
-                    initial="hidden"
-                    animate="visible"
-                    exit={{ opacity: 0, scale: 0.8 }}
+                    className="relative z-10 flex h-full flex-col items-center justify-center px-6 text-center"
+                    style={{ x: bgX, y: bgY }}
                   >
                     <motion.div
-                      variants={popIn}
-                      className="mb-5 flex h-16 w-16 items-center justify-center rounded-2xl border border-[#E60000]/30 bg-[#E60000]/20 backdrop-blur-md"
+                      className="flex flex-col items-center"
+                      initial="hidden"
+                      animate="visible"
+                      variants={staggerContainer}
                     >
                       <motion.div
-                        animate={{ rotate: [0, 10, -10, 0] }}
-                        transition={{
-                          duration: 2,
-                          repeat: Infinity,
-                          ease: "easeInOut",
-                        }}
+                        variants={popIn}
+                        className="mb-5 flex h-16 w-16 items-center justify-center rounded-2xl border border-[#E60000]/30 bg-[#E60000]/20 backdrop-blur-md"
                       >
-                        <Sparkles className="h-8 w-8 text-[#E60000]" />
-                      </motion.div>
-                    </motion.div>
-
-                    <motion.div
-                      variants={staggerItem}
-                      className="mb-2 text-[10px] font-black uppercase tracking-[0.4em] text-[#E60000]/80"
-                    >
-                      Runda {data.raceRound}
-                    </motion.div>
-
-                    <motion.h1
-                      variants={heroText}
-                      className="mb-1 text-3xl font-black uppercase leading-[0.9] tracking-tight text-white sm:text-5xl"
-                    >
-                      {data.raceName
-                        .replace(" Grand Prix", "")
-                        .replace("Grand Prix ", "")}
-                    </motion.h1>
-
-                    <motion.div
-                      variants={{
-                        hidden: { opacity: 0, y: 40, scale: 0.7 },
-                        visible: {
-                          opacity: 1,
-                          y: 0,
-                          scale: 1,
-                          transition: { ...SPRING_HEAVY, delay: 0.5 },
-                        },
-                      }}
-                      className={clsx(
-                        "mb-5 bg-gradient-to-r bg-clip-text text-xl font-black uppercase text-transparent sm:text-3xl",
-                        isSprint
-                          ? "from-amber-500 to-amber-300"
-                          : "from-[#E60000] to-[#FF6B6B]",
-                      )}
-                    >
-                      {isSprint ? "SPRINT" : "Grand Prix"}
-                    </motion.div>
-
-                    <motion.div
-                      variants={{
-                        hidden: { opacity: 0, width: 0 },
-                        visible: {
-                          opacity: 1,
-                          width: "auto",
-                          transition: { delay: 0.7, duration: 0.6 },
-                        },
-                      }}
-                      className="mb-8 flex items-center gap-2 overflow-hidden text-xs text-gray-400"
-                    >
-                      <motion.div
-                        className="h-1.5 w-1.5 rounded-full bg-[#E60000]"
-                        animate={{ scale: [1, 1.5, 1] }}
-                        transition={{ duration: 2, repeat: Infinity }}
-                      />
-                      <span className="whitespace-nowrap font-bold uppercase tracking-widest">
-                        {data.raceLocation}
-                      </span>
-                    </motion.div>
-
-                    <motion.div
-                      variants={{
-                        hidden: { opacity: 0, y: 20 },
-                        visible: {
-                          opacity: 1,
-                          y: 0,
-                          transition: { delay: 1 },
-                        },
-                      }}
-                      className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 backdrop-blur-md"
-                    >
-                      <span className="text-[11px] font-bold text-gray-400">
-                        Stuknij, aby kontynuować
-                      </span>
-                      <motion.span
-                        className="text-[#E60000]"
-                        animate={{ x: [0, 6, 0] }}
-                        transition={{
-                          duration: 1.2,
-                          repeat: Infinity,
-                          ease: "easeInOut",
-                        }}
-                      >
-                        <ChevronRight className="h-3.5 w-3.5" />
-                      </motion.span>
-                    </motion.div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </motion.div>
-          </BG>
-        </Panel>
-
-        {/* ════════════ SLIDE 1: YOUR POINTS ════════════ */}
-        <Panel>
-          <BG gradient="from-[#0D0D0D] via-[#0a0a1a] to-[#0D0D0D]">
-            <Particles color="#4F46E5" />
-            <ConfettiBurst active={showConfetti} />
-            <GlowRing
-              color="#E60000"
-              size={350}
-              className="left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
-            />
-            <div className="relative z-10 flex h-full flex-col items-center justify-center px-6 text-center">
-              <DramaticReveal
-                label="Twoje punkty..."
-                active={s(1)}
-                revealDelay={1.4}
-              >
-                <motion.div
-                  className="flex flex-col items-center"
-                  variants={staggerContainer}
-                  initial="hidden"
-                  animate="visible"
-                >
-                  <motion.div
-                    variants={popIn}
-                    className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl border border-[#E60000]/30 bg-[#E60000]/20"
-                  >
-                    <Trophy className="h-6 w-6 text-[#E60000]" />
-                  </motion.div>
-
-                  <motion.div
-                    variants={staggerItem}
-                    className="mb-2 text-[10px] font-black uppercase tracking-[0.3em] text-[#E60000]/80"
-                  >
-                    Twoje punkty
-                  </motion.div>
-
-                  <motion.div variants={scaleReveal} className="mb-3">
-                    <AnimatedCounter
-                      target={data.userPoints}
-                      delay={200}
-                      className="w-glow text-7xl font-black tabular-nums leading-none text-white sm:text-9xl"
-                    />
-                    <span className="ml-1 text-xl font-bold text-gray-600">
-                      /{data.maxPoints}
-                    </span>
-                  </motion.div>
-
-                  <motion.div
-                    variants={staggerItem}
-                    className="mb-5 h-2.5 w-44 overflow-hidden rounded-full bg-white/10"
-                  >
-                    <motion.div
-                      className="h-full rounded-full bg-gradient-to-r from-[#E60000] to-[#FF6B6B]"
-                      initial={{ width: "0%" }}
-                      animate={{
-                        width: `${Math.round(
-                          (data.userPoints / data.maxPoints) * 100,
-                        )}%`,
-                      }}
-                      transition={{ duration: 1.5, delay: 0.5, ease: "easeOut" }}
-                    />
-                  </motion.div>
-
-                  <motion.div
-                    variants={staggerItem}
-                    className="flex flex-wrap justify-center gap-1.5"
-                  >
-                    {data.perfectPredictions > 0 && (
-                      <motion.div
-                        whileHover={{ scale: 1.05 }}
-                        className="flex items-center gap-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1.5"
-                      >
-                        <span className="text-xs text-emerald-400">✨</span>
-                        <span className="text-[11px] font-bold text-emerald-400">
-                          {data.perfectPredictions} idealnie
-                        </span>
-                      </motion.div>
-                    )}
-                    {data.bonusP1 > 0 && (
-                      <motion.div
-                        whileHover={{ scale: 1.05 }}
-                        className="flex items-center gap-1.5 rounded-lg border border-[#E60000]/30 bg-[#E60000]/10 px-2.5 py-1.5"
-                      >
-                        <span className="text-xs text-[#E60000]">🏆</span>
-                        <span className="text-[11px] font-bold text-[#E60000]">
-                          +{data.bonusP1} za P1
-                        </span>
-                      </motion.div>
-                    )}
-                    {data.bonusPodium > 0 && (
-                      <motion.div
-                        whileHover={{ scale: 1.05 }}
-                        className="flex items-center gap-1.5 rounded-lg border border-amber-500/30 bg-amber-500/10 px-2.5 py-1.5"
-                      >
-                        <span className="text-xs text-amber-400">🥇</span>
-                        <span className="text-[11px] font-bold text-amber-400">
-                          +{data.bonusPodium} za podium
-                        </span>
-                      </motion.div>
-                    )}
-                  </motion.div>
-                </motion.div>
-              </DramaticReveal>
-            </div>
-          </BG>
-        </Panel>
-
-        {/* ════════════ SLIDE 2: FAVORITE DRIVER ════════════ */}
-        <Panel>
-          <BG gradient="from-[#0D0D0D] via-[#001a00] to-[#0D0D0D]">
-            <Particles color="#10B981" />
-            <GlowRing
-              color="#10B981"
-              size={280}
-              className="left-1/2 top-1/3 -translate-x-1/2 -translate-y-1/2"
-            />
-            <div className="relative z-10 flex h-full flex-col items-center justify-center px-6 text-center">
-              <DramaticReveal
-                label="Twój ulubiony kierowca..."
-                active={s(2)}
-                revealDelay={1.2}
-              >
-                <motion.div
-                  className="flex flex-col items-center"
-                  variants={staggerContainer}
-                  initial="hidden"
-                  animate="visible"
-                >
-                  <motion.div
-                    variants={popIn}
-                    className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl border border-emerald-500/30 bg-emerald-500/20"
-                  >
-                    <Heart className="h-6 w-6 text-emerald-400" />
-                  </motion.div>
-
-                  <motion.div
-                    variants={staggerItem}
-                    className="mb-2 text-[10px] font-black uppercase tracking-[0.3em] text-emerald-400/80"
-                  >
-                    Twój ulubiony kierowca
-                  </motion.div>
-
-                  {data.favoriteDriverName ? (
-                    <>
-                      <motion.h2
-                        variants={heroText}
-                        className="mb-5 text-2xl font-black text-white sm:text-4xl"
-                      >
-                        {data.favoriteDriverName}
-                      </motion.h2>
-
-                      <motion.div variants={scaleReveal}>
-                        {data.favoriteDriverFinishPos !== null ? (
-                          <motion.div
-                            className={`inline-flex flex-col items-center gap-2 rounded-2xl px-6 py-4 ${
-                              data.favoriteDriverFinishPos === 1
-                                ? "border border-[#E60000]/40 bg-[#E60000]/10"
-                                : data.favoriteDriverFinishPos <= 3
-                                  ? "border border-amber-500/30 bg-amber-500/10"
-                                  : data.favoriteDriverInTop10
-                                    ? "border border-emerald-500/30 bg-emerald-500/10"
-                                    : "border border-white/10 bg-white/5"
-                            }`}
-                            whileHover={{ scale: 1.02 }}
-                          >
-                            {/* Big emoji reaction */}
-                            <motion.div
-                              className="text-5xl"
-                              initial={{ scale: 0, rotate: -20 }}
-                              animate={{ scale: 1, rotate: 0 }}
-                              transition={{ ...SPRING_BOUNCY, delay: 0.2 }}
-                            >
-                              {data.favoriteDriverFinishPos === 1
-                                ? "🏆"
-                                : data.favoriteDriverFinishPos <= 3
-                                  ? "🥇"
-                                  : data.favoriteDriverFinishPos <= 10
-                                    ? "👏"
-                                    : data.favoriteDriverFinishPos <= 15
-                                      ? "😐"
-                                      : "😢"}
-                            </motion.div>
-                            <div className="flex items-center gap-3">
-                              <motion.span
-                                className="text-4xl font-black text-white"
-                                initial={{ scale: 0, rotate: -20 }}
-                                animate={{ scale: 1, rotate: 0 }}
-                                transition={{ ...SPRING_BOUNCY, delay: 0.3 }}
-                              >
-                                P{data.favoriteDriverFinishPos}
-                              </motion.span>
-                              <div className="text-left">
-                                <div className="text-[10px] font-bold uppercase tracking-wider text-gray-400">
-                                  Pozycja
-                                </div>
-                                <div
-                                  className={`text-sm font-black ${
-                                    data.favoriteDriverFinishPos === 1
-                                      ? "text-[#E60000]"
-                                      : data.favoriteDriverFinishPos <= 3
-                                        ? "text-amber-400"
-                                        : data.favoriteDriverInTop10
-                                          ? "text-emerald-400"
-                                          : "text-gray-400"
-                                  }`}
-                                >
-                                  {data.favoriteDriverFinishPos === 1
-                                    ? "Zwycięstwo!"
-                                    : data.favoriteDriverFinishPos <= 3
-                                      ? "Podium!"
-                                      : data.favoriteDriverInTop10
-                                        ? "W top 10"
-                                        : data.favoriteDriverFinishPos <= 15
-                                          ? "Poza top 10"
-                                          : "Koniec stawki"}
-                                </div>
-                              </div>
-                            </div>
-                          </motion.div>
-                        ) : (
-                          <div className="flex flex-col items-center gap-2 rounded-2xl border border-gray-600/30 bg-gray-600/10 px-5 py-4">
-                            <span className="text-4xl">💀</span>
-                            <span className="text-base font-black text-gray-400">
-                              DNF
-                            </span>
-                          </div>
-                        )}
-                      </motion.div>
-
-                      {data.favoriteDriverF1Points > 0 && (
                         <motion.div
-                          variants={staggerItem}
-                          className="mt-4 flex items-center justify-between rounded-xl border border-emerald-500/20 bg-emerald-500/5 px-5 py-2.5"
+                          animate={{ rotate: [0, 10, -10, 0] }}
+                          transition={{
+                            duration: 2,
+                            repeat: Infinity,
+                            ease: "easeInOut",
+                          }}
                         >
-                          <span className="text-xs font-black uppercase tracking-wider text-emerald-400/70">
-                            Punkty F1
-                          </span>
-                          <span className="text-lg font-black text-emerald-400">
-                            +{data.favoriteDriverF1Points} pkt
-                          </span>
+                          <Sparkles className="h-8 w-8 text-[#E60000]" />
                         </motion.div>
-                      )}
-                    </>
-                  ) : (
-                    <motion.div
-                      variants={staggerItem}
-                      className="rounded-2xl border border-white/10 bg-white/5 px-5 py-3"
-                    >
-                      <span className="text-base text-gray-500">
-                        Nie wybrałeś ulubionego kierowcy
-                      </span>
-                    </motion.div>
-                  )}
-                </motion.div>
-              </DramaticReveal>
-            </div>
-          </BG>
-        </Panel>
+                      </motion.div>
 
-        {/* ════════════ SLIDE 3: FAVORITE TEAM ════════════ */}
-        <Panel>
-          <BG gradient="from-[#0D0D0D] via-[#0a001a] to-[#0D0D0D]">
-            <Particles color="#8B5CF6" />
-            <GlowRing
-              color="#8B5CF6"
-              size={280}
-              className="bottom-1/3 right-1/4"
-            />
-            <div className="relative z-10 flex h-full flex-col items-center justify-center px-6 text-center">
-              <DramaticReveal
-                label="Twój ulubiony zespół..."
-                active={s(3)}
-                revealDelay={1.2}
-              >
-                <motion.div
-                  className="flex flex-col items-center"
-                  variants={staggerContainer}
-                  initial="hidden"
-                  animate="visible"
-                >
-                  <motion.div
-                    variants={popIn}
-                    className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl border border-purple-500/30 bg-purple-500/20"
-                  >
-                    <Star className="h-6 w-6 text-purple-400" />
-                  </motion.div>
-
-                  <motion.div
-                    variants={staggerItem}
-                    className="mb-2 text-[10px] font-black uppercase tracking-[0.3em] text-purple-400/80"
-                  >
-                    Twój ulubiony zespół
-                  </motion.div>
-
-                  {data.favoriteTeamName ? (
-                    <>
                       <motion.div
+                        variants={staggerItem}
+                        className="mb-2 text-[10px] font-black uppercase tracking-[0.4em] text-[#E60000]/80"
+                      >
+                        Runda {data.raceRound}
+                      </motion.div>
+
+                      <motion.h1
                         variants={heroText}
-                        className="mb-5 flex items-center gap-2.5"
+                        className="mb-1 text-3xl font-black uppercase leading-[0.9] tracking-tight text-white sm:text-5xl"
                       >
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <motion.img
-                          src={getTeamLogo(data.favoriteTeamName)}
-                          alt=""
-                          className="h-8 w-8 object-contain brightness-0 invert opacity-80"
-                          initial={{ rotate: -180, scale: 0 }}
-                          animate={{ rotate: 0, scale: 1 }}
-                          transition={{ ...SPRING_BOUNCY, delay: 0.5 }}
-                        />
-                        <h2 className="text-xl font-black text-white sm:text-3xl">
-                          {data.favoriteTeamName}
-                        </h2>
-                      </motion.div>
+                        {data.raceName
+                          .replace(" Grand Prix", "")
+                          .replace("Grand Prix ", "")}
+                      </motion.h1>
 
-                      <div className="w-full max-w-[280px] space-y-2.5">
-                        {data.favoriteTeamDriverResults.map((dr, i) => (
-                          <motion.div
-                            key={dr.driverName}
-                            variants={i === 0 ? slideFromLeft : slideFromRight}
-                            className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-4 py-3"
-                            whileHover={{
-                              scale: 1.02,
-                              borderColor: "rgba(139,92,246,0.3)",
-                            }}
-                          >
-                            <span className="text-sm font-bold text-white">
-                              {dr.driverName}
-                            </span>
-                            <div className="flex items-center gap-2">
-                              {/* Emoji reaction */}
-                              <span className="text-base">
-                                {dr.finishPos === null
-                                  ? "💀"
-                                  : dr.finishPos === 1
-                                    ? "🏆"
-                                    : dr.finishPos <= 3
-                                      ? "🥇"
-                                      : dr.finishPos <= 10
-                                        ? "👍"
-                                        : dr.finishPos <= 15
-                                          ? "😐"
-                                          : "😢"}
-                              </span>
-                              {dr.f1Points > 0 && (
-                                <span className="rounded-md bg-purple-500/15 px-2 py-0.5 text-[10px] font-black text-purple-400">
-                                  +{dr.f1Points} pkt
-                                </span>
-                              )}
-                              <span
-                                className={`text-lg font-black ${
-                                  dr.finishPos !== null
-                                    ? dr.finishPos <= 3
-                                      ? "text-[#E60000]"
-                                      : dr.finishPos <= 10
-                                        ? "text-emerald-400"
-                                        : "text-gray-400"
-                                    : "text-gray-600"
-                                }`}
-                              >
-                                {dr.finishPos !== null
-                                  ? `P${dr.finishPos}`
-                                  : "DNF"}
-                              </span>
-                            </div>
-                          </motion.div>
-                        ))}
-                      </div>
-
-                      {data.favoriteTeamTotalF1Points > 0 && (
-                        <motion.div
-                          variants={staggerItem}
-                          className="mt-5 flex items-center justify-between rounded-xl border border-purple-500/20 bg-purple-500/5 px-5 py-2.5"
-                        >
-                          <span className="text-xs font-black uppercase tracking-wider text-purple-400/70">
-                            Łącznie punktów F1
-                          </span>
-                          <span className="text-lg font-black text-purple-400">
-                            +{data.favoriteTeamTotalF1Points} pkt
-                          </span>
-                        </motion.div>
-                      )}
-                    </>
-                  ) : (
-                    <motion.div
-                      variants={staggerItem}
-                      className="rounded-2xl border border-white/10 bg-white/5 px-5 py-3"
-                    >
-                      <span className="text-base text-gray-500">
-                        Nie wybrałeś ulubionego zespołu
-                      </span>
-                    </motion.div>
-                  )}
-                </motion.div>
-              </DramaticReveal>
-            </div>
-          </BG>
-        </Panel>
-
-        {/* ════════════ SLIDE 4: COMPARISON ════════════ */}
-        <Panel>
-          <BG gradient="from-[#0D0D0D] via-[#1a0a00] to-[#0D0D0D]">
-            <Particles color="#F59E0B" />
-            <GlowRing
-              color="#F59E0B"
-              size={300}
-              className="left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
-            />
-            <div className="relative z-10 flex h-full flex-col items-center justify-center px-5 text-center">
-              <DramaticReveal
-                label="Na tle innych graczy..."
-                active={s(4)}
-                revealDelay={1.4}
-              >
-                <motion.div
-                  className="flex flex-col items-center"
-                  variants={staggerContainer}
-                  initial="hidden"
-                  animate="visible"
-                >
-                  <motion.div
-                    variants={popIn}
-                    className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl border border-amber-500/30 bg-amber-500/20"
-                  >
-                    <Users className="h-6 w-6 text-amber-400" />
-                  </motion.div>
-
-                  <motion.div
-                    variants={staggerItem}
-                    className="mb-2 text-[10px] font-black uppercase tracking-[0.3em] text-amber-400/80"
-                  >
-                    Na tle innych
-                  </motion.div>
-
-                  <motion.div
-                    variants={scaleReveal}
-                    className="mb-1 flex items-baseline gap-1.5"
-                  >
-                    <AnimatedCounter
-                      target={data.userRank}
-                      delay={300}
-                      className="text-6xl font-black tabular-nums leading-none text-white sm:text-8xl"
-                    />
-                    <span className="text-xl font-bold text-gray-500">
-                      /{data.totalPlayers}
-                    </span>
-                  </motion.div>
-
-                  <motion.div
-                    variants={staggerItem}
-                    className="mb-4 text-xs font-bold text-gray-400"
-                  >
-                    miejsce w rankingu
-                  </motion.div>
-
-                  {/* Ranking reaction */}
-                  <motion.div
-                    variants={staggerItem}
-                    className={`mb-5 flex flex-col items-center gap-1 rounded-2xl border px-6 py-3 ${
-                      data.userRank <= 2
-                        ? "border-[#E60000]/30 bg-[#E60000]/10"
-                        : data.userRank >= data.totalPlayers - 1
-                          ? "border-gray-600/30 bg-gray-600/10"
-                          : "border-amber-500/30 bg-amber-500/10"
-                    }`}
-                  >
-                    <motion.span
-                      className="text-4xl"
-                      animate={{ scale: [1, 1.2, 1] }}
-                      transition={{ duration: 1.5, repeat: Infinity }}
-                    >
-                      {data.userRank <= 2
-                        ? data.userRank === 1 ? "🥇" : "🥈"
-                        : data.userRank >= data.totalPlayers - 1
-                          ? data.userRank === data.totalPlayers ? "💀" : "😬"
-                          : "💪"}
-                    </motion.span>
-                    <span className={`text-sm font-black ${
-                      data.userRank <= 2
-                        ? "text-[#E60000]"
-                        : data.userRank >= data.totalPlayers - 1
-                          ? "text-gray-400"
-                          : "text-amber-400"
-                    }`}>
-                      {data.userRank === 1
-                        ? "Jesteś na szczycie!"
-                        : data.userRank === 2
-                          ? "Prawie lider! 🔥"
-                          : data.userRank >= data.totalPlayers
-                            ? "Ostatnie miejsce 😅"
-                            : data.userRank >= data.totalPlayers - 1
-                              ? "Przedostatnie..."
-                              : `Lepszy od ${data.playersBeaten} graczy 🔥`}
-                    </span>
-                  </motion.div>
-
-                  <motion.div
-                    variants={staggerItem}
-                    className="w-full max-w-[300px] space-y-1.5"
-                  >
-                    {data.allScores.slice(0, 5).map((sc, i) => (
                       <motion.div
-                        key={sc.userName + sc.rank}
-                        initial={{ opacity: 0, x: -30 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{
-                          ...SPRING_SOFT,
-                          delay: 0.5 + i * 0.1,
+                        variants={{
+                          hidden: { opacity: 0, y: 40, scale: 0.7 },
+                          visible: {
+                            opacity: 1,
+                            y: 0,
+                            scale: 1,
+                            transition: { ...SPRING_HEAVY, delay: 0.5 },
+                          },
                         }}
-                        className={`flex items-center gap-2.5 rounded-xl px-3 py-2 ${
-                          sc.isUser
-                            ? "border border-[#E60000]/30 bg-[#E60000]/10"
-                            : "bg-white/[0.03]"
-                        }`}
-                        whileHover={{
-                          scale: 1.02,
-                          backgroundColor: sc.isUser
-                            ? "rgba(230,0,0,0.15)"
-                            : "rgba(255,255,255,0.05)",
-                        }}
-                      >
-                        <span
-                          className={`w-5 shrink-0 text-xs font-black ${
-                            sc.rank <= 3
-                              ? "text-amber-400"
-                              : "text-gray-500"
-                          }`}
-                        >
-                          {sc.rank}
-                        </span>
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                          src={sc.avatar}
-                          alt=""
-                          className="h-6 w-6 shrink-0 rounded-md object-cover"
-                        />
-                        <span
-                          className={`flex-1 truncate text-left text-xs font-bold ${
-                            sc.isUser ? "text-[#E60000]" : "text-white"
-                          }`}
-                        >
-                          {sc.userName}
-                          {sc.isUser && " (Ty)"}
-                        </span>
-                        <span className="shrink-0 text-xs font-black tabular-nums text-white">
-                          {sc.points}
-                        </span>
-                      </motion.div>
-                    ))}
-
-                    {data.userRank > 5 && (
-                      <>
-                        <div className="flex justify-center gap-1 py-0.5">
-                          {[0, 1, 2].map((i) => (
-                            <motion.div
-                              key={i}
-                              className="h-0.5 w-0.5 rounded-full bg-gray-600"
-                              animate={{
-                                opacity: [0.3, 1, 0.3],
-                              }}
-                              transition={{
-                                duration: 1,
-                                repeat: Infinity,
-                                delay: i * 0.2,
-                              }}
-                            />
-                          ))}
-                        </div>
-                        {data.allScores
-                          .filter((sc) => sc.isUser)
-                          .map((sc) => (
-                            <motion.div
-                              key="me"
-                              initial={{ opacity: 0, scale: 0.8 }}
-                              animate={{ opacity: 1, scale: 1 }}
-                              transition={{
-                                ...SPRING_BOUNCY,
-                                delay: 1,
-                              }}
-                              className="flex items-center gap-2.5 rounded-xl border border-[#E60000]/30 bg-[#E60000]/10 px-3 py-2"
-                            >
-                              <span className="w-5 shrink-0 text-xs font-black text-gray-500">
-                                {sc.rank}
-                              </span>
-                              {/* eslint-disable-next-line @next/next/no-img-element */}
-                              <img
-                                src={sc.avatar}
-                                alt=""
-                                className="h-6 w-6 shrink-0 rounded-md object-cover"
-                              />
-                              <span className="flex-1 truncate text-left text-xs font-bold text-[#E60000]">
-                                {sc.userName} (Ty)
-                              </span>
-                              <span className="shrink-0 text-xs font-black tabular-nums text-white">
-                                {sc.points}
-                              </span>
-                            </motion.div>
-                          ))}
-                      </>
-                    )}
-                  </motion.div>
-
-                  {data.pointsToFirst > 0 && (
-                    <motion.div
-                      variants={staggerItem}
-                      className="mt-3 text-[10px] font-bold text-gray-500"
-                    >
-                      {data.pointsToFirst} pkt do lidera
-                    </motion.div>
-                  )}
-                </motion.div>
-              </DramaticReveal>
-            </div>
-          </BG>
-        </Panel>
-
-        {/* ════════════ SLIDE 5: SUMMARY (RECAP) ════════════ */}
-        <Panel>
-          <BG gradient="from-[#0D0D0D] via-[#120008] to-[#0D0D0D]">
-            <Particles color="#E60000" />
-            <GlowRing
-              color="#E60000"
-              size={350}
-              className="left-1/2 top-1/4 -translate-x-1/2"
-            />
-            <GlowRing
-              color="#8B5CF6"
-              size={180}
-              className="bottom-1/4 right-0"
-            />
-            <div className="relative z-10 flex h-full flex-col items-center justify-center overflow-y-auto px-5 py-20 text-center">
-              <AnimatePresence>
-                {s(5) && (
-                  <motion.div
-                    className="flex flex-col items-center"
-                    variants={staggerContainer}
-                    initial="hidden"
-                    animate="visible"
-                    exit={{ opacity: 0 }}
-                  >
-                    {/* Title */}
-                    <motion.div
-                      variants={staggerItem}
-                      className="mb-1 text-[10px] font-black uppercase tracking-[0.3em] text-[#E60000]/80"
-                    >
-                      Runda {data.raceRound} — Podsumowanie
-                    </motion.div>
-                    <motion.h2
-                      variants={heroText}
-                      className="mb-6 text-2xl font-black uppercase leading-tight text-white sm:text-3xl"
-                    >
-                      {data.raceName
-                        .replace(" Grand Prix", "")
-                        .replace("Grand Prix ", "")}{" "}
-                      <span
                         className={clsx(
-                          "bg-gradient-to-r bg-clip-text text-transparent",
+                          "mb-5 bg-gradient-to-r bg-clip-text text-xl font-black uppercase text-transparent sm:text-3xl",
                           isSprint
                             ? "from-amber-500 to-amber-300"
                             : "from-[#E60000] to-[#FF6B6B]",
                         )}
                       >
-                        {isSprint ? "SPRINT" : "GP"}
-                      </span>
-                    </motion.h2>
-
-                    {/* Points recap card */}
-                    <motion.div
-                      variants={scaleReveal}
-                      className="mb-4 w-full max-w-sm rounded-2xl border border-[#E60000]/20 bg-[#E60000]/5 p-4"
-                      whileHover={{ scale: 1.02, borderColor: "rgba(230,0,0,0.4)" }}
-                    >
-                      <div className="flex items-center justify-between gap-3">
-                        <div className="flex items-center gap-2">
-                          <Trophy className="h-5 w-5 text-[#E60000]" />
-                          <span className="text-xs font-black uppercase tracking-wider text-[#E60000]/80">
-                            Punkty
-                          </span>
-                        </div>
-                        <div className="flex items-baseline gap-1">
-                          <span className="text-3xl font-black tabular-nums text-white">
-                            {data.userPoints}
-                          </span>
-                          <span className="text-sm text-gray-500">
-                            /{data.maxPoints}
-                          </span>
-                        </div>
-                      </div>
-                      {(data.perfectPredictions > 0 ||
-                        data.bonusP1 > 0 ||
-                        data.bonusPodium > 0) && (
-                        <div className="mt-2 flex flex-wrap gap-1">
-                          {data.perfectPredictions > 0 && (
-                            <span className="rounded-md bg-emerald-500/15 px-2 py-0.5 text-[10px] font-bold text-emerald-400">
-                              ✨ {data.perfectPredictions} idealnie
-                            </span>
-                          )}
-                          {data.bonusP1 > 0 && (
-                            <span className="rounded-md bg-[#E60000]/15 px-2 py-0.5 text-[10px] font-bold text-[#E60000]">
-                              🏆 +{data.bonusP1}
-                            </span>
-                          )}
-                          {data.bonusPodium > 0 && (
-                            <span className="rounded-md bg-amber-500/15 px-2 py-0.5 text-[10px] font-bold text-amber-400">
-                              🥇 +{data.bonusPodium}
-                            </span>
-                          )}
-                        </div>
-                      )}
-                    </motion.div>
-
-                    {/* Rank recap */}
-                    <motion.div
-                      variants={slideFromLeft}
-                      className="mb-4 w-full max-w-sm rounded-2xl border border-amber-500/20 bg-amber-500/5 p-4"
-                      whileHover={{ scale: 1.02 }}
-                    >
-                      <div className="flex items-center justify-between gap-3">
-                        <div className="flex items-center gap-2">
-                          <Users className="h-5 w-5 text-amber-400" />
-                          <span className="text-xs font-black uppercase tracking-wider text-amber-400/80">
-                            Ranking
-                          </span>
-                        </div>
-                        <div className="flex items-baseline gap-1">
-                          <span className="text-3xl font-black tabular-nums text-white">
-                            {data.userRank}
-                          </span>
-                          <span className="text-sm text-gray-500">
-                            /{data.totalPlayers}
-                          </span>
-                        </div>
-                      </div>
-                      {data.playersBeaten > 0 && (
-                        <div className="mt-2 text-[11px] font-bold text-amber-400/70">
-                          Lepszy od {data.playersBeaten} graczy 🔥
-                        </div>
-                      )}
-                    </motion.div>
-
-                    {/* Driver + Team recap */}
-                    <motion.div
-                      variants={slideFromRight}
-                      className="mb-4 grid w-full max-w-sm grid-cols-2 gap-2"
-                    >
-                      <motion.div
-                        className="rounded-2xl border border-emerald-500/20 bg-emerald-500/5 p-3 text-center"
-                        whileHover={{ scale: 1.03, y: -2 }}
-                      >
-                        <Heart className="mx-auto mb-1.5 h-4 w-4 text-emerald-400" />
-                        <div className="mb-1 text-[9px] font-black uppercase tracking-wider text-emerald-400/60">
-                          Kierowca
-                        </div>
-                        <div className="truncate text-xs font-black text-white">
-                          {data.favoriteDriverName?.split(" ").pop() || "—"}
-                        </div>
-                        <div
-                          className={`mt-1 text-lg font-black ${
-                            data.favoriteDriverFinishPos !== null
-                              ? data.favoriteDriverFinishPos <= 3
-                                ? "text-[#E60000]"
-                                : data.favoriteDriverInTop10
-                                  ? "text-emerald-400"
-                                  : "text-gray-400"
-                              : "text-gray-600"
-                          }`}
-                        >
-                          {data.favoriteDriverFinishPos !== null
-                            ? `P${data.favoriteDriverFinishPos}`
-                            : "—"}
-                        </div>
+                        {isSprint ? "SPRINT" : "Grand Prix"}
                       </motion.div>
 
                       <motion.div
-                        className="rounded-2xl border border-purple-500/20 bg-purple-500/5 p-3 text-center"
-                        whileHover={{ scale: 1.03, y: -2 }}
-                      >
-                        <Star className="mx-auto mb-1.5 h-4 w-4 text-purple-400" />
-                        <div className="mb-1 text-[9px] font-black uppercase tracking-wider text-purple-400/60">
-                          Zespół
-                        </div>
-                        <div className="truncate text-xs font-black text-white">
-                          {data.favoriteTeamName || "—"}
-                        </div>
-                        <div
-                          className={`mt-1 text-lg font-black ${
-                            data.favoriteTeamBestPos !== null
-                              ? data.favoriteTeamBestPos <= 3
-                                ? "text-[#E60000]"
-                                : data.favoriteTeamBestPos <= 10
-                                  ? "text-purple-400"
-                                  : "text-gray-400"
-                              : "text-gray-600"
-                          }`}
-                        >
-                          {data.favoriteTeamBestPos !== null
-                            ? `P${data.favoriteTeamBestPos}`
-                            : "—"}
-                        </div>
-                      </motion.div>
-                    </motion.div>
-
-                    {/* Random stats */}
-                    <motion.div
-                      variants={staggerItem}
-                      className="mb-5 w-full max-w-sm space-y-2"
-                    >
-                      {data.randomStats.map((st, i) => (
-                        <motion.div
-                          key={st.id}
-                          initial={{ opacity: 0, x: i % 2 === 0 ? -40 : 40 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{
-                            ...SPRING_SOFT,
-                            delay: 0.8 + i * 0.12,
-                          }}
-                          className="flex items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.03] px-3.5 py-2.5 text-left"
-                          whileHover={{ scale: 1.02, x: 4 }}
-                        >
-                          <motion.span
-                            className="shrink-0 text-xl"
-                            animate={{ rotate: [0, 10, -10, 0] }}
-                            transition={{
-                              duration: 2,
-                              repeat: Infinity,
-                              delay: i * 0.3,
-                            }}
-                          >
-                            {st.emoji}
-                          </motion.span>
-                          <div className="min-w-0 flex-1">
-                            <div className="text-[9px] font-black uppercase tracking-wider text-gray-500">
-                              {st.title}
-                            </div>
-                            <div className="text-sm font-black text-white">
-                              {st.value}
-                            </div>
-                          </div>
-                        </motion.div>
-                      ))}
-                    </motion.div>
-
-                 {/* CTA */}
-                    <motion.div variants={scaleReveal}>
-                      <motion.button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          router.push(returnPath);
+                        variants={{
+                          hidden: { opacity: 0, width: 0 },
+                          visible: {
+                            opacity: 1,
+                            width: "auto",
+                            transition: { delay: 0.7, duration: 0.6 },
+                          },
                         }}
-                        className="group relative overflow-hidden rounded-xl bg-[#E60000] px-7 py-3 text-sm font-black text-white shadow-lg shadow-[#E60000]/30"
-                        whileHover={{
-                          scale: 1.08,
-                          boxShadow: "0 0 40px rgba(230,0,0,0.5)",
-                        }}
-                        whileTap={{ scale: 0.92 }}
-                        transition={SPRING_BOUNCY}
+                        className="mb-8 flex items-center gap-2 overflow-hidden text-xs text-gray-400"
                       >
-                        <span className="relative z-10">
-                          Zobacz pełne wyniki →
-                        </span>
                         <motion.div
-                          className="absolute inset-0 bg-white/10"
-                          initial={{ x: "-100%" }}
-                          whileHover={{ x: "0%" }}
-                          transition={{ duration: 0.3 }}
+                          className="h-1.5 w-1.5 rounded-full bg-[#E60000]"
+                          animate={{ scale: [1, 1.5, 1] }}
+                          transition={{ duration: 2, repeat: Infinity }}
                         />
-                      </motion.button>
+                        <span className="whitespace-nowrap font-bold uppercase tracking-widest">
+                          {data.raceLocation}
+                        </span>
+                      </motion.div>
+
+                      <motion.div
+                        variants={{
+                          hidden: { opacity: 0, y: 20 },
+                          visible: { opacity: 1, y: 0, transition: { delay: 1 } },
+                        }}
+                        className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 backdrop-blur-md"
+                      >
+                        <span className="text-[11px] font-bold text-gray-400">
+                          Stuknij, aby kontynuować
+                        </span>
+                        <motion.span
+                          className="text-[#E60000]"
+                          animate={{ x: [0, 6, 0] }}
+                          transition={{
+                            duration: 1.2,
+                            repeat: Infinity,
+                            ease: "easeInOut",
+                          }}
+                        >
+                          <ChevronRight className="h-3.5 w-3.5" />
+                        </motion.span>
+                      </motion.div>
                     </motion.div>
                   </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          </BG>
-        </Panel>
-      </motion.div>
-    </div>
-  );
-}
+                </BG>
+              </Panel>
+            )}
 
-/* ─── Layout helpers ─── */
-function Panel({ children }: { children: React.ReactNode }) {
-  return <div className="h-full w-full shrink-0">{children}</div>;
-}
+            {/* ════════ SLIDE 1: YOUR POINTS ════════ */}
+            {s(1) && (
+              <Panel>
+                <BG gradient="from-[#0D0D0D] via-[#0a0a1a] to-[#0D0D0D]">
+                  <Particles color="#4F46E5" />
+                  <ConfettiBurst active={showConfetti} />
+                  <GlowRing
+                    color="#E60000"
+                    size={350}
+                    className="left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+                  />
+                  <div className="relative z-10 flex h-full flex-col items-center justify-center px-6 text-center">
+                    <motion.div
+                      className="flex flex-col items-center"
+                      variants={staggerContainer}
+                      initial="hidden"
+                      animate="visible"
+                    >
+                      <motion.div
+                        variants={popIn}
+                        className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl border border-[#E60000]/30 bg-[#E60000]/20"
+                      >
+                        <Trophy className="h-6 w-6 text-[#E60000]" />
+                      </motion.div>
 
-function BG({
-  children,
-  gradient,
-}: {
-  children: React.ReactNode;
-  gradient: string;
-}) {
-  return (
-    <div
-      className={`relative h-full w-full overflow-hidden bg-gradient-to-b ${gradient}`}
-    >
-      {children}
+                      <motion.div
+                        variants={staggerItem}
+                        className="mb-2 text-[10px] font-black uppercase tracking-[0.3em] text-[#E60000]/80"
+                      >
+                        Twoje punkty
+                      </motion.div>
+
+                      <motion.div variants={scaleReveal} className="mb-3">
+                        <AnimatedCounter
+                          target={data.userPoints}
+                          delay={200}
+                          className="text-7xl font-black tabular-nums leading-none text-white sm:text-9xl"
+                        />
+                        <span className="ml-1 text-xl font-bold text-gray-600">
+                          /{data.maxPoints}
+                        </span>
+                      </motion.div>
+
+                      <motion.div
+                        variants={staggerItem}
+                        className="mb-5 h-2.5 w-44 overflow-hidden rounded-full bg-white/10"
+                      >
+                        <motion.div
+                          className="h-full rounded-full bg-gradient-to-r from-[#E60000] to-[#FF6B6B]"
+                          initial={{ width: "0%" }}
+                          animate={{
+                            width: `${Math.round(
+                              (data.userPoints / data.maxPoints) * 100,
+                            )}%`,
+                          }}
+                          transition={{
+                            duration: 1.5,
+                            delay: 0.5,
+                            ease: "easeOut",
+                          }}
+                        />
+                      </motion.div>
+
+                      <motion.div
+                        variants={staggerItem}
+                        className="flex flex-wrap justify-center gap-1.5"
+                      >
+                        {data.perfectPredictions > 0 && (
+                          <motion.div
+                            whileHover={{ scale: 1.05 }}
+                            className="flex items-center gap-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1.5"
+                          >
+                            <span className="text-xs text-emerald-400">
+                              ✨
+                            </span>
+                            <span className="text-[11px] font-bold text-emerald-400">
+                              {data.perfectPredictions} idealnie
+                            </span>
+                          </motion.div>
+                        )}
+                        {data.bonusP1 > 0 && (
+                          <motion.div
+                            whileHover={{ scale: 1.05 }}
+                            className="flex items-center gap-1.5 rounded-lg border border-[#E60000]/30 bg-[#E60000]/10 px-2.5 py-1.5"
+                          >
+                            <span className="text-xs text-[#E60000]">🏆</span>
+                            <span className="text-[11px] font-bold text-[#E60000]">
+                              +{data.bonusP1} za P1
+                            </span>
+                          </motion.div>
+                        )}
+                        {data.bonusPodium > 0 && (
+                          <motion.div
+                            whileHover={{ scale: 1.05 }}
+                            className="flex items-center gap-1.5 rounded-lg border border-amber-500/30 bg-amber-500/10 px-2.5 py-1.5"
+                          >
+                            <span className="text-xs text-amber-400">🥇</span>
+                            <span className="text-[11px] font-bold text-amber-400">
+                              +{data.bonusPodium} za podium
+                            </span>
+                          </motion.div>
+                        )}
+                      </motion.div>
+                    </motion.div>
+                  </div>
+                </BG>
+              </Panel>
+            )}
+
+            {/* ════════ SLIDE 2: FAVORITE DRIVER ════════ */}
+            {s(2) && (
+              <Panel>
+                <BG gradient="from-[#0D0D0D] via-[#001a00] to-[#0D0D0D]">
+                  <Particles color="#10B981" />
+                  <GlowRing
+                    color="#10B981"
+                    size={280}
+                    className="left-1/2 top-1/3 -translate-x-1/2 -translate-y-1/2"
+                  />
+                  <div className="relative z-10 flex h-full flex-col items-center justify-center px-6 text-center">
+                    <motion.div
+                      className="flex flex-col items-center"
+                      variants={staggerContainer}
+                      initial="hidden"
+                      animate="visible"
+                    >
+                      <motion.div
+                        variants={popIn}
+                        className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl border border-emerald-500/30 bg-emerald-500/20"
+                      >
+                        <Heart className="h-6 w-6 text-emerald-400" />
+                      </motion.div>
+
+                      <motion.div
+                        variants={staggerItem}
+                        className="mb-2 text-[10px] font-black uppercase tracking-[0.3em] text-emerald-400/80"
+                      >
+                        Twój ulubiony kierowca
+                      </motion.div>
+
+                      {data.favoriteDriverName ? (
+                        <>
+                          <motion.h2
+                            variants={heroText}
+                            className="mb-5 text-2xl font-black text-white sm:text-4xl"
+                          >
+                            {data.favoriteDriverName}
+                          </motion.h2>
+
+                          <motion.div variants={scaleReveal}>
+                            {data.favoriteDriverFinishPos !== null ? (
+                              <motion.div
+                                className={`inline-flex flex-col items-center gap-2 rounded-2xl px-6 py-4 ${
+                                  data.favoriteDriverFinishPos === 1
+                                    ? "border border-[#E60000]/40 bg-[#E60000]/10"
+                                    : data.favoriteDriverFinishPos <= 3
+                                      ? "border border-amber-500/30 bg-amber-500/10"
+                                      : data.favoriteDriverInTop10
+                                        ? "border border-emerald-500/30 bg-emerald-500/10"
+                                        : "border border-white/10 bg-white/5"
+                                }`}
+                                whileHover={{ scale: 1.02 }}
+                              >
+                                <motion.div
+                                  className="text-5xl"
+                                  initial={{ scale: 0, rotate: -20 }}
+                                  animate={{ scale: 1, rotate: 0 }}
+                                  transition={{ ...SPRING_BOUNCY, delay: 0.2 }}
+                                >
+                                  {data.favoriteDriverFinishPos === 1
+                                    ? "🏆"
+                                    : data.favoriteDriverFinishPos <= 3
+                                      ? "🥇"
+                                      : data.favoriteDriverFinishPos <= 10
+                                        ? "👏"
+                                        : data.favoriteDriverFinishPos <= 15
+                                          ? "😐"
+                                          : "😢"}
+                                </motion.div>
+                                <div className="flex items-center gap-3">
+                                  <motion.span
+                                    className="text-4xl font-black text-white"
+                                    initial={{ scale: 0, rotate: -20 }}
+                                    animate={{ scale: 1, rotate: 0 }}
+                                    transition={{ ...SPRING_BOUNCY, delay: 0.3 }}
+                                  >
+                                    P{data.favoriteDriverFinishPos}
+                                  </motion.span>
+                                  <div className="text-left">
+                                    <div className="text-[10px] font-bold uppercase tracking-wider text-gray-400">
+                                      Pozycja
+                                    </div>
+                                    <div
+                                      className={`text-sm font-black ${
+                                        data.favoriteDriverFinishPos === 1
+                                          ? "text-[#E60000]"
+                                          : data.favoriteDriverFinishPos <= 3
+                                            ? "text-amber-400"
+                                            : data.favoriteDriverInTop10
+                                              ? "text-emerald-400"
+                                              : "text-gray-400"
+                                      }`}
+                                    >
+                                      {data.favoriteDriverFinishPos === 1
+                                        ? "Zwycięstwo!"
+                                        : data.favoriteDriverFinishPos <= 3
+                                          ? "Podium!"
+                                          : data.favoriteDriverInTop10
+                                            ? "W top 10"
+                                            : data.favoriteDriverFinishPos <= 15
+                                              ? "Poza top 10"
+                                              : "Koniec stawki"}
+                                    </div>
+                                  </div>
+                                </div>
+                              </motion.div>
+                            ) : (
+                              <div className="flex flex-col items-center gap-2 rounded-2xl border border-gray-600/30 bg-gray-600/10 px-5 py-4">
+                                <span className="text-4xl">💀</span>
+                                <span className="text-base font-black text-gray-400">
+                                  DNF
+                                </span>
+                              </div>
+                            )}
+                          </motion.div>
+
+                          {data.favoriteDriverF1Points > 0 && (
+                            <motion.div
+                              variants={staggerItem}
+                              className="mt-4 flex items-center justify-between rounded-xl border border-emerald-500/20 bg-emerald-500/5 px-5 py-2.5"
+                            >
+                              <span className="text-xs font-black uppercase tracking-wider text-emerald-400/70">
+                                Punkty F1
+                              </span>
+                              <span className="text-lg font-black text-emerald-400">
+                                +{data.favoriteDriverF1Points} pkt
+                              </span>
+                            </motion.div>
+                          )}
+                        </>
+                      ) : (
+                        <motion.div
+                          variants={staggerItem}
+                          className="rounded-2xl border border-white/10 bg-white/5 px-5 py-3"
+                        >
+                          <span className="text-base text-gray-500">
+                            Nie wybrałeś ulubionego kierowcy
+                          </span>
+                        </motion.div>
+                      )}
+                    </motion.div>
+                  </div>
+                </BG>
+              </Panel>
+            )}
+
+            {/* ════════ SLIDE 3: FAVORITE TEAM ════════ */}
+            {s(3) && (
+              <Panel>
+                <BG gradient="from-[#0D0D0D] via-[#0a001a] to-[#0D0D0D]">
+                  <Particles color="#8B5CF6" />
+                  <GlowRing
+                    color="#8B5CF6"
+                    size={280}
+                    className="bottom-1/3 right-1/4"
+                  />
+                  <div className="relative z-10 flex h-full flex-col items-center justify-center px-6 text-center">
+                    <motion.div
+                      className="flex flex-col items-center"
+                      variants={staggerContainer}
+                      initial="hidden"
+                      animate="visible"
+                    >
+                      <motion.div
+                        variants={popIn}
+                        className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl border border-purple-500/30 bg-purple-500/20"
+                      >
+                        <Star className="h-6 w-6 text-purple-400" />
+                      </motion.div>
+
+                      <motion.div
+                        variants={staggerItem}
+                        className="mb-2 text-[10px] font-black uppercase tracking-[0.3em] text-purple-400/80"
+                      >
+                        Twój ulubiony zespół
+                      </motion.div>
+
+                      {data.favoriteTeamName ? (
+                        <>
+                          <motion.div
+                            variants={heroText}
+                            className="mb-5 flex items-center gap-2.5"
+                          >
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <motion.img
+                              src={getTeamLogo(data.favoriteTeamName)}
+                              alt=""
+                              className="h-8 w-8 object-contain brightness-0 invert opacity-80"
+                              initial={{ rotate: -180, scale: 0 }}
+                              animate={{ rotate: 0, scale: 1 }}
+                              transition={{ ...SPRING_BOUNCY, delay: 0.5 }}
+                            />
+                            <h2 className="text-xl font-black text-white sm:text-3xl">
+                              {data.favoriteTeamName}
+                            </h2>
+                          </motion.div>
+
+                          <div className="w-full max-w-[280px] space-y-2.5">
+                            {data.favoriteTeamDriverResults.map((dr, i) => (
+                              <motion.div
+                                key={dr.driverName}
+                                variants={
+                                  i === 0 ? slideFromLeft : slideFromRight
+                                }
+                                className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-4 py-3"
+                                whileHover={{
+                                  scale: 1.02,
+                                  borderColor: "rgba(139,92,246,0.3)",
+                                }}
+                              >
+                                <span className="text-sm font-bold text-white">
+                                  {dr.driverName}
+                                </span>
+                                <div className="flex items-center gap-2">
+                                  <span className="text-base">
+                                    {dr.finishPos === null
+                                      ? "💀"
+                                      : dr.finishPos === 1
+                                        ? "🏆"
+                                        : dr.finishPos <= 3
+                                          ? "🥇"
+                                          : dr.finishPos <= 10
+                                            ? "👍"
+                                            : dr.finishPos <= 15
+                                              ? "😐"
+                                              : "😢"}
+                                  </span>
+                                  {dr.f1Points > 0 && (
+                                    <span className="rounded-md bg-purple-500/15 px-2 py-0.5 text-[10px] font-black text-purple-400">
+                                      +{dr.f1Points} pkt
+                                    </span>
+                                  )}
+                                  <span
+                                    className={`text-lg font-black ${
+                                      dr.finishPos !== null
+                                        ? dr.finishPos <= 3
+                                          ? "text-[#E60000]"
+                                          : dr.finishPos <= 10
+                                            ? "text-emerald-400"
+                                            : "text-gray-400"
+                                        : "text-gray-600"
+                                    }`}
+                                  >
+                                    {dr.finishPos !== null
+                                      ? `P${dr.finishPos}`
+                                      : "DNF"}
+                                  </span>
+                                </div>
+                              </motion.div>
+                            ))}
+                          </div>
+
+                          {data.favoriteTeamTotalF1Points > 0 && (
+                            <motion.div
+                              variants={staggerItem}
+                              className="mt-5 flex items-center justify-between rounded-xl border border-purple-500/20 bg-purple-500/5 px-5 py-2.5"
+                            >
+                              <span className="text-xs font-black uppercase tracking-wider text-purple-400/70">
+                                Łącznie punktów F1
+                              </span>
+                              <span className="text-lg font-black text-purple-400">
+                                +{data.favoriteTeamTotalF1Points} pkt
+                              </span>
+                            </motion.div>
+                          )}
+                        </>
+                      ) : (
+                        <motion.div
+                          variants={staggerItem}
+                          className="rounded-2xl border border-white/10 bg-white/5 px-5 py-3"
+                        >
+                          <span className="text-base text-gray-500">
+                            Nie wybrałeś ulubionego zespołu
+                          </span>
+                        </motion.div>
+                      )}
+                    </motion.div>
+                  </div>
+                </BG>
+              </Panel>
+            )}
+
+            {/* ════════ SLIDE 4: COMPARISON ════════ */}
+            {s(4) && (
+              <Panel>
+                <BG gradient="from-[#0D0D0D] via-[#1a0a00] to-[#0D0D0D]">
+                  <Particles color="#F59E0B" />
+                  <GlowRing
+                    color="#F59E0B"
+                    size={300}
+                    className="left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+                  />
+                  <div className="relative z-10 flex h-full flex-col items-center justify-center px-5 text-center">
+                    <motion.div
+                      className="flex flex-col items-center"
+                      variants={staggerContainer}
+                      initial="hidden"
+                      animate="visible"
+                    >
+                      <motion.div
+                        variants={popIn}
+                        className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl border border-amber-500/30 bg-amber-500/20"
+                      >
+                        <Users className="h-6 w-6 text-amber-400" />
+                      </motion.div>
+
+                      <motion.div
+                        variants={staggerItem}
+                        className="mb-2 text-[10px] font-black uppercase tracking-[0.3em] text-amber-400/80"
+                      >
+                        Na tle innych
+                      </motion.div>
+
+                      <motion.div
+                        variants={scaleReveal}
+                        className="mb-1 flex items-baseline gap-1.5"
+                      >
+                        <AnimatedCounter
+                          target={data.userRank}
+                          delay={300}
+                          className="text-6xl font-black tabular-nums leading-none text-white sm:text-8xl"
+                        />
+                        <span className="text-xl font-bold text-gray-500">
+                          /{data.totalPlayers}
+                        </span>
+                      </motion.div>
+
+                      <motion.div
+                        variants={staggerItem}
+                        className="mb-4 text-xs font-bold text-gray-400"
+                      >
+                        miejsce w rankingu
+                      </motion.div>
+
+                      <motion.div
+                        variants={staggerItem}
+                        className={`mb-5 flex flex-col items-center gap-1 rounded-2xl border px-6 py-3 ${
+                          data.userRank <= 2
+                            ? "border-[#E60000]/30 bg-[#E60000]/10"
+                            : data.userRank >= data.totalPlayers - 1
+                              ? "border-gray-600/30 bg-gray-600/10"
+                              : "border-amber-500/30 bg-amber-500/10"
+                        }`}
+                      >
+                        <motion.span
+                          className="text-4xl"
+                          animate={{ scale: [1, 1.2, 1] }}
+                          transition={{ duration: 1.5, repeat: Infinity }}
+                        >
+                          {data.userRank <= 2
+                            ? data.userRank === 1
+                              ? "🥇"
+                              : "🥈"
+                            : data.userRank >= data.totalPlayers - 1
+                              ? data.userRank === data.totalPlayers
+                                ? "💀"
+                                : "😬"
+                              : "💪"}
+                        </motion.span>
+                        <span
+                          className={`text-sm font-black ${
+                            data.userRank <= 2
+                              ? "text-[#E60000]"
+                              : data.userRank >= data.totalPlayers - 1
+                                ? "text-gray-400"
+                                : "text-amber-400"
+                          }`}
+                        >
+                          {data.userRank === 1
+                            ? "Jesteś na szczycie!"
+                            : data.userRank === 2
+                              ? "Prawie lider! 🔥"
+                              : data.userRank >= data.totalPlayers
+                                ? "Ostatnie miejsce 😅"
+                                : data.userRank >= data.totalPlayers - 1
+                                  ? "Przedostatnie..."
+                                  : `Lepszy od ${data.playersBeaten} graczy 🔥`}
+                        </span>
+                      </motion.div>
+
+                      <motion.div
+                        variants={staggerItem}
+                        className="w-full max-w-[300px] space-y-1.5"
+                      >
+                        {data.allScores.slice(0, 5).map((sc, i) => (
+                          <motion.div
+                            key={sc.userName + sc.rank}
+                            initial={{ opacity: 0, x: -30 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ ...SPRING_SOFT, delay: 0.5 + i * 0.1 }}
+                            className={`flex items-center gap-2.5 rounded-xl px-3 py-2 ${
+                              sc.isUser
+                                ? "border border-[#E60000]/30 bg-[#E60000]/10"
+                                : "bg-white/[0.03]"
+                            }`}
+                            whileHover={{
+                              scale: 1.02,
+                              backgroundColor: sc.isUser
+                                ? "rgba(230,0,0,0.15)"
+                                : "rgba(255,255,255,0.05)",
+                            }}
+                          >
+                            <span
+                              className={`w-5 shrink-0 text-xs font-black ${
+                                sc.rank <= 3 ? "text-amber-400" : "text-gray-500"
+                              }`}
+                            >
+                              {sc.rank}
+                            </span>
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={sc.avatar}
+                              alt=""
+                              className="h-6 w-6 shrink-0 rounded-md object-cover"
+                            />
+                            <span
+                              className={`flex-1 truncate text-left text-xs font-bold ${
+                                sc.isUser ? "text-[#E60000]" : "text-white"
+                              }`}
+                            >
+                              {sc.userName}
+                              {sc.isUser && " (Ty)"}
+                            </span>
+                            <span className="shrink-0 text-xs font-black tabular-nums text-white">
+                              {sc.points}
+                            </span>
+                          </motion.div>
+                        ))}
+
+                        {data.userRank > 5 && (
+                          <>
+                            <div className="flex justify-center gap-1 py-0.5">
+                              {[0, 1, 2].map((i) => (
+                                <motion.div
+                                  key={i}
+                                  className="h-0.5 w-0.5 rounded-full bg-gray-600"
+                                  animate={{ opacity: [0.3, 1, 0.3] }}
+                                  transition={{
+                                    duration: 1,
+                                    repeat: Infinity,
+                                    delay: i * 0.2,
+                                  }}
+                                />
+                              ))}
+                            </div>
+                            {data.allScores
+                              .filter((sc) => sc.isUser)
+                              .map((sc) => (
+                                <motion.div
+                                  key="me"
+                                  initial={{ opacity: 0, scale: 0.8 }}
+                                  animate={{ opacity: 1, scale: 1 }}
+                                  transition={{ ...SPRING_BOUNCY, delay: 1 }}
+                                  className="flex items-center gap-2.5 rounded-xl border border-[#E60000]/30 bg-[#E60000]/10 px-3 py-2"
+                                >
+                                  <span className="w-5 shrink-0 text-xs font-black text-gray-500">
+                                    {sc.rank}
+                                  </span>
+                                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                                  <img
+                                    src={sc.avatar}
+                                    alt=""
+                                    className="h-6 w-6 shrink-0 rounded-md object-cover"
+                                  />
+                                  <span className="flex-1 truncate text-left text-xs font-bold text-[#E60000]">
+                                    {sc.userName} (Ty)
+                                  </span>
+                                  <span className="shrink-0 text-xs font-black tabular-nums text-white">
+                                    {sc.points}
+                                  </span>
+                                </motion.div>
+                              ))}
+                          </>
+                        )}
+                      </motion.div>
+
+                      {data.pointsToFirst > 0 && (
+                        <motion.div
+                          variants={staggerItem}
+                          className="mt-3 text-[10px] font-bold text-gray-500"
+                        >
+                          {data.pointsToFirst} pkt do lidera
+                        </motion.div>
+                      )}
+                    </motion.div>
+                  </div>
+                </BG>
+              </Panel>
+            )}
+
+            {/* ════════ SLIDE 5: SUMMARY ════════ */}
+            {s(5) && (
+              <Panel>
+                <BG gradient="from-[#0D0D0D] via-[#120008] to-[#0D0D0D]">
+                  <Particles color="#E60000" />
+                  <GlowRing
+                    color="#E60000"
+                    size={350}
+                    className="left-1/2 top-1/4 -translate-x-1/2"
+                  />
+                  <GlowRing
+                    color="#8B5CF6"
+                    size={180}
+                    className="bottom-1/4 right-0"
+                  />
+                  <div className="relative z-10 flex h-full flex-col items-center justify-center overflow-y-auto px-5 py-20 text-center">
+                    <motion.div
+                      className="flex flex-col items-center"
+                      variants={staggerContainer}
+                      initial="hidden"
+                      animate="visible"
+                    >
+                      <motion.div
+                        variants={staggerItem}
+                        className="mb-1 text-[10px] font-black uppercase tracking-[0.3em] text-[#E60000]/80"
+                      >
+                        Runda {data.raceRound} — Podsumowanie
+                      </motion.div>
+
+                      <motion.h2
+                        variants={heroText}
+                        className="mb-6 text-2xl font-black uppercase leading-tight text-white sm:text-3xl"
+                      >
+                        {data.raceName
+                          .replace(" Grand Prix", "")
+                          .replace("Grand Prix ", "")}{" "}
+                        <span
+                          className={clsx(
+                            "bg-gradient-to-r bg-clip-text text-transparent",
+                            isSprint
+                              ? "from-amber-500 to-amber-300"
+                              : "from-[#E60000] to-[#FF6B6B]",
+                          )}
+                        >
+                          {isSprint ? "SPRINT" : "GP"}
+                        </span>
+                      </motion.h2>
+
+                      {/* Points recap */}
+                      <motion.div
+                        variants={scaleReveal}
+                        className="mb-4 w-full max-w-sm rounded-2xl border border-[#E60000]/20 bg-[#E60000]/5 p-4"
+                        whileHover={{
+                          scale: 1.02,
+                          borderColor: "rgba(230,0,0,0.4)",
+                        }}
+                      >
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="flex items-center gap-2">
+                            <Trophy className="h-5 w-5 text-[#E60000]" />
+                            <span className="text-xs font-black uppercase tracking-wider text-[#E60000]/80">
+                              Punkty
+                            </span>
+                          </div>
+                          <div className="flex items-baseline gap-1">
+                            <span className="text-3xl font-black tabular-nums text-white">
+                              {data.userPoints}
+                            </span>
+                            <span className="text-sm text-gray-500">
+                              /{data.maxPoints}
+                            </span>
+                          </div>
+                        </div>
+                        {(data.perfectPredictions > 0 ||
+                          data.bonusP1 > 0 ||
+                          data.bonusPodium > 0) && (
+                          <div className="mt-2 flex flex-wrap gap-1">
+                            {data.perfectPredictions > 0 && (
+                              <span className="rounded-md bg-emerald-500/15 px-2 py-0.5 text-[10px] font-bold text-emerald-400">
+                                ✨ {data.perfectPredictions} idealnie
+                              </span>
+                            )}
+                            {data.bonusP1 > 0 && (
+                              <span className="rounded-md bg-[#E60000]/15 px-2 py-0.5 text-[10px] font-bold text-[#E60000]">
+                                🏆 +{data.bonusP1}
+                              </span>
+                            )}
+                            {data.bonusPodium > 0 && (
+                              <span className="rounded-md bg-amber-500/15 px-2 py-0.5 text-[10px] font-bold text-amber-400">
+                                🥇 +{data.bonusPodium}
+                              </span>
+                            )}
+                          </div>
+                        )}
+                      </motion.div>
+
+                      {/* Rank recap */}
+                      <motion.div
+                        variants={slideFromLeft}
+                        className="mb-4 w-full max-w-sm rounded-2xl border border-amber-500/20 bg-amber-500/5 p-4"
+                        whileHover={{ scale: 1.02 }}
+                      >
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="flex items-center gap-2">
+                            <Users className="h-5 w-5 text-amber-400" />
+                            <span className="text-xs font-black uppercase tracking-wider text-amber-400/80">
+                              Ranking
+                            </span>
+                          </div>
+                          <div className="flex items-baseline gap-1">
+                            <span className="text-3xl font-black tabular-nums text-white">
+                              {data.userRank}
+                            </span>
+                            <span className="text-sm text-gray-500">
+                              /{data.totalPlayers}
+                            </span>
+                          </div>
+                        </div>
+                        {data.playersBeaten > 0 && (
+                          <div className="mt-2 text-[11px] font-bold text-amber-400/70">
+                            Lepszy od {data.playersBeaten} graczy 🔥
+                          </div>
+                        )}
+                      </motion.div>
+
+                      {/* Driver + Team recap */}
+                      <motion.div
+                        variants={slideFromRight}
+                        className="mb-4 grid w-full max-w-sm grid-cols-2 gap-2"
+                      >
+                        <motion.div
+                          className="rounded-2xl border border-emerald-500/20 bg-emerald-500/5 p-3 text-center"
+                          whileHover={{ scale: 1.03, y: -2 }}
+                        >
+                          <Heart className="mx-auto mb-1.5 h-4 w-4 text-emerald-400" />
+                          <div className="mb-1 text-[9px] font-black uppercase tracking-wider text-emerald-400/60">
+                            Kierowca
+                          </div>
+                          <div className="truncate text-xs font-black text-white">
+                            {data.favoriteDriverName?.split(" ").pop() || "—"}
+                          </div>
+                          <div
+                            className={`mt-1 text-lg font-black ${
+                              data.favoriteDriverFinishPos !== null
+                                ? data.favoriteDriverFinishPos <= 3
+                                  ? "text-[#E60000]"
+                                  : data.favoriteDriverInTop10
+                                    ? "text-emerald-400"
+                                    : "text-gray-400"
+                                : "text-gray-600"
+                            }`}
+                          >
+                            {data.favoriteDriverFinishPos !== null
+                              ? `P${data.favoriteDriverFinishPos}`
+                              : "—"}
+                          </div>
+                        </motion.div>
+
+                        <motion.div
+                          className="rounded-2xl border border-purple-500/20 bg-purple-500/5 p-3 text-center"
+                          whileHover={{ scale: 1.03, y: -2 }}
+                        >
+                          <Star className="mx-auto mb-1.5 h-4 w-4 text-purple-400" />
+                          <div className="mb-1 text-[9px] font-black uppercase tracking-wider text-purple-400/60">
+                            Zespół
+                          </div>
+                          <div className="truncate text-xs font-black text-white">
+                            {data.favoriteTeamName || "—"}
+                          </div>
+                          <div
+                            className={`mt-1 text-lg font-black ${
+                              data.favoriteTeamBestPos !== null
+                                ? data.favoriteTeamBestPos <= 3
+                                  ? "text-[#E60000]"
+                                  : data.favoriteTeamBestPos <= 10
+                                    ? "text-purple-400"
+                                    : "text-gray-400"
+                                : "text-gray-600"
+                            }`}
+                          >
+                            {data.favoriteTeamBestPos !== null
+                              ? `P${data.favoriteTeamBestPos}`
+                              : "—"}
+                          </div>
+                        </motion.div>
+                      </motion.div>
+
+                      {/* Random stats */}
+                      <motion.div
+                        variants={staggerItem}
+                        className="mb-5 w-full max-w-sm space-y-2"
+                      >
+                        {data.randomStats.map((st, i) => (
+                          <motion.div
+                            key={st.id}
+                            initial={{
+                              opacity: 0,
+                              x: i % 2 === 0 ? -40 : 40,
+                            }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ ...SPRING_SOFT, delay: 0.8 + i * 0.12 }}
+                            className="flex items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.03] px-3.5 py-2.5 text-left"
+                            whileHover={{ scale: 1.02, x: 4 }}
+                          >
+                            <motion.span
+                              className="shrink-0 text-xl"
+                              animate={{ rotate: [0, 10, -10, 0] }}
+                              transition={{
+                                duration: 2,
+                                repeat: Infinity,
+                                delay: i * 0.3,
+                              }}
+                            >
+                              {st.emoji}
+                            </motion.span>
+                            <div className="min-w-0 flex-1">
+                              <div className="text-[9px] font-black uppercase tracking-wider text-gray-500">
+                                {st.title}
+                              </div>
+                              <div className="text-sm font-black text-white">
+                                {st.value}
+                              </div>
+                            </div>
+                          </motion.div>
+                        ))}
+                      </motion.div>
+
+                      {/* CTA */}
+                      <motion.div variants={scaleReveal}>
+                        <motion.button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            router.push(returnPath);
+                          }}
+                          className="group relative overflow-hidden rounded-xl bg-[#E60000] px-7 py-3 text-sm font-black text-white shadow-lg shadow-[#E60000]/30"
+                          whileHover={{
+                            scale: 1.08,
+                            boxShadow: "0 0 40px rgba(230,0,0,0.5)",
+                          }}
+                          whileTap={{ scale: 0.92 }}
+                          transition={SPRING_BOUNCY}
+                        >
+                          <span className="relative z-10">
+                            Zobacz pełne wyniki →
+                          </span>
+                          <motion.div
+                            className="absolute inset-0 bg-white/10"
+                            initial={{ x: "-100%" }}
+                            whileHover={{ x: "0%" }}
+                            transition={{ duration: 0.3 }}
+                          />
+                        </motion.button>
+                      </motion.div>
+                    </motion.div>
+                  </div>
+                </BG>
+              </Panel>
+            )}
+          </div>
+        </motion.div>
+      </AnimatePresence>
     </div>
   );
 }

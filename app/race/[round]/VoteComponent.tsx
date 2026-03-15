@@ -457,7 +457,7 @@ export function VoteComponent({ race, drivers }: Props) {
 
         {/* Sprint / Race Tabs - Fixed above global nav on mobile, static center on desktop */}
         {hasSprint && (
-          <div className="fixed bottom-32 left-4 right-4 z-50 md:static md:bottom-auto md:left-auto md:right-auto md:mb-6 pointer-events-none flex justify-center">
+          <div className="fixed bottom-27 left-4 right-4 z-30 md:static md:bottom-auto md:left-auto md:right-auto md:mb-6 pointer-events-none flex justify-center">
             <div className="w-full max-w-sm p-1.5 bg-[#1C1C1E]/80 backdrop-blur-2xl rounded-2xl flex relative shadow-[0_20px_40px_rgba(0,0,0,0.9)] border border-white/10 pointer-events-auto">
               <button
                 onClick={() => handleTabChange("sprint")}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { clsx } from "clsx";
 import { getTeamLogo } from "@/lib/data";
 import { useRouter } from "next/navigation";
@@ -173,8 +173,13 @@ export default function RaceResultsContent({ raceRound, isSprint = false, hideHe
     ? Math.round((myScore.totalPoints / maxPoints) * 100)
     : 0;
 
-  const toggleSection = (id: string) =>
+  const toggleSection = (id: string) => {
+    // Save scroll position before toggling so the page doesn't jump
+    const scrollY = window.scrollY;
     setExpandedSection(expandedSection === id ? null : id);
+    // Restore scroll position on next frame
+    requestAnimationFrame(() => window.scrollTo({ top: scrollY, behavior: "instant" }));
+  };
 
   return (
     <div className="mx-auto max-w-lg px-3 sm:px-4 pb-28 pt-4 sm:pt-6">
@@ -709,6 +714,16 @@ export default function RaceResultsContent({ raceRound, isSprint = false, hideHe
               );
             })}
           </div>
+
+          {/* Dodatkowe typowania – community summary */}
+          {!isSprint && raceData.scores.some(s => s.details?.extraPredictions) && (
+            <div className="mt-4 space-y-1">
+              <div className="text-[10px] font-black uppercase tracking-widest text-gray-500 px-1 mb-2 flex items-center gap-2">
+                <Zap className="h-3 w-3" /> Dodatkowe Typowania
+              </div>
+              <ExtraPredictionsCommunity scores={raceData.scores} drivers={drivers} />
+            </div>
+          )}
         </div>
       </CollapsibleSection>
 
@@ -807,6 +822,7 @@ export default function RaceResultsContent({ raceRound, isSprint = false, hideHe
           </div>
         </CollapsibleSection>
       )}
+
 
       {/* ── SCORING RULES ── */}
       <div className="mt-8">
@@ -923,6 +939,154 @@ export default function RaceResultsContent({ raceRound, isSprint = false, hideHe
       </div>
 
       <div className="h-8" />
+    </div>
+  );
+}
+
+/* ── EXTRA PREDICTIONS COMMUNITY ── */
+function ExtraPredictionsCommunity({ scores, drivers }: { scores: RaceScore[], drivers: DriverInfo[] }) {
+  type ExtraEntry = {
+    user: RaceScore['user'];
+    predicted: string;
+    correct: boolean;
+  };
+
+  // Collect actual values from any score that has extra predictions
+  const anyExtra = scores.find(s => s.details?.extraPredictions)?.details?.extraPredictions;
+  if (!anyExtra) return null;
+
+  const formatDriver = (slug: string | null | undefined) => {
+    if (!slug) return "—";
+    const d = drivers.find(dr => dr.slug === slug);
+    return d ? d.name.split(" ").pop()! : slug;
+  };
+
+  const categories: {
+    key: keyof NonNullable<ScoreDetails['extraPredictions']>;
+    label: string;
+    emoji: string;
+    actual: string;
+    format: (val: string | number | boolean | null | undefined) => string;
+  }[] = [
+    {
+      key: "dotd",
+      label: "Driver of the Day",
+      emoji: "⭐",
+      actual: formatDriver(anyExtra.dotd?.actual ?? null),
+      format: (v) => formatDriver(v as string | null),
+    },
+    {
+      key: "dnfCount",
+      label: "Liczba DNF",
+      emoji: "💥",
+      actual: anyExtra.dnfCount?.actual != null ? String(anyExtra.dnfCount.actual) : "—",
+      format: (v) => v != null ? String(v) : "—",
+    },
+    {
+      key: "fastestLap",
+      label: "Najszybsze okrążenie",
+      emoji: "⏱",
+      actual: formatDriver(anyExtra.fastestLap?.actual ?? null),
+      format: (v) => formatDriver(v as string | null),
+    },
+    {
+      key: "startCollision",
+      label: "Kolizja na starcie",
+      emoji: "💢",
+      actual: anyExtra.startCollision?.actual != null ? (anyExtra.startCollision.actual ? "Tak" : "Nie") : "—",
+      format: (v) => v === true ? "Tak" : v === false ? "Nie" : "—",
+    },
+  ];
+
+  return (
+    <div className="space-y-4">
+      {categories.map((cat) => {
+        const entries: ExtraEntry[] = scores.flatMap(score => {
+          const extra = score.details?.extraPredictions;
+          if (!extra) return [];
+          const field = extra[cat.key];
+          if (!field) return [];
+          const predicted = cat.format((field as any).predicted);
+          if (predicted === "—") return [];
+          return [{ user: score.user, predicted, correct: (field as any).correct }];
+        });
+
+        if (entries.length === 0) return null;
+
+        // Group by predicted value
+        const grouped: Record<string, { predicted: string; correct: boolean; users: RaceScore['user'][] }> = {};
+        for (const e of entries) {
+          if (!grouped[e.predicted]) {
+            grouped[e.predicted] = { predicted: e.predicted, correct: e.correct, users: [] };
+          }
+          grouped[e.predicted].users.push(e.user);
+        }
+
+        const sortedGroups = Object.values(grouped).sort((a, b) => {
+          if (a.correct && !b.correct) return -1;
+          if (!a.correct && b.correct) return 1;
+          return b.users.length - a.users.length;
+        });
+
+        return (
+          <div key={cat.key} className="rounded-2xl border border-white/[0.06] bg-[#131315] overflow-hidden">
+            {/* Category header */}
+            <div className="flex items-center gap-3 px-4 py-3 border-b border-white/[0.05]">
+              <span className="text-base">{cat.emoji}</span>
+              <span className="text-xs font-black uppercase tracking-wider text-gray-300 flex-1">{cat.label}</span>
+              <span className="text-[10px] font-bold text-gray-500">
+                Wynik: <span className="text-white font-black">{cat.actual}</span>
+              </span>
+            </div>
+
+            {/* Votes grouped by answer */}
+            <div className="p-3 space-y-2">
+              {sortedGroups.map((group) => (
+                <div
+                  key={group.predicted}
+                  className={clsx(
+                    "flex items-center gap-3 rounded-xl px-3 py-2.5 border",
+                    group.correct
+                      ? "border-emerald-500/30 bg-emerald-500/10"
+                      : "border-white/[0.04] bg-white/[0.02]"
+                  )}
+                >
+                  {/* Answer */}
+                  <div className={clsx(
+                    "shrink-0 text-xs font-black min-w-[3rem] text-center",
+                    group.correct ? "text-emerald-400" : "text-gray-400"
+                  )}>
+                    {group.predicted}
+                  </div>
+
+                  {/* Avatars */}
+                  <div className="flex flex-wrap gap-1.5 flex-1 min-w-0">
+                    {group.users.map((u) => (
+                      <img
+                        key={u.id}
+                        src={u.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name || "U")}&background=E60000&color=fff&bold=true`}
+                        alt={u.name || "User"}
+                        title={u.name || "User"}
+                        className={clsx(
+                          "h-8 w-8 rounded-full object-cover border-2 shadow-sm transition-transform hover:scale-110",
+                          group.correct ? "border-emerald-500/50" : "border-white/10"
+                        )}
+                      />
+                    ))}
+                  </div>
+
+                  {/* Correct badge */}
+                  {group.correct && (
+                    <div className="shrink-0 rounded-lg bg-emerald-500/20 px-2 py-1 text-xs font-black text-emerald-400">
+                      +1
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }
