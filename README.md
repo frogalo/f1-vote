@@ -3,7 +3,7 @@
 A mobile-first PWA for predicting the 2026 Formula 1 season.
 
 | Calendar | Voting | Leaderboard |
-|------|----------|--------|-------------|
+|----------|--------|-------------|
 | <img src="https://github.com/user-attachments/assets/de01bec2-829a-4b15-b126-9bf57640e9c9" width="180" alt="Calendar"> | <img src="https://github.com/user-attachments/assets/a38c9177-b5b2-4895-8c2b-0c14bcec0681" width="180" alt="Vote"> | <img src="https://github.com/user-attachments/assets/03d09dd6-29e9-4c1a-a133-846538b50044" width="180" alt="Leaderboard"> |
 
 ## Features
