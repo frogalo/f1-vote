@@ -1,6 +1,13 @@
-# F1 2026 Predictions App 🏎️
+<img width="774" height="962" alt="image" src="https://github.com/user-attachments/assets/0cb40be5-87d7-4b2d-9aed-0bb86759e5be" /># F1 2026 Predictions App 🏎️
 
 A modern, mobile-first Progressive Web App (PWA) for making predictions about the 2026 Formula 1 season.
+
+
+<img width="774" height="962" alt="image" src="https://github.com/user-attachments/assets/de01bec2-829a-4b15-b126-9bf57640e9c9" />
+<img width="550" height="1227" alt="image" src="https://github.com/user-attachments/assets/a38c9177-b5b2-4895-8c2b-0c14bcec0681" />
+<img width="762" height="1228" alt="image" src="https://github.com/user-attachments/assets/03d09dd6-29e9-4c1a-a133-846538b50044" />
+<img width="532" height="1204" alt="image" src="https://github.com/user-attachments/assets/7fe86a08-3c52-43cc-ba78-33c5d1f7324d" />
+
 
 ## Features
 
