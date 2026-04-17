@@ -1,13 +1,10 @@
-<img width="774" height="962" alt="image" src="https://github.com/user-attachments/assets/0cb40be5-87d7-4b2d-9aed-0bb86759e5be" /># F1 2026 Predictions App 🏎️
+# F1 2026 Predictions App 🏎️
 
-A modern, mobile-first Progressive Web App (PWA) for making predictions about the 2026 Formula 1 season.
+A mobile-first PWA for predicting the 2026 Formula 1 season.
 
-
-<img width="774" height="962" alt="image" src="https://github.com/user-attachments/assets/de01bec2-829a-4b15-b126-9bf57640e9c9" />
-<img width="550" height="1227" alt="image" src="https://github.com/user-attachments/assets/a38c9177-b5b2-4895-8c2b-0c14bcec0681" />
-<img width="762" height="1228" alt="image" src="https://github.com/user-attachments/assets/03d09dd6-29e9-4c1a-a133-846538b50044" />
-<img width="532" height="1204" alt="image" src="https://github.com/user-attachments/assets/7fe86a08-3c52-43cc-ba78-33c5d1f7324d" />
-
+| Home | Calendar | Voting | Leaderboard |
+|------|----------|--------|-------------|
+| <img src="https://github.com/user-attachments/assets/0cb40be5-87d7-4b2d-9aed-0bb86759e5be" width="180" alt="Home"> | <img src="https://github.com/user-attachments/assets/de01bec2-829a-4b15-b126-9bf57640e9c9" width="180" alt="Calendar"> | <img src="https://github.com/user-attachments/assets/a38c9177-b5b2-4895-8c2b-0c14bcec0681" width="180" alt="Vote"> | <img src="https://github.com/user-attachments/assets/03d09dd6-29e9-4c1a-a133-846538b50044" width="180" alt="Leaderboard"> |
 
 ## Features
 
