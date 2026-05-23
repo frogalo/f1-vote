@@ -13,6 +13,39 @@ import { clsx } from "clsx";
 import ReactCountryFlag from "react-country-flag";
 import FinishRaceModal from "./FinishRaceModal";
 
+// Warsaw timezone formatter
+const WARSAW_TZ = "Europe/Warsaw";
+function formatWarsawDate(date: string | Date): string {
+    return new Date(date).toLocaleDateString("pl-PL", {
+        timeZone: WARSAW_TZ,
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+    });
+}
+function formatWarsawTime(date: string | Date): string {
+    return new Date(date).toLocaleTimeString("pl-PL", {
+        timeZone: WARSAW_TZ,
+        hour: "2-digit",
+        minute: "2-digit",
+    });
+}
+function formatWarsawDateTime(date: string | Date): string {
+    return `${formatWarsawDate(date)} ${formatWarsawTime(date)}`;
+}
+/** Convert a Date to a datetime-local value in Warsaw timezone */
+function toWarsawDatetimeLocal(date: string | Date): string {
+    const d = new Date(date);
+    const opts: Intl.DateTimeFormatOptions = {
+        timeZone: WARSAW_TZ,
+        year: "numeric", month: "2-digit", day: "2-digit",
+        hour: "2-digit", minute: "2-digit", hour12: false,
+    };
+    const parts = new Intl.DateTimeFormat("en-CA", opts).formatToParts(d);
+    const get = (t: string) => parts.find(p => p.type === t)?.value || "";
+    return `${get("year")}-${get("month")}-${get("day")}T${get("hour")}:${get("minute")}`;
+}
+
 
 type Team = {
     id: string;
@@ -211,11 +244,11 @@ export default function AdminPage() {
             setFormRaceRound(String(race.round));
             setFormRaceName(race.name);
             setFormRaceLocation(race.location);
-            setFormRaceDate(new Date(race.date).toISOString().slice(0, 16)); // for datetime-local
+            setFormRaceDate(toWarsawDatetimeLocal(race.date));
             setFormRaceTrackImage(race.trackImage || "");
             setFormRaceCountry(race.country || "");
             setFormRaceHasSprint(race.hasSprint || false);
-            setFormRaceSprintDate(race.sprintDate ? new Date(race.sprintDate).toISOString().slice(0, 16) : "");
+            setFormRaceSprintDate(race.sprintDate ? toWarsawDatetimeLocal(race.sprintDate) : "");
         }
         setShowForm(true);
     }
@@ -444,7 +477,7 @@ export default function AdminPage() {
     }
 
     return (
-        <div className="pb-32 pt-8 px-4">
+        <div className="pb-32 pt-8 px-4 max-w-5xl mx-auto">
             {/* Header */}
             <div className="flex items-center justify-between mb-8">
                 <div className="flex items-center gap-3">
@@ -470,7 +503,7 @@ export default function AdminPage() {
             </div>
 
             {/* Stats cards */}
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-8">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
                 <div className="bg-[#1C1C1E] border border-white/5 rounded-2xl p-5">
                     <div className="text-gray-500 text-[10px] uppercase font-bold tracking-widest mb-1">Kierowcy</div>
                     <div className="text-3xl font-black text-white">{drivers.length}</div>
@@ -479,7 +512,14 @@ export default function AdminPage() {
                     <div className="text-gray-500 text-[10px] uppercase font-bold tracking-widest mb-1">Użytkownicy</div>
                     <div className="text-3xl font-black text-white">{users.length}</div>
                 </div>
-                <div className="bg-[#1C1C1E] border border-white/5 rounded-2xl p-5 hidden md:block">
+                <div className="bg-[#1C1C1E] border border-white/5 rounded-2xl p-5">
+                    <div className="text-gray-500 text-[10px] uppercase font-bold tracking-widest mb-1">Wyścigi</div>
+                    <div className="text-3xl font-black text-white">
+                        {races.filter(r => r.completed).length}
+                        <span className="text-base text-gray-500 font-bold">/{races.length}</span>
+                    </div>
+                </div>
+                <div className="bg-[#1C1C1E] border border-white/5 rounded-2xl p-5">
                     <div className="text-gray-500 text-[10px] uppercase font-bold tracking-widest mb-1">Głosy</div>
                     <div className="text-3xl font-black text-white">
                         {users.reduce((acc, u) => acc + u.votesCount + u.seasonVotesCount, 0)}
@@ -846,7 +886,7 @@ export default function AdminPage() {
 
                                     <div>
                                         <label className="text-[10px] uppercase font-bold text-gray-500 tracking-widest mb-1 block">
-                                            Data i Czas (UTC/Lokalny) *
+                                            Data i Czas (Europa/Warszawa 🇵🇱) *
                                         </label>
                                         <input
                                             type="datetime-local"
@@ -915,7 +955,7 @@ export default function AdminPage() {
                                     {formRaceHasSprint && (
                                         <div>
                                             <label className="text-[10px] uppercase font-bold text-gray-500 tracking-widest mb-1 block">
-                                                Data i Czas Sprintu (UTC/Lokalny) *
+                                                Data i Czas Sprintu (Europa/Warszawa 🇵🇱) *
                                             </label>
                                             <input
                                                 type="datetime-local"
@@ -988,7 +1028,7 @@ export default function AdminPage() {
                                                 <span>{race.location}</span>
                                                 <span>·</span>
                                                 <span className={new Date(race.date) < new Date() ? "text-gray-600" : "text-[#E60000] font-bold"}>
-                                                    {new Date(race.date).toLocaleDateString()} {new Date(race.date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                                                    {formatWarsawDateTime(race.date)}
                                                 </span>
                                             </div>
                                         </div>

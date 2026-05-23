@@ -140,6 +140,7 @@ export default function CalendarPage() {
 
     const formatDateTime = (date: Date) => {
         return new Date(date).toLocaleDateString("pl-PL", {
+            timeZone: "Europe/Warsaw",
             day: "2-digit",
             month: "short",
             hour: "2-digit",

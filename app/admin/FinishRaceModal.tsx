@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { X, CheckCircle2, RotateCcw, Trophy, ArrowRightLeft, Undo2 } from "lucide-react";
+import { X, CheckCircle2, RotateCcw, Trophy, ArrowRightLeft, Undo2, Pencil } from "lucide-react";
 import { clsx } from "clsx";
 import { getActiveDriversForResults, finishRace, reopenRace, finishSprint, reopenSprint } from "@/app/actions/raceResults";
 import { saveRaceExtras, getRaceExtras } from "@/app/actions/raceExtras";
@@ -46,6 +46,9 @@ export default function FinishRaceModal({ race, onClose, onFinished }: Props) {
 
     // Swap mode: click two drivers in the picked list to swap them
     const [swapFirst, setSwapFirst] = useState<number | null>(null);
+
+    // Edit mode for completed races
+    const [editMode, setEditMode] = useState(false);
 
     // Extra race data (only for race, not sprint)
     const [extraDotd, setExtraDotd] = useState<string>("");
@@ -104,16 +107,17 @@ export default function FinishRaceModal({ race, onClose, onFinished }: Props) {
 
     const isSprint = race.finishTarget === 'sprint';
     const isCompleted = isSprint ? race.sprintCompleted : race.completed;
+    const isLocked = isCompleted && !editMode; // Locked = completed AND not editing
 
     // Pick a driver — adds them to the next position
     function pickDriver(driver: DriverOption) {
-        if (isCompleted) return;
+        if (isLocked) return;
         setPickedOrder(prev => [...prev, driver]);
     }
 
     // Click on a picked driver — either start swap or complete swap
     function handlePickedClick(index: number) {
-        if (isCompleted) return;
+        if (isLocked) return;
 
         if (swapFirst === null) {
             // Start swap — select first driver
@@ -240,7 +244,7 @@ export default function FinishRaceModal({ race, onClose, onFinished }: Props) {
                                             <Trophy className="w-3 h-3 text-[#E60000]" />
                                             Kolejność ({pickedOrder.length}/{allDrivers.length})
                                         </h3>
-                                        {!isCompleted && (
+                                        {!isLocked && (
                                             <div className="flex items-center gap-1">
                                                 <button
                                                     onClick={undoLast}
@@ -270,7 +274,7 @@ export default function FinishRaceModal({ race, onClose, onFinished }: Props) {
                                             <button
                                                 key={driver.slug}
                                                 onClick={() => handlePickedClick(index)}
-                                                disabled={isCompleted}
+                                                disabled={isLocked}
                                                 className={clsx(
                                                     "w-full flex items-center gap-3 p-2.5 rounded-xl border transition-all text-left",
                                                     swapFirst === index
@@ -278,7 +282,7 @@ export default function FinishRaceModal({ race, onClose, onFinished }: Props) {
                                                         : swapFirst !== null
                                                             ? "border-white/10 bg-[#2C2C2E]/70 hover:border-[#E60000]/50 hover:bg-[#E60000]/5 cursor-pointer"
                                                             : "border-white/5 bg-[#2C2C2E]/50 hover:bg-[#2C2C2E] cursor-pointer",
-                                                    isCompleted && "cursor-default",
+                                                    isLocked && "cursor-default",
                                                     index === 0 && "border-[#E60000]/30 bg-gradient-to-r from-[#E60000]/10 to-transparent",
                                                     index === 0 && swapFirst === index && "border-[#E60000] bg-[#E60000]/20"
                                                 )}
@@ -315,7 +319,7 @@ export default function FinishRaceModal({ race, onClose, onFinished }: Props) {
                                                 </div>
 
                                                 {/* Swap indicator */}
-                                                {!isCompleted && swapFirst !== null && swapFirst !== index && (
+                                                {!isLocked && swapFirst !== null && swapFirst !== index && (
                                                     <ArrowRightLeft className="w-3.5 h-3.5 text-[#E60000] shrink-0" />
                                                 )}
                                             </button>
@@ -386,7 +390,7 @@ export default function FinishRaceModal({ race, onClose, onFinished }: Props) {
                             )}
 
                             {/* ── REMAINING DRIVERS TO PICK ── */}
-                            {!isCompleted && remainingDrivers.length > 0 && (
+                            {!isLocked && remainingDrivers.length > 0 && (
                                 <div>
                                     <h3 className="text-[10px] uppercase font-bold text-gray-500 tracking-widest mb-2">
                                         {pickedOrder.length === 0
@@ -423,7 +427,7 @@ export default function FinishRaceModal({ race, onClose, onFinished }: Props) {
                             )}
 
                             {/* All picked message */}
-                            {allPicked && !isCompleted && (
+                            {allPicked && !isLocked && (
                                 <div className="text-center text-xs text-green-400 bg-green-900/20 border border-green-500/20 rounded-xl py-3 font-bold">
                                     ✅ Wszyscy kierowcy ustawieni — kliknij dwóch aby zamienić lub zatwierdź
                                 </div>
@@ -434,13 +438,19 @@ export default function FinishRaceModal({ race, onClose, onFinished }: Props) {
 
                 {/* Footer actions */}
                 <div className="p-4 border-t border-white/5 shrink-0 space-y-2">
-                    {isCompleted ? (
+                    {isCompleted && !editMode ? (
                         <div className="space-y-2">
+                            <button
+                                onClick={() => setEditMode(true)}
+                                className="w-full flex items-center justify-center gap-2 p-4 bg-amber-600 hover:bg-amber-700 rounded-xl font-black uppercase tracking-wider text-white transition-all active:scale-[0.98] shadow-lg shadow-amber-900/20"
+                            >
+                                <Pencil className="w-5 h-5" />
+                                ✏️ Edytuj Wyniki i Przelicz Punkty
+                            </button>
                             <button
                                 onClick={async () => {
                                     setSubmitting(true);
                                     try {
-                                        // Save extras before recalculating (race only)
                                         if (!isSprint) {
                                             await saveRaceExtras(race.round, {
                                                 actualDotd: extraDotd || null,
@@ -467,12 +477,12 @@ export default function FinishRaceModal({ race, onClose, onFinished }: Props) {
                                 }}
                                 disabled={submitting}
                                 className={clsx(
-                                    "w-full flex items-center justify-center gap-2 p-4 bg-[#E60000] hover:bg-red-700 rounded-xl font-black uppercase tracking-wider text-white transition-all active:scale-[0.98] shadow-lg shadow-red-900/20",
+                                    "w-full flex items-center justify-center gap-2 p-3 bg-[#2C2C2E] hover:bg-white/10 rounded-xl font-bold uppercase tracking-wider text-gray-400 transition-all text-sm border border-white/5",
                                     submitting && "opacity-50 cursor-not-allowed"
                                 )}
                             >
-                                <RotateCcw className="w-5 h-5" />
-                                {submitting ? "Obliczanie..." : "🔄 Przelicz Punkty Ponownie"}
+                                <RotateCcw className="w-4 h-4" />
+                                {submitting ? "Obliczanie..." : "Przelicz Punkty (bez zmian)"}
                             </button>
                             <button
                                 onClick={handleReopen}
@@ -484,6 +494,75 @@ export default function FinishRaceModal({ race, onClose, onFinished }: Props) {
                             >
                                 <RotateCcw className="w-4 h-4" />
                                 {submitting ? "Cofanie..." : "Cofnij Zakończenie"}
+                            </button>
+                        </div>
+                    ) : editMode ? (
+                        <div className="space-y-2">
+                            <div className="text-center text-xs text-amber-400 bg-amber-900/20 border border-amber-500/20 rounded-xl py-2 px-3 font-bold mb-2">
+                                ✏️ Tryb edycji — kliknij dwóch kierowców aby zamienić pozycje
+                            </div>
+                            <button
+                                onClick={async () => {
+                                    if (!allPicked) {
+                                        toast.error("Musisz ustawić kolejność wszystkich kierowców");
+                                        return;
+                                    }
+                                    if (!confirm(`Zapisać zmienione wyniki i przeliczyć punkty dla "${race.name}"?`)) return;
+                                    setSubmitting(true);
+                                    try {
+                                        if (!isSprint) {
+                                            await saveRaceExtras(race.round, {
+                                                actualDotd: extraDotd || null,
+                                                actualDnfCount: extraDnfCount ? parseInt(extraDnfCount) : null,
+                                                actualFastestLap: extraFastestLap || null,
+                                                actualStartCollision: extraStartCollision ? extraStartCollision === "true" : null,
+                                            });
+                                        }
+                                        const results = pickedOrder.map(d => d.slug);
+                                        const result = isSprint 
+                                            ? await finishSprint(race.round, results)
+                                            : await finishRace(race.round, results);
+                                        if (result.error) {
+                                            toast.error(result.error);
+                                        } else {
+                                            toast.success(`✅ Wyniki zaktualizowane! Przeliczono punkty dla ${result.usersScored} użytkowników.`);
+                                            setEditMode(false);
+                                            onFinished();
+                                        }
+                                    } catch {
+                                        toast.error("Błąd zapisywania zmian");
+                                    } finally {
+                                        setSubmitting(false);
+                                    }
+                                }}
+                                disabled={submitting || !allPicked}
+                                className={clsx(
+                                    "w-full flex items-center justify-center gap-2 p-4 bg-amber-600 hover:bg-amber-700 rounded-xl font-black uppercase tracking-wider text-white transition-all active:scale-[0.98] shadow-lg shadow-amber-900/20",
+                                    (submitting || !allPicked) && "opacity-50 cursor-not-allowed"
+                                )}
+                            >
+                                <CheckCircle2 className="w-5 h-5" />
+                                {submitting ? "Zapisywanie i obliczanie..." : "💾 Zapisz Zmiany i Przelicz Punkty"}
+                            </button>
+                            <button
+                                onClick={() => {
+                                    setEditMode(false);
+                                    setSwapFirst(null);
+                                    // Re-load original order
+                                    const currentResults = isSprint ? race.sprintResults : race.results;
+                                    if (currentResults && currentResults.length > 0) {
+                                        const ordered: DriverOption[] = [];
+                                        for (const slug of currentResults) {
+                                            const d = allDrivers.find(dr => dr.slug === slug);
+                                            if (d) ordered.push(d);
+                                        }
+                                        setPickedOrder(ordered);
+                                    }
+                                }}
+                                className="w-full flex items-center justify-center gap-2 p-3 bg-[#2C2C2E] hover:bg-white/10 rounded-xl font-bold uppercase tracking-wider text-gray-400 transition-all text-sm border border-white/5"
+                            >
+                                <X className="w-4 h-4" />
+                                Anuluj Edycję
                             </button>
                         </div>
                     ) : (

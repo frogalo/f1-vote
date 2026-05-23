@@ -1026,7 +1026,7 @@ export default function WrappedContent({
 
                       <motion.div
                         variants={staggerItem}
-                        className="mb-5 h-2.5 w-44 overflow-hidden rounded-full bg-white/10"
+                        className="mb-5 h-2.5 w-full max-w-[90vw] sm:max-w-[240px] overflow-hidden rounded-full bg-white/10"
                       >
                         <motion.div
                           className="h-full rounded-full bg-gradient-to-r from-[#E60000] to-[#FF6B6B]"
@@ -1288,7 +1288,7 @@ export default function WrappedContent({
                             </h2>
                           </motion.div>
 
-                          <div className="w-full max-w-[280px] space-y-2.5">
+                          <div className="w-full max-w-[92vw] sm:max-w-[280px] space-y-2.5">
                             {data.favoriteTeamDriverResults.map((dr, i) => (
                               <motion.div
                                 key={dr.driverName}
@@ -1346,7 +1346,7 @@ export default function WrappedContent({
                           {data.favoriteTeamTotalF1Points > 0 && (
                             <motion.div
                               variants={staggerItem}
-                              className="mt-5 flex items-center justify-between rounded-xl border border-purple-500/20 bg-purple-500/5 px-5 py-2.5"
+                              className="mt-5 flex w-full max-w-[92vw] sm:max-w-[280px] items-center justify-between rounded-xl border border-purple-500/20 bg-purple-500/5 px-5 py-2.5"
                             >
                               <span className="text-xs font-black uppercase tracking-wider text-purple-400/70">
                                 Łącznie punktów F1
@@ -1473,7 +1473,7 @@ export default function WrappedContent({
 
                       <motion.div
                         variants={staggerItem}
-                        className="w-full max-w-[300px] space-y-1.5"
+                        className="w-full max-w-[92vw] sm:max-w-[300px] space-y-1.5"
                       >
                         {data.allScores.slice(0, 5).map((sc, i) => (
                           <motion.div
@@ -1632,7 +1632,7 @@ export default function WrappedContent({
                       {/* Points recap */}
                       <motion.div
                         variants={scaleReveal}
-                        className="mb-4 w-full max-w-sm rounded-2xl border border-[#E60000]/20 bg-[#E60000]/5 p-4"
+                        className="mb-4 w-full max-w-[92vw] sm:max-w-sm rounded-2xl border border-[#E60000]/20 bg-[#E60000]/5 p-4"
                         whileHover={{
                           scale: 1.02,
                           borderColor: "rgba(230,0,0,0.4)",
@@ -1680,7 +1680,7 @@ export default function WrappedContent({
                       {/* Rank recap */}
                       <motion.div
                         variants={slideFromLeft}
-                        className="mb-4 w-full max-w-sm rounded-2xl border border-amber-500/20 bg-amber-500/5 p-4"
+                        className="mb-4 w-full max-w-[92vw] sm:max-w-sm rounded-2xl border border-amber-500/20 bg-amber-500/5 p-4"
                         whileHover={{ scale: 1.02 }}
                       >
                         <div className="flex items-center justify-between gap-3">
@@ -1709,7 +1709,7 @@ export default function WrappedContent({
                       {/* Driver + Team recap */}
                       <motion.div
                         variants={slideFromRight}
-                        className="mb-4 grid w-full max-w-sm grid-cols-2 gap-2"
+                        className="mb-4 grid w-full max-w-[92vw] sm:max-w-sm grid-cols-2 gap-2"
                       >
                         <motion.div
                           className="rounded-2xl border border-emerald-500/20 bg-emerald-500/5 p-3 text-center"
@@ -1771,7 +1771,7 @@ export default function WrappedContent({
                       {/* Random stats */}
                       <motion.div
                         variants={staggerItem}
-                        className="mb-5 w-full max-w-sm space-y-2"
+                        className="mb-5 w-full max-w-[92vw] sm:max-w-sm space-y-2"
                       >
                         {data.randomStats.map((st, i) => (
                           <motion.div
