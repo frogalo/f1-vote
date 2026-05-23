@@ -5,17 +5,22 @@ import { races as seedData, Race as SeedRace } from "@/lib/data";
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 
-/**
- * Parse a datetime-local string (e.g. "2026-05-23T18:00") as Warsaw timezone.
- * This ensures that when admin enters 18:00, it's stored as 18:00 Warsaw time
- * regardless of the server's timezone.
- */
 function parseAsWarsawTime(dateStr: string): Date {
-    // datetime-local gives "YYYY-MM-DDTHH:mm"
-    // Treat it as UTC first, then adjust for Warsaw offset
-    const asUtc = new Date(dateStr + "Z"); // Force UTC interpretation
+    let cleanStr = dateStr.trim();
     
-    // Find what Warsaw shows for this UTC moment
+    // If it is in DD/MM/YYYY HH:mm format, convert it to YYYY-MM-DDTHH:mm
+    const match = cleanStr.match(/^(\d{2})\/(\d{2})\/(\d{4})\s+(\d{2}):(\d{2})$/);
+    if (match) {
+        const [, dd, mm, yyyy, hh, min] = match;
+        cleanStr = `${yyyy}-${mm}-${dd}T${hh}:${min}`;
+    }
+    
+    // Now it should be in YYYY-MM-DDTHH:mm format
+    const asUtc = new Date(cleanStr + "Z");
+    if (isNaN(asUtc.getTime())) {
+        throw new Error("Nieprawidłowy format daty. Wymagany format to: DD/MM/RRRR GG:MM");
+    }
+    
     const warsawParts = new Intl.DateTimeFormat("en-US", {
         timeZone: "Europe/Warsaw",
         year: "numeric", month: "2-digit", day: "2-digit",
@@ -28,11 +33,7 @@ function parseAsWarsawTime(dateStr: string): Date {
         `${get("year")}-${get("month")}-${get("day")}T${get("hour")}:${get("minute")}:${get("second")}Z`
     );
     
-    // Offset = difference between UTC input and what Warsaw shows
     const offsetMs = warsawRendered.getTime() - asUtc.getTime();
-    
-    // Subtract offset: if Warsaw is UTC+2, we need to subtract 2h from the input
-    // so that "18:00" input → 16:00 UTC → displays as 18:00 Warsaw
     return new Date(asUtc.getTime() - offsetMs);
 }
 
