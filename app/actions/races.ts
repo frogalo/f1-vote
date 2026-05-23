@@ -5,6 +5,37 @@ import { races as seedData, Race as SeedRace } from "@/lib/data";
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 
+/**
+ * Parse a datetime-local string (e.g. "2026-05-23T18:00") as Warsaw timezone.
+ * This ensures that when admin enters 18:00, it's stored as 18:00 Warsaw time
+ * regardless of the server's timezone.
+ */
+function parseAsWarsawTime(dateStr: string): Date {
+    // datetime-local gives "YYYY-MM-DDTHH:mm"
+    // Treat it as UTC first, then adjust for Warsaw offset
+    const asUtc = new Date(dateStr + "Z"); // Force UTC interpretation
+    
+    // Find what Warsaw shows for this UTC moment
+    const warsawParts = new Intl.DateTimeFormat("en-US", {
+        timeZone: "Europe/Warsaw",
+        year: "numeric", month: "2-digit", day: "2-digit",
+        hour: "2-digit", minute: "2-digit", second: "2-digit",
+        hour12: false,
+    }).formatToParts(asUtc);
+    
+    const get = (t: string) => warsawParts.find(p => p.type === t)?.value || "0";
+    const warsawRendered = new Date(
+        `${get("year")}-${get("month")}-${get("day")}T${get("hour")}:${get("minute")}:${get("second")}Z`
+    );
+    
+    // Offset = difference between UTC input and what Warsaw shows
+    const offsetMs = warsawRendered.getTime() - asUtc.getTime();
+    
+    // Subtract offset: if Warsaw is UTC+2, we need to subtract 2h from the input
+    // so that "18:00" input → 16:00 UTC → displays as 18:00 Warsaw
+    return new Date(asUtc.getTime() - offsetMs);
+}
+
 // Admin check helper
 async function requireAdmin() {
     const cookieStore = await cookies();
@@ -77,12 +108,12 @@ export async function addRace(formData: FormData) {
                 round,
                 name,
                 location,
-                date: new Date(date),
+                date: parseAsWarsawTime(date),
                 trackImage: trackImage || null,
                 country: country || null,
                 circuitId: circuitId || null,
                 hasSprint,
-                sprintDate: hasSprint && sprintDate ? new Date(sprintDate) : null,
+                sprintDate: hasSprint && sprintDate ? parseAsWarsawTime(sprintDate) : null,
             },
         });
         revalidatePath("/admin");
@@ -118,12 +149,12 @@ export async function updateRace(formData: FormData) {
                 round,
                 name,
                 location,
-                date: new Date(date),
+                date: parseAsWarsawTime(date),
                 trackImage: trackImage || null,
                 country: country || null,
                 circuitId: circuitId || null,
                 hasSprint,
-                sprintDate: hasSprint && sprintDate ? new Date(sprintDate) : null,
+                sprintDate: hasSprint && sprintDate ? parseAsWarsawTime(sprintDate) : null,
             },
         });
         revalidatePath("/admin");

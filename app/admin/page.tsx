@@ -28,6 +28,7 @@ function formatWarsawTime(date: string | Date): string {
         timeZone: WARSAW_TZ,
         hour: "2-digit",
         minute: "2-digit",
+        hour12: false,
     });
 }
 function formatWarsawDateTime(date: string | Date): string {
