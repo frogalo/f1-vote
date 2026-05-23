@@ -34,8 +34,8 @@ function formatWarsawTime(date: string | Date): string {
 function formatWarsawDateTime(date: string | Date): string {
     return `${formatWarsawDate(date)} ${formatWarsawTime(date)}`;
 }
-/** Convert a Date to a datetime-local value in Warsaw timezone */
-function toWarsawDatetimeLocal(date: string | Date): string {
+/** Convert a Date to DD/MM/YYYY HH:MM in Warsaw timezone */
+function toWarsawDisplayDate(date: string | Date): string {
     const d = new Date(date);
     const opts: Intl.DateTimeFormatOptions = {
         timeZone: WARSAW_TZ,
@@ -44,7 +44,15 @@ function toWarsawDatetimeLocal(date: string | Date): string {
     };
     const parts = new Intl.DateTimeFormat("en-CA", opts).formatToParts(d);
     const get = (t: string) => parts.find(p => p.type === t)?.value || "";
-    return `${get("year")}-${get("month")}-${get("day")}T${get("hour")}:${get("minute")}`;
+    return `${get("day")}/${get("month")}/${get("year")} ${get("hour")}:${get("minute")}`;
+}
+/** Parse DD/MM/YYYY HH:MM → YYYY-MM-DDTHH:MM for server */
+function polishDateToFormValue(str: string): string {
+    // "23/05/2026 18:00" → "2026-05-23T18:00"
+    const match = str.trim().match(/^(\d{2})\/(\d{2})\/(\d{4})\s+(\d{2}):(\d{2})$/);
+    if (!match) return str;
+    const [, dd, mm, yyyy, hh, min] = match;
+    return `${yyyy}-${mm}-${dd}T${hh}:${min}`;
 }
 
 
@@ -245,11 +253,11 @@ export default function AdminPage() {
             setFormRaceRound(String(race.round));
             setFormRaceName(race.name);
             setFormRaceLocation(race.location);
-            setFormRaceDate(toWarsawDatetimeLocal(race.date));
+            setFormRaceDate(toWarsawDisplayDate(race.date));
             setFormRaceTrackImage(race.trackImage || "");
             setFormRaceCountry(race.country || "");
             setFormRaceHasSprint(race.hasSprint || false);
-            setFormRaceSprintDate(race.sprintDate ? toWarsawDatetimeLocal(race.sprintDate) : "");
+            setFormRaceSprintDate(race.sprintDate ? toWarsawDisplayDate(race.sprintDate) : "");
         }
         setShowForm(true);
     }
@@ -263,12 +271,12 @@ export default function AdminPage() {
             formData.append("round", formRaceRound);
             formData.append("name", formRaceName);
             formData.append("location", formRaceLocation);
-            formData.append("date", formRaceDate);
+            formData.append("date", polishDateToFormValue(formRaceDate));
             formData.append("trackImage", formRaceTrackImage);
             formData.append("country", formRaceCountry);
             formData.append("hasSprint", String(formRaceHasSprint));
             if (formRaceHasSprint && formRaceSprintDate) {
-                formData.append("sprintDate", formRaceSprintDate);
+                formData.append("sprintDate", polishDateToFormValue(formRaceSprintDate));
             }
 
             let result;
@@ -887,15 +895,17 @@ export default function AdminPage() {
 
                                     <div>
                                         <label className="text-[10px] uppercase font-bold text-gray-500 tracking-widest mb-1 block">
-                                            Data i Czas (Europa/Warszawa 🇵🇱) *
+                                            Data i Czas (Warszawa 🇵🇱) *
                                         </label>
                                         <input
-                                            type="datetime-local"
+                                            type="text"
                                             value={formRaceDate}
                                             onChange={(e) => setFormRaceDate(e.target.value)}
-                                            className="w-full bg-[#2C2C2E] border border-white/10 p-3 rounded-xl text-white placeholder-gray-600 font-medium focus:border-[#E60000] outline-none transition-colors [color-scheme:dark]"
+                                            placeholder="23/05/2026 18:00"
+                                            className="w-full bg-[#2C2C2E] border border-white/10 p-3 rounded-xl text-white placeholder-gray-600 font-medium focus:border-[#E60000] outline-none transition-colors font-mono tracking-wide"
                                             required
                                         />
+                                        <span className="text-[9px] text-gray-600 mt-1 block">Format: DD/MM/RRRR GG:MM (24h)</span>
                                     </div>
 
                                     <div>
@@ -956,15 +966,17 @@ export default function AdminPage() {
                                     {formRaceHasSprint && (
                                         <div>
                                             <label className="text-[10px] uppercase font-bold text-gray-500 tracking-widest mb-1 block">
-                                                Data i Czas Sprintu (Europa/Warszawa 🇵🇱) *
+                                                Data i Czas Sprintu (Warszawa 🇵🇱) *
                                             </label>
                                             <input
-                                                type="datetime-local"
+                                                type="text"
                                                 value={formRaceSprintDate}
                                                 onChange={(e) => setFormRaceSprintDate(e.target.value)}
-                                                className="w-full bg-[#2C2C2E] border border-white/10 p-3 rounded-xl text-white placeholder-gray-600 font-medium focus:border-[#E60000] outline-none transition-colors [color-scheme:dark]"
+                                                placeholder="22/05/2026 15:30"
+                                                className="w-full bg-[#2C2C2E] border border-white/10 p-3 rounded-xl text-white placeholder-gray-600 font-medium focus:border-[#E60000] outline-none transition-colors font-mono tracking-wide"
                                                 required={formRaceHasSprint}
                                             />
+                                            <span className="text-[9px] text-gray-600 mt-1 block">Format: DD/MM/RRRR GG:MM (24h)</span>
                                         </div>
                                     )}
 
