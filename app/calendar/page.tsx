@@ -91,6 +91,26 @@ export default function CalendarPage() {
             }
 
             setLoading(false);
+
+            // Center on the next (or live) race round on load
+            setTimeout(() => {
+                let targetRace = fetchedRaces.find(r => {
+                    if (r.canceled || r.completed) return false;
+                    return new Date(r.date) < new Date(); // Live / active
+                });
+                if (!targetRace) {
+                    targetRace = fetchedRaces.find(r => {
+                        if (r.canceled || r.completed) return false;
+                        return new Date(r.date) > new Date(); // Upcoming / next
+                    });
+                }
+                if (targetRace) {
+                    const el = document.getElementById(`race-card-${targetRace.round}`);
+                    if (el) {
+                        el.scrollIntoView({ behavior: "smooth", block: "center" });
+                    }
+                }
+            }, 100);
         };
         load();
 
@@ -288,7 +308,7 @@ export default function CalendarPage() {
 
                                 {status === "completed" && totalPoints > 0 && !race.hasSprint && (
                                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                                        <div className="bg-[#E60000] text-white font-black px-3 py-1 rounded-full text-sm shadow-lg">
+                                        <div className="bg-[#E60000] text-white font-black px-5 py-2.5 rounded-full text-2xl shadow-2xl border border-white/10 scale-110">
                                             +{totalPoints} PKT
                                         </div>
                                     </div>
@@ -298,16 +318,16 @@ export default function CalendarPage() {
                                     <>
                                         {/* Left Side (Race) Points */}
                                         {status === "completed" && racePoints > 0 && (
-                                           <div className="absolute inset-y-0 left-2 flex items-center pointer-events-none">
-                                                <div className="bg-[#E60000] text-white font-black px-2 py-1 rounded-full text-xs shadow-lg">
+                                           <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                                                <div className="bg-[#E60000] text-white font-black px-3.5 py-1.5 rounded-full text-base shadow-lg border border-white/10">
                                                     +{racePoints} PKT
                                                 </div>
                                             </div>
                                         )}
                                         {/* Right Side (Sprint) Points */}
                                         {race.sprintCompleted && sprintPoints > 0 && (
-                                           <div className="absolute inset-y-0 right-2 flex items-center pointer-events-none">
-                                                <div className="bg-orange-500 text-white font-black px-2 py-1 rounded-full text-xs shadow-lg">
+                                           <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
+                                                <div className="bg-orange-500 text-white font-black px-3.5 py-1.5 rounded-full text-base shadow-lg border border-white/10">
                                                     +{sprintPoints} PKT
                                                 </div>
                                             </div>
@@ -315,7 +335,7 @@ export default function CalendarPage() {
                                         {/* Total Summary */}
                                         {status === "completed" && totalPoints > 0 && (
                                             <div className="absolute inset-x-0 bottom-[35px] flex justify-center pointer-events-none">
-                                                <div className="bg-[#1C1C1E] border border-white/10 text-gray-300 font-black px-2 py-0.5 rounded-lg text-[10px] shadow-lg scale-90 sm:scale-100">
+                                                <div className="bg-[#1C1C1E] border border-white/10 text-gray-300 font-black px-3 py-1.5 rounded-lg text-sm shadow-xl scale-95 sm:scale-100">
                                                     SUMA: +{totalPoints}
                                                 </div>
                                             </div>
@@ -387,7 +407,7 @@ export default function CalendarPage() {
                     );
 
                     return (
-                        <div key={race.round} className={cardClasses} style={sprintBackgroundStyle}>
+                        <div key={race.round} id={`race-card-${race.round}`} className={cardClasses} style={sprintBackgroundStyle}>
                             {/* Clickable Overlay Links */}
                             {href && !race.hasSprint && (
                                 <Link href={href} className="absolute inset-0 z-20" />

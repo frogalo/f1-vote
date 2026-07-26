@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { clsx } from 'clsx';
-import { Home, Calendar, Flag, Trophy, User } from 'lucide-react';
+import { Calendar, Trophy, TrendingUp, User } from 'lucide-react';
 import { useAuth } from '@/app/providers/AuthProvider';
 
 export default function Nav({ nextRound = 1, hidden = false }: { nextRound?: number; hidden?: boolean }) {
@@ -16,9 +16,9 @@ export default function Nav({ nextRound = 1, hidden = false }: { nextRound?: num
   if (pathname.includes("/wrapped")) return null;
 
   const tabs = [
-    { name: 'Sezon', href: '/season', icon: Home },
     { name: 'Kalendarz', href: '/calendar', icon: Calendar },
     { name: 'Ranking', href: '/leaderboard', icon: Trophy },
+    { name: 'Statystyki', href: '/stats', icon: TrendingUp },
     { name: 'Profil', href: '/profile', icon: User },
   ];
 
@@ -33,7 +33,7 @@ export default function Nav({ nextRound = 1, hidden = false }: { nextRound?: num
           <div className="bg-[#1C1C1E]/90 backdrop-blur-xl border border-white/5 rounded-3xl h-20 shadow-2xl flex items-center justify-between px-2 relative">
 
             {tabs.map((tab) => {
-              const isActive = pathname === tab.href || (tab.href !== '/season' && pathname.startsWith(tab.href));
+              const isActive = pathname === tab.href || (tab.href !== '/profile' && pathname.startsWith(tab.href));
 
               return (
                 <Link

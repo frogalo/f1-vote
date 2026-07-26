@@ -15,8 +15,8 @@ export default function SeasonGuard({ isComplete }: { isComplete: boolean }) {
         // Allowed public routes (login/register/landing typically handled in middleware, but just in case)
         if (pathname === "/login" || pathname === "/register" || pathname === "/") return;
         
-        if (!isComplete && pathname !== "/season") {
-            router.replace("/season");
+        if (!isComplete && pathname !== "/profile") {
+            router.replace("/profile");
         }
     }, [isComplete, pathname, router, user, loading]);
 

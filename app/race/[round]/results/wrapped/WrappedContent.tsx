@@ -114,172 +114,11 @@ const scaleReveal: Variants = {
    exit   = how the old slide leaves
    All transitions >= 2 s
    ───────────────────────────────────────────── */
-const SLIDE_VARIANTS: Variants[] = [
-  // 0: Intro — cinematic scale + blur
-  {
-    enter: {
-      opacity: 0,
-      scale: 1.18,
-      filter: "blur(28px) brightness(1.6)",
-    },
-    center: {
-      opacity: 1,
-      scale: 1,
-      filter: "blur(0px) brightness(1)",
-      transition: {
-        duration: 2,
-        ease: [0.16, 1, 0.3, 1],
-      },
-    },
-    exit: {
-      opacity: 0,
-      scale: 0.82,
-      filter: "blur(20px) brightness(0.6)",
-      transition: { duration: 0.9, ease: [0.4, 0, 1, 1] },
-    },
-  },
-
-  // 1: Points — barrel-roll rise with long settle
-  {
-    enter: {
-      opacity: 0,
-      y: 120,
-      rotateX: "25deg",
-      scale: 0.88,
-      filter: "blur(12px)",
-    },
-    center: {
-      opacity: 1,
-      y: 0,
-      rotateX: "0deg",
-      scale: 1,
-      filter: "blur(0px)",
-      transition: {
-        duration: 2.1,
-        ease: [0.16, 1, 0.3, 1],
-      },
-    },
-    exit: {
-      opacity: 0,
-      y: -100,
-      rotateX: "-15deg",
-      scale: 0.9,
-      filter: "blur(10px)",
-      transition: { duration: 0.85, ease: [0.4, 0, 1, 1] },
-    },
-  },
-
-  // 2: Driver — deep warp slide from right
-  {
-    enter: {
-      opacity: 0,
-      x: 160,
-      skewX: "-12deg",
-      scale: 0.88,
-      filter: "blur(14px)",
-    },
-    center: {
-      opacity: 1,
-      x: 0,
-      skewX: "0deg",
-      scale: 1,
-      filter: "blur(0px)",
-      transition: {
-        duration: 2.0,
-        ease: [0.16, 1, 0.3, 1],
-      },
-    },
-    exit: {
-      opacity: 0,
-      x: -140,
-      skewX: "10deg",
-      scale: 0.9,
-      filter: "blur(10px)",
-      transition: { duration: 0.85, ease: [0.4, 0, 1, 1] },
-    },
-  },
-
-  // 3: Team — diagonal gravity drop
-  {
-    enter: {
-      opacity: 0,
-      x: -140,
-      y: 60,
-      rotate: -8,
-      filter: "blur(16px)",
-    },
-    center: {
-      opacity: 1,
-      x: 0,
-      y: 0,
-      rotate: 0,
-      filter: "blur(0px)",
-      transition: {
-        duration: 2.1,
-        ease: [0.16, 1, 0.3, 1],
-      },
-    },
-    exit: {
-      opacity: 0,
-      x: 120,
-      y: -50,
-      rotate: 6,
-      filter: "blur(12px)",
-      transition: { duration: 0.85, ease: [0.4, 0, 1, 1] },
-    },
-  },
-
-  // 4: Comparison — 3-D flip Y with depth
-  {
-    enter: {
-      opacity: 0,
-      rotateY: "90deg",
-      scale: 0.8,
-      filter: "blur(18px)",
-    },
-    center: {
-      opacity: 1,
-      rotateY: "0deg",
-      scale: 1,
-      filter: "blur(0px)",
-      transition: {
-        duration: 2.0,
-        ease: [0.16, 1, 0.3, 1],
-      },
-    },
-    exit: {
-      opacity: 0,
-      rotateY: "-85deg",
-      scale: 0.85,
-      filter: "blur(14px)",
-      transition: { duration: 0.9, ease: [0.4, 0, 1, 1] },
-    },
-  },
-
-  // 5: Summary — supernova birth from pinpoint
-  {
-    enter: {
-      opacity: 0,
-      scale: 0.3,
-      filter: "blur(40px) brightness(3)",
-    },
-    center: {
-      opacity: 1,
-      scale: 1,
-      filter: "blur(0px) brightness(1)",
-      transition: {
-        duration: 2.2,
-        ease: [0.16, 1, 0.3, 1],
-      },
-    },
-    exit: {
-      opacity: 0,
-      scale: 1.2,
-      filter: "blur(20px) brightness(0.4)",
-      transition: { duration: 0.9, ease: [0.4, 0, 1, 1] },
-    },
-  },
-];
+const SLIDE_VARIANTS: Variants[] = Array.from({ length: 6 }, () => ({
+  enter: { opacity: 0 },
+  center: { opacity: 1, transition: { duration: 0.35, ease: "easeInOut" } },
+  exit: { opacity: 0, transition: { duration: 0.25, ease: "easeInOut" } },
+}));
 
 /* ─────────────────────────────────────────────
    ANIMATED COUNTER
@@ -527,6 +366,10 @@ export default function WrappedContent({
   const [showConfetti, setShowConfetti] = useState(false);
   const prevSlide = useRef(0);
 
+  const [slideLoading, setSlideLoading] = useState(false);
+  const [loadingText, setLoadingText] = useState("Inicjalizacja podsumowania...");
+  const [targetSlide, setTargetSlide] = useState(0);
+
   const touchStartX = useRef(0);
   const touchStartY = useRef(0);
   const touchMoveX = useRef(0);
@@ -557,7 +400,15 @@ export default function WrappedContent({
     if (authLoading) return;
     getWrappedData(raceRound, isSprint)
       .then(setData)
-      .finally(() => setLoading(false));
+      .finally(() => {
+        setTargetSlide(0);
+        setLoadingText("Inicjalizacja podsumowania...");
+        setSlideLoading(true);
+        setLoading(false);
+        setTimeout(() => {
+          setSlideLoading(false);
+        }, 1500);
+      });
   }, [raceRound, isSprint, authLoading]);
 
   /* Confetti on points slide */
@@ -573,13 +424,48 @@ export default function WrappedContent({
     prevSlide.current = slide;
   }, [slide, data]);
 
+  const triggerSlideChange = useCallback((targetIndex: number) => {
+    if (targetIndex === slide || slideLoading) return;
+    
+    setTargetSlide(targetIndex);
+
+    // Choose loading text based on the target slide
+    const texts = [
+      "Inicjalizacja podsumowania...",
+      "Podliczanie zdobyczy punktowych...",
+      "Analizowanie typów kierowców...",
+      "Porównywanie wyników zespołowych...",
+      "Zestawianie wyników z rywalami...",
+      "Generowanie podsumowania rundy..."
+    ];
+    setLoadingText(texts[targetIndex] || "Ładowanie danych...");
+    setSlideLoading(true);
+
+    // Swap the slide index at 900ms underneath the loader
+    setTimeout(() => {
+      setSlide(targetIndex);
+    }, 900);
+
+    // Hide the loader at 1500ms
+    setTimeout(() => {
+      setSlideLoading(false);
+    }, 1500);
+  }, [slide, slideLoading]);
+
   const goNext = useCallback(
-    () => setSlide((p) => Math.min(p + 1, totalSlides - 1)),
-    [],
+    () => {
+      const nextIdx = Math.min(slide + 1, totalSlides - 1);
+      triggerSlideChange(nextIdx);
+    },
+    [slide, totalSlides, triggerSlideChange],
   );
+
   const goPrev = useCallback(
-    () => setSlide((p) => Math.max(p - 1, 0)),
-    [],
+    () => {
+      const prevIdx = Math.max(slide - 1, 0);
+      triggerSlideChange(prevIdx);
+    },
+    [slide, triggerSlideChange],
   );
 
   useEffect(() => {
@@ -1841,6 +1727,264 @@ export default function WrappedContent({
             )}
           </div>
         </motion.div>
+      </AnimatePresence>
+
+      {/* ── FAKE SLIDE LOADING OVERLAY ── */}
+      <AnimatePresence>
+        {slideLoading && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.25 }}
+            className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#0D0D0D] overflow-hidden"
+          >
+            {/* Ambient glowing radial light */}
+            <motion.div
+              className="absolute inset-0 pointer-events-none"
+              animate={{
+                background: [
+                  "radial-gradient(ellipse 60% 50% at 50% 50%, #E600001a 0%, transparent 70%)",
+                  "radial-gradient(ellipse 60% 50% at 50% 50%, #FF78001a 0%, transparent 70%)",
+                  "radial-gradient(ellipse 60% 50% at 50% 50%, #E600001a 0%, transparent 70%)",
+                ],
+              }}
+              transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+            />
+
+            {/* Orbiting Elements Themed Per Slide */}
+            <div className="relative flex items-center justify-center" style={{ width: 220, height: 220 }}>
+              {/* Target Slide 0: Intro (Original loading screen elements matching user screenshot) */}
+              {targetSlide === 0 && (
+                <>
+                  <motion.div
+                    className="absolute rounded-full"
+                    style={{
+                      width: 36,
+                      height: 36,
+                      background: "radial-gradient(circle, #E60000 0%, #FF6B6B 100%)",
+                    }}
+                    animate={{ scale: [1, 1.4, 1], opacity: [0.9, 0.5, 0.9] }}
+                    transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut" }}
+                  />
+                  <motion.div className="absolute rounded-full border border-[#E60000]/40" style={{ width: 60, height: 60 }} animate={{ scale: [1, 1.8, 1], opacity: [0.4, 0, 0.4] }} transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut" }} />
+                  <motion.div className="absolute" style={{ width: 110, height: 110 }} animate={{ rotate: 360 }} transition={{ duration: 2.2, repeat: Infinity, ease: "linear" }}>
+                    <motion.div className="absolute -top-3 left-1/2 h-6 w-6 -translate-x-1/2 rounded-full bg-[#E60000] shadow-lg shadow-[#E60000]/60" animate={{ scale: [1, 1.3, 1] }} transition={{ duration: 1.1, repeat: Infinity }} />
+                  </motion.div>
+                  <motion.div className="absolute" style={{ width: 150, height: 150 }} animate={{ rotate: -360 }} transition={{ duration: 3.5, repeat: Infinity, ease: "linear" }}>
+                    <motion.div className="absolute -top-3 left-1/2 h-6 w-6 -translate-x-1/2 bg-purple-500 shadow-lg shadow-purple-500/60" style={{ rotate: 45 }} animate={{ scale: [1, 1.2, 1], rotate: [45, 90, 45] }} transition={{ duration: 1.8, repeat: Infinity }} />
+                  </motion.div>
+                  <motion.div className="absolute" style={{ width: 195, height: 195 }} animate={{ rotate: 360 }} transition={{ duration: 5.5, repeat: Infinity, ease: "linear" }}>
+                    <motion.div className="absolute -top-3 left-1/2 -translate-x-1/2" style={{ width: 0, height: 0, borderLeft: "8px solid transparent", borderRight: "8px solid transparent", borderBottom: "14px solid #F59E0B", filter: "drop-shadow(0 0 6px #F59E0B)" }} animate={{ scale: [1, 1.4, 1] }} transition={{ duration: 2.2, repeat: Infinity }} />
+                  </motion.div>
+                  <motion.div className="absolute" style={{ width: 130, height: 130 }} animate={{ rotate: -360 }} transition={{ duration: 1.6, repeat: Infinity, ease: "linear" }}>
+                    <motion.div className="absolute bottom-0 left-1/2 h-5 w-5 -translate-x-1/2 rounded-sm bg-emerald-400 shadow-lg shadow-emerald-400/60" animate={{ scale: [1, 1.3, 1], rotate: [0, 45, 0] }} transition={{ duration: 0.8, repeat: Infinity }} />
+                  </motion.div>
+                </>
+              )}
+
+              {/* Target Slide 1: Points (Gold Stars & Dollar Spheres) */}
+              {targetSlide === 1 && (
+                <>
+                  <motion.div
+                    className="absolute rounded-full"
+                    style={{
+                      width: 36,
+                      height: 36,
+                      background: "radial-gradient(circle, #F59E0B 0%, #FFD700 100%)",
+                    }}
+                    animate={{ scale: [1, 1.4, 1], opacity: [0.9, 0.5, 0.9] }}
+                    transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut" }}
+                  />
+                  <motion.div className="absolute rounded-full border border-yellow-500/40" style={{ width: 60, height: 60 }} animate={{ scale: [1, 1.8, 1], opacity: [0.4, 0, 0.4] }} transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut" }} />
+                  <motion.div className="absolute" style={{ width: 120, height: 120 }} animate={{ rotate: 360 }} transition={{ duration: 2.0, repeat: Infinity, ease: "linear" }}>
+                    <motion.div className="absolute -top-3 left-1/2 h-5 w-5 -translate-x-1/2 bg-yellow-400 shadow-lg shadow-yellow-400/60 rounded-full flex items-center justify-center font-bold text-[10px] text-black" animate={{ scale: [1, 1.3, 1] }} transition={{ duration: 1.0, repeat: Infinity }}>★</motion.div>
+                  </motion.div>
+                  <motion.div className="absolute" style={{ width: 160, height: 160 }} animate={{ rotate: -360 }} transition={{ duration: 3.0, repeat: Infinity, ease: "linear" }}>
+                    <motion.div className="absolute -top-3 left-1/2 h-6 w-6 -translate-x-1/2 bg-amber-500 shadow-lg shadow-amber-500/60 rounded-full flex items-center justify-center font-black text-[12px] text-white" animate={{ scale: [1, 1.2, 1] }} transition={{ duration: 1.5, repeat: Infinity }}>$</motion.div>
+                  </motion.div>
+                  <motion.div className="absolute" style={{ width: 140, height: 140 }} animate={{ rotate: 360 }} transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}>
+                    <motion.div className="absolute bottom-0 left-1/2 h-5 w-5 -translate-x-1/2 rounded-full bg-yellow-300 shadow-lg shadow-yellow-300/60 flex items-center justify-center text-[10px]" animate={{ scale: [1, 1.3, 1] }} transition={{ duration: 0.75, repeat: Infinity }}>🏆</motion.div>
+                  </motion.div>
+                </>
+              )}
+
+              {/* Target Slide 2: Driver (Emerald Hearts & Squares) */}
+              {targetSlide === 2 && (
+                <>
+                  <motion.div
+                    className="absolute rounded-full"
+                    style={{
+                      width: 36,
+                      height: 36,
+                      background: "radial-gradient(circle, #10B981 0%, #34D399 100%)",
+                    }}
+                    animate={{ scale: [1, 1.4, 1], opacity: [0.9, 0.5, 0.9] }}
+                    transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut" }}
+                  />
+                  <motion.div className="absolute rounded-full border border-emerald-500/40" style={{ width: 60, height: 60 }} animate={{ scale: [1, 1.8, 1], opacity: [0.4, 0, 0.4] }} transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut" }} />
+                  <motion.div className="absolute" style={{ width: 130, height: 130 }} animate={{ rotate: -360 }} transition={{ duration: 2.5, repeat: Infinity, ease: "linear" }}>
+                    <motion.div className="absolute -top-3 left-1/2 h-6 w-6 -translate-x-1/2 bg-emerald-400 shadow-lg shadow-emerald-400/60 rounded-full flex items-center justify-center text-[11px]" animate={{ scale: [1, 1.3, 1] }} transition={{ duration: 1.25, repeat: Infinity }}>❤️</motion.div>
+                  </motion.div>
+                  <motion.div className="absolute" style={{ width: 170, height: 170 }} animate={{ rotate: 360 }} transition={{ duration: 4.0, repeat: Infinity, ease: "linear" }}>
+                    <motion.div className="absolute -top-3 left-1/2 h-5 w-5 -translate-x-1/2 bg-teal-500 shadow-lg shadow-teal-500/60" style={{ rotate: 45 }} animate={{ scale: [1, 1.2, 1], rotate: [45, 90, 45] }} transition={{ duration: 2.0, repeat: Infinity }} />
+                  </motion.div>
+                  <motion.div className="absolute" style={{ width: 110, height: 110 }} animate={{ rotate: -360 }} transition={{ duration: 1.8, repeat: Infinity, ease: "linear" }}>
+                    <motion.div className="absolute bottom-0 left-1/2 h-4 w-4 -translate-x-1/2 rounded-full bg-green-400 shadow-lg shadow-green-400/60" animate={{ scale: [1, 1.3, 1] }} transition={{ duration: 0.9, repeat: Infinity }} />
+                  </motion.div>
+                </>
+              )}
+
+              {/* Target Slide 3: Team (Cyan Construction Elements) */}
+              {targetSlide === 3 && (
+                <>
+                  <motion.div
+                    className="absolute rounded-full"
+                    style={{
+                      width: 36,
+                      height: 36,
+                      background: "radial-gradient(circle, #06B6D4 0%, #38BDF8 100%)",
+                    }}
+                    animate={{ scale: [1, 1.4, 1], opacity: [0.9, 0.5, 0.9] }}
+                    transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut" }}
+                  />
+                  <motion.div className="absolute rounded-full border border-cyan-500/40" style={{ width: 60, height: 60 }} animate={{ scale: [1, 1.8, 1], opacity: [0.4, 0, 0.4] }} transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut" }} />
+                  <motion.div className="absolute" style={{ width: 140, height: 140 }} animate={{ rotate: 360 }} transition={{ duration: 3.0, repeat: Infinity, ease: "linear" }}>
+                    <motion.div className="absolute -top-3 left-1/2 -translate-x-1/2" style={{ width: 0, height: 0, borderLeft: "8px solid transparent", borderRight: "8px solid transparent", borderBottom: "14px solid #06B6D4", filter: "drop-shadow(0 0 6px #06B6D4)" }} animate={{ scale: [1, 1.4, 1] }} transition={{ duration: 1.5, repeat: Infinity }} />
+                  </motion.div>
+                  <motion.div className="absolute" style={{ width: 180, height: 180 }} animate={{ rotate: -360 }} transition={{ duration: 5.0, repeat: Infinity, ease: "linear" }}>
+                    <motion.div className="absolute -top-3 left-1/2 h-6 w-6 -translate-x-1/2 bg-sky-400 shadow-lg shadow-sky-400/60 rounded-full" animate={{ scale: [1, 1.2, 1] }} transition={{ duration: 2.5, repeat: Infinity }} />
+                  </motion.div>
+                  <motion.div className="absolute" style={{ width: 115, height: 115 }} animate={{ rotate: 360 }} transition={{ duration: 2.2, repeat: Infinity, ease: "linear" }}>
+                    <motion.div className="absolute bottom-0 left-1/2 h-5 w-5 -translate-x-1/2 bg-indigo-500 shadow-lg shadow-indigo-500/60" style={{ rotate: 45 }} animate={{ scale: [1, 1.3, 1], rotate: [0, 45, 0] }} transition={{ duration: 1.1, repeat: Infinity }} />
+                  </motion.div>
+                </>
+              )}
+
+              {/* Target Slide 4: Comparison (Red vs Blue Duel chasing) */}
+              {targetSlide === 4 && (
+                <>
+                  <motion.div
+                    className="absolute rounded-full"
+                    style={{
+                      width: 36,
+                      height: 36,
+                      background: "radial-gradient(circle, #8B5CF6 0%, #A78BFA 100%)",
+                    }}
+                    animate={{ scale: [1, 1.4, 1], opacity: [0.9, 0.5, 0.9] }}
+                    transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut" }}
+                  />
+                  <motion.div className="absolute rounded-full border border-purple-500/40" style={{ width: 60, height: 60 }} animate={{ scale: [1, 1.8, 1], opacity: [0.4, 0, 0.4] }} transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut" }} />
+                  <motion.div className="absolute" style={{ width: 130, height: 130 }} animate={{ rotate: 360 }} transition={{ duration: 2.0, repeat: Infinity, ease: "linear" }}>
+                    <motion.div className="absolute -top-3 left-1/2 h-6 w-6 -translate-x-1/2 bg-red-500 shadow-lg shadow-red-500/60 rounded-full" animate={{ scale: [1, 1.3, 1] }} transition={{ duration: 1.0, repeat: Infinity }} />
+                  </motion.div>
+                  <motion.div className="absolute" style={{ width: 130, height: 130 }} animate={{ rotate: 360 }} transition={{ duration: 2.0, repeat: Infinity, ease: "linear" }}>
+                    <motion.div className="absolute bottom-0 left-1/2 h-6 w-6 -translate-x-1/2 bg-blue-500 shadow-lg shadow-blue-500/60 rounded-full" animate={{ scale: [1, 1.3, 1] }} transition={{ duration: 1.0, repeat: Infinity }} />
+                  </motion.div>
+                  <motion.div className="absolute" style={{ width: 170, height: 170 }} animate={{ rotate: -360 }} transition={{ duration: 3.5, repeat: Infinity, ease: "linear" }}>
+                    <motion.div className="absolute -top-3 left-1/2 -translate-x-1/2" style={{ width: 0, height: 0, borderLeft: "7px solid transparent", borderRight: "7px solid transparent", borderBottom: "12px solid #8B5CF6", filter: "drop-shadow(0 0 5px #8B5CF6)" }} animate={{ scale: [1, 1.3, 1] }} transition={{ duration: 1.75, repeat: Infinity }} />
+                  </motion.div>
+                </>
+              )}
+
+              {/* Target Slide 5: Summary (Checkered Flag / All orbiter spin) */}
+              {targetSlide === 5 && (
+                <>
+                  <motion.div
+                    className="absolute rounded-full"
+                    style={{
+                      width: 36,
+                      height: 36,
+                      background: "radial-gradient(circle, #ffffff 0%, #9CA3AF 100%)",
+                    }}
+                    animate={{ scale: [1, 1.4, 1], opacity: [0.9, 0.5, 0.9] }}
+                    transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut" }}
+                  />
+                  <motion.div className="absolute rounded-full border border-gray-400/40" style={{ width: 60, height: 60 }} animate={{ scale: [1, 1.8, 1], opacity: [0.4, 0, 0.4] }} transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut" }} />
+                  <motion.div className="absolute" style={{ width: 110, height: 110 }} animate={{ rotate: 360 }} transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}>
+                    <motion.div className="absolute -top-3 left-1/2 h-5 w-5 -translate-x-1/2 rounded-full bg-[#E60000] shadow-lg shadow-[#E60000]/60" animate={{ scale: [1, 1.3, 1] }} transition={{ duration: 0.75, repeat: Infinity }} />
+                  </motion.div>
+                  <motion.div className="absolute" style={{ width: 140, height: 140 }} animate={{ rotate: -360 }} transition={{ duration: 2.0, repeat: Infinity, ease: "linear" }}>
+                    <motion.div className="absolute -top-3 left-1/2 h-6 w-6 -translate-x-1/2 bg-purple-500 shadow-lg shadow-purple-500/60" style={{ rotate: 45 }} animate={{ scale: [1, 1.2, 1], rotate: [45, 90, 45] }} transition={{ duration: 1.0, repeat: Infinity }} />
+                  </motion.div>
+                  <motion.div className="absolute" style={{ width: 175, height: 175 }} animate={{ rotate: 360 }} transition={{ duration: 2.5, repeat: Infinity, ease: "linear" }}>
+                    <motion.div className="absolute -top-3 left-1/2 -translate-x-1/2" style={{ width: 0, height: 0, borderLeft: "8px solid transparent", borderRight: "8px solid transparent", borderBottom: "14px solid #F59E0B", filter: "drop-shadow(0 0 6px #F59E0B)" }} animate={{ scale: [1, 1.4, 1] }} transition={{ duration: 1.25, repeat: Infinity }} />
+                  </motion.div>
+                  <motion.div className="absolute" style={{ width: 200, height: 200 }} animate={{ rotate: -360 }} transition={{ duration: 3.0, repeat: Infinity, ease: "linear" }}>
+                    <motion.div className="absolute bottom-0 left-1/2 h-5 w-5 -translate-x-1/2 rounded-sm bg-emerald-400 shadow-lg shadow-emerald-400/60" animate={{ scale: [1, 1.3, 1], rotate: [0, 45, 0] }} transition={{ duration: 1.5, repeat: Infinity }} />
+                  </motion.div>
+                </>
+              )}
+            </div>
+
+            {/* Staggered header text styling */}
+            <motion.div
+              className="mt-8 flex gap-[2px]"
+              initial="hidden"
+              animate="visible"
+              variants={{
+                visible: {
+                  transition: { staggerChildren: 0.06, delayChildren: 0.2 },
+                },
+              }}
+            >
+              {"F1 TYPY".split("").map((ch, i) => (
+                <motion.span
+                  key={i}
+                  className={
+                    ch === " "
+                      ? "w-3"
+                      : "text-xs font-black uppercase tracking-[0.25em] text-[#E60000]"
+                  }
+                  variants={{
+                    hidden: { opacity: 0, y: 12, scale: 0.8 },
+                    visible: {
+                      opacity: 1,
+                      y: 0,
+                      scale: 1,
+                      transition: {
+                        type: "spring",
+                        stiffness: 400,
+                        damping: 20,
+                      },
+                    },
+                  }}
+                >
+                  {ch}
+                </motion.span>
+              ))}
+            </motion.div>
+
+            {/* Sweep progress bar with exact linear-gradient style */}
+            <motion.div
+              className="mt-6 h-[3px] w-40 overflow-hidden rounded-full bg-white/10 relative"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.4 }}
+            >
+              <motion.div
+                className="h-full rounded-full"
+                style={{
+                  background:
+                    "linear-gradient(90deg, #E60000, #8B5CF6, #F59E0B, #10B981)",
+                  width: "100%",
+                  position: "absolute",
+                }}
+                animate={{ x: ["-100%", "100%"] }}
+                transition={{ duration: 1.4, repeat: Infinity, ease: "easeInOut" }}
+              />
+            </motion.div>
+
+            {/* Dynamic loading text */}
+            <motion.p
+              className="mt-4 text-[10px] font-bold uppercase tracking-[0.4em] text-gray-500"
+              animate={{ opacity: [0.4, 1, 0.4] }}
+              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+            >
+              {loadingText}
+            </motion.p>
+          </motion.div>
+        )}
       </AnimatePresence>
     </div>
   );

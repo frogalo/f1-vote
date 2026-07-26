@@ -7,7 +7,7 @@ const PUBLIC_ROUTES = ["/login", "/register", "/privacy-policy", "/invite", "/ra
 const ADMIN_ROUTES = ["/admin"];
 
 // Routes that are ONLY for regular users (not admins)
-const USER_ONLY_ROUTES = ["/calendar", "/season", "/profile", "/leaderboard"];
+const USER_ONLY_ROUTES = ["/calendar", "/stats", "/profile", "/leaderboard"];
 
 export function middleware(req: NextRequest) {
     const { pathname } = req.nextUrl;
